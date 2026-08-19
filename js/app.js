@@ -1,342 +1,205 @@
-/* =========================================================
-   VOIDRECORDS
-   LOGIN + LOADING SYSTEM
-========================================================= */
+/* =====================================================
+   VOIDRECORDS APP
+===================================================== */
 
 
-/* =========================================================
+/* =====================================================
    SUPABASE CONFIG
-========================================================= */
+===================================================== */
 
 const SUPABASE_URL =
     "https://kttpyshyutdmxhcqekxh.supabase.co";
 
+/*
+    Use your PUBLIC / PUBLISHABLE Supabase key here.
+
+    DO NOT put your Supabase SECRET key in this file.
+*/
+
 const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_W-r75b5qVPiikM20aF8NwA_I4h5lhau";
+    "YOUR_PUBLISHABLE_KEY_HERE";
 
-
-/* =========================================================
-   SUPABASE CLIENT
-========================================================= */
 
 let supabaseClient = null;
 
 
-try {
+/* =====================================================
+   INITIALIZE SUPABASE
+===================================================== */
 
-    if (
-        typeof supabase !== "undefined" &&
-        supabase.createClient
-    ) {
+function initializeSupabase() {
 
-        supabaseClient =
-            supabase.createClient(
-                SUPABASE_URL,
-                SUPABASE_PUBLISHABLE_KEY,
-                {
-                    auth: {
-                        persistSession: true,
-                        autoRefreshToken: true,
-                        detectSessionInUrl: true
-                    }
-                }
+    try {
+
+        if (
+            typeof window.supabase === "undefined"
+        ) {
+
+            console.warn(
+                "Supabase library has not loaded."
             );
 
-        console.log(
-            "VoidRecords: Supabase connected."
+            return false;
+        }
+
+        if (
+            SUPABASE_PUBLISHABLE_KEY ===
+            "YOUR_PUBLISHABLE_KEY_HERE"
+        ) {
+
+            console.warn(
+                "Supabase publishable key has not been added."
+            );
+
+            return false;
+        }
+
+        supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_PUBLISHABLE_KEY
+            );
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "Supabase initialization error:",
+            error
         );
 
+        return false;
     }
-
-} catch (error) {
-
-    console.error(
-        "Supabase initialization error:",
-        error
-    );
-
 }
 
 
-/* =========================================================
-   PAGE ELEMENTS
-========================================================= */
+/* =====================================================
+   LOADING SCREEN
+===================================================== */
 
 const loadingScreen =
-    document.getElementById(
-        "loadingScreen"
-    );
-
+    document.getElementById("loadingScreen");
 
 const loadingProgress =
-    document.getElementById(
-        "loadingProgress"
-    );
-
+    document.getElementById("loadingProgress");
 
 const slowMessage =
-    document.getElementById(
-        "slowMessage"
-    );
-
+    document.getElementById("slowMessage");
 
 const loginPage =
-    document.querySelector(
-        ".login-page"
-    );
+    document.querySelector(".login-page");
 
 
-/* =========================================================
-   LOADING PROGRESS
-========================================================= */
-
-let progress = 0;
+let loadingValue = 0;
 
 
-function setProgress(value) {
+/* =====================================================
+   LOADING BAR
+===================================================== */
 
-    progress = Math.max(
-        0,
-        Math.min(100, value)
-    );
+function updateLoadingBar(value) {
 
+    loadingValue =
+        Math.max(
+            0,
+            Math.min(100, value)
+        );
 
     if (loadingProgress) {
 
         loadingProgress.style.width =
-            progress + "%";
-
+            loadingValue + "%";
     }
-
 }
 
 
-/* =========================================================
-   SHOW LOGIN PAGE
-========================================================= */
+/* =====================================================
+   FINISH LOADING
+===================================================== */
 
-function showLoginPage() {
+function finishLoading() {
 
-    if (!loginPage) {
-        return;
-    }
-
-
-    loginPage.classList.add(
-        "ready"
-    );
-
-}
-
-
-/* =========================================================
-   HIDE LOADING SCREEN
-========================================================= */
-
-function hideLoadingScreen() {
-
-    console.log(
-        "VoidRecords: finishing loading."
-    );
-
-
-    setProgress(100);
-
-
-    /*
-     * Make the login page visible.
-     */
-
-    showLoginPage();
-
-
-    /*
-     * Fade out loading screen.
-     */
-
-    if (loadingScreen) {
-
-        loadingScreen.classList.add(
-            "loading-hidden"
-        );
-
-    }
-
-
-    /*
-     * Absolute fail-safe.
-     *
-     * Even if CSS has a problem,
-     * remove the loading screen.
-     */
+    updateLoadingBar(100);
 
     setTimeout(() => {
+
+        if (loginPage) {
+
+            loginPage.classList.add("ready");
+        }
 
         if (loadingScreen) {
 
-            loadingScreen.style.display =
-                "none";
-
-        }
-
-    }, 700);
-
-}
-
-
-/* =========================================================
-   LOADING BAR ANIMATION
-========================================================= */
-
-setProgress(5);
-
-
-const loadingTimer =
-    setInterval(() => {
-
-        if (progress < 90) {
-
-            setProgress(
-                progress + 5
+            loadingScreen.classList.add(
+                "fade-out"
             );
-
         }
 
-    }, 150);
-
-
-/* =========================================================
-   SLOW MESSAGE
-========================================================= */
-
-if (slowMessage) {
-
-    slowMessage.style.display =
-        "none";
-
-
-    setTimeout(() => {
-
-        /*
-         * Only show the message if
-         * we're still loading.
-         */
-
-        if (
-            loadingScreen &&
-            !loadingScreen.classList.contains(
-                "loading-hidden"
-            )
-        ) {
-
-            slowMessage.style.display =
-                "block";
-
-        }
-
-    }, 3000);
-
+    }, 250);
 }
 
 
-/* =========================================================
-   FORCE LOADING TO FINISH
-========================================================= */
+/* =====================================================
+   SLOW WEBSITE MESSAGE
+===================================================== */
 
-/*
- * The loading screen can NEVER remain
- * forever.
- *
- * Maximum loading time:
- * 4 seconds.
- */
+setTimeout(() => {
 
-const maximumLoadingTime =
-    setTimeout(() => {
+    if (
+        loadingScreen &&
+        !loadingScreen.classList.contains(
+            "fade-out"
+        )
+    ) {
 
-        clearInterval(
-            loadingTimer
-        );
+        if (slowMessage) {
 
-
-        hideLoadingScreen();
-
-    }, 4000);
-
-
-/* =========================================================
-   CHECK EXISTING LOGIN
-========================================================= */
-
-async function checkExistingSession() {
-
-    /*
-     * If Supabase isn't available,
-     * don't prevent the login page.
-     */
-
-    if (!supabaseClient) {
-
-        console.warn(
-            "Supabase unavailable."
-        );
-
-        return;
+            slowMessage.classList.add(
+                "show"
+            );
+        }
 
     }
 
-
-    try {
-
-        /*
-         * Give Supabase 3 seconds
-         * to check the session.
-         */
-
-        const result =
-            await Promise.race([
-
-                supabaseClient.auth
-                    .getSession(),
-
-                new Promise(resolve => {
-
-                    setTimeout(() => {
-
-                        resolve({
-                            timedOut: true
-                        });
-
-                    }, 3000);
-
-                })
-
-            ]);
+}, 6000);
 
 
-        /*
-         * Supabase took too long.
-         *
-         * The normal login screen
-         * will appear automatically.
-         */
+/* =====================================================
+   LOADING PROGRESS
+===================================================== */
 
-        if (result.timedOut) {
+let progressInterval =
+    setInterval(() => {
 
-            console.warn(
-                "Supabase session check timed out."
+        if (loadingValue < 90) {
+
+            updateLoadingBar(
+                loadingValue + 2
             );
-
-            return;
-
         }
 
+    }, 120);
+
+
+/* =====================================================
+   CHECK EXISTING SESSION
+===================================================== */
+
+async function checkExistingSession() {
+
+    if (!supabaseClient) {
+
+        return;
+    }
+
+    try {
 
         const {
             data,
             error
-        } = result;
-
+        } =
+            await supabaseClient.auth.getSession();
 
         if (error) {
 
@@ -346,58 +209,25 @@ async function checkExistingSession() {
             );
 
             return;
-
         }
 
+        const session =
+            data?.session;
 
-        /*
-         * Existing logged-in user.
-         */
-
-        if (
-            data &&
-            data.session
-        ) {
+        if (session) {
 
             console.log(
-                "Existing user:",
-                data.session.user.email
+                "Existing login found."
             );
-
 
             /*
-             * Stop loading animation.
-             */
-
-            clearInterval(
-                loadingTimer
-            );
-
-
-            clearTimeout(
-                maximumLoadingTime
-            );
-
-
-            setProgress(100);
-
-
-            /*
-             * Send user to dashboard.
-             */
+                We do NOT redirect immediately here
+                unless dashboard.html exists.
+            */
 
             window.location.href =
                 "dashboard.html";
-
-
-            return;
-
         }
-
-
-        console.log(
-            "No existing session."
-        );
 
     } catch (error) {
 
@@ -405,20 +235,16 @@ async function checkExistingSession() {
             "Session check failed:",
             error
         );
-
     }
-
 }
 
 
-/* =========================================================
-   LOGIN FORM
-========================================================= */
+/* =====================================================
+   LOGIN
+===================================================== */
 
 const loginForm =
-    document.getElementById(
-        "loginForm"
-    );
+    document.getElementById("loginForm");
 
 
 if (loginForm) {
@@ -429,87 +255,95 @@ if (loginForm) {
 
             event.preventDefault();
 
-
-            const emailInput =
-                document.getElementById(
-                    "email"
-                );
-
-
-            const passwordInput =
-                document.getElementById(
-                    "password"
-                );
-
-
-            const rememberInput =
-                document.getElementById(
-                    "remember"
-                );
-
-
             const email =
-                emailInput.value.trim();
-
+                document
+                    .getElementById("email")
+                    .value
+                    .trim();
 
             const password =
-                passwordInput.value;
+                document
+                    .getElementById("password")
+                    .value;
+
+            const remember =
+                document
+                    .getElementById("remember")
+                    .checked;
+
+            const loginButton =
+                document
+                    .getElementById("loginButton");
 
 
-            /* -----------------------------------------
-               VALIDATION
-            ----------------------------------------- */
-
-            if (
-                !email ||
-                !password
-            ) {
+            if (!email || !password) {
 
                 alert(
                     "Please enter your email and password."
                 );
 
                 return;
-
             }
 
 
-            /* -----------------------------------------
-               BUTTON
-            ----------------------------------------- */
+            if (!supabaseClient) {
 
-            const loginButton =
-                loginForm.querySelector(
-                    ".login-button"
+                alert(
+                    "Login system is not connected yet."
                 );
 
-
-            const originalButton =
-                loginButton.innerHTML;
-
-
-            loginButton.disabled =
-                true;
-
-
-            loginButton.innerHTML =
-                "<span>SIGNING IN...</span><span>→</span>";
+                return;
+            }
 
 
             try {
 
-                if (!supabaseClient) {
+                loginButton.disabled = true;
 
-                    throw new Error(
-                        "Supabase is unavailable."
+                loginButton
+                    .querySelector("span")
+                    .textContent =
+                    "SIGNING IN...";
+
+
+                /*
+                    Supabase manages the actual
+                    authentication session.
+
+                    The Remember Me option controls
+                    whether we keep the browser session.
+                */
+
+                if (!remember) {
+
+                    /*
+                        Session storage is not directly
+                        configurable through the browser
+                        client in every Supabase setup.
+
+                        We mark the preference locally
+                        and clear it when the browser
+                        session ends.
+                    */
+
+                    sessionStorage.setItem(
+                        "vr_session_mode",
+                        "session"
+                    );
+
+                    localStorage.removeItem(
+                        "vr_remember"
+                    );
+
+                } else {
+
+                    localStorage.setItem(
+                        "vr_remember",
+                        "true"
                     );
 
                 }
 
-
-                /* -----------------------------------------
-                   SIGN IN
-                ----------------------------------------- */
 
                 const {
                     data,
@@ -517,89 +351,28 @@ if (loginForm) {
                 } =
                     await supabaseClient.auth
                         .signInWithPassword({
-
-                            email:
-                                email,
-
-                            password:
-                                password
-
+                            email: email,
+                            password: password
                         });
 
 
-                /* -----------------------------------------
-                   LOGIN ERROR
-                ----------------------------------------- */
-
                 if (error) {
 
-                    console.error(
-                        "Login error:",
-                        error
-                    );
-
-
-                    alert(
-                        error.message
-                    );
-
-
-                    loginButton.disabled =
-                        false;
-
-
-                    loginButton.innerHTML =
-                        originalButton;
-
-
-                    return;
-
+                    throw error;
                 }
 
 
-                /* -----------------------------------------
-                   REMEMBER ME
-                ----------------------------------------- */
+                if (!data?.session) {
 
-                if (
-                    rememberInput &&
-                    rememberInput.checked
-                ) {
-
-                    localStorage.setItem(
-                        "vr_remember_me",
-                        "true"
+                    throw new Error(
+                        "Login succeeded but no session was returned."
                     );
-
-                } else {
-
-                    localStorage.removeItem(
-                        "vr_remember_me"
-                    );
-
                 }
 
 
-                /* -----------------------------------------
-                   SAVE EMAIL
-                ----------------------------------------- */
-
-                if (
-                    data &&
-                    data.user
-                ) {
-
-                    localStorage.setItem(
-                        "vr_user_email",
-                        data.user.email || ""
-                    );
-
-                }
-
-
-                /* -----------------------------------------
-                   GO TO DASHBOARD
-                ----------------------------------------- */
+                /*
+                    Login successful.
+                */
 
                 window.location.href =
                     "dashboard.html";
@@ -612,66 +385,49 @@ if (loginForm) {
                     error
                 );
 
-
                 alert(
-                    "Unable to sign in. Please check your connection and try again."
+                    error.message ||
+                    "Unable to sign in."
                 );
 
 
                 loginButton.disabled =
                     false;
 
-
-                loginButton.innerHTML =
-                    originalButton;
-
+                loginButton
+                    .querySelector("span")
+                    .textContent =
+                    "SIGN IN";
             }
 
         }
     );
-
 }
 
 
-/* =========================================================
-   REQUEST INVITE
-========================================================= */
-
-function requestInvite() {
-
-    window.location.href =
-        "https://fiya8.github.io/voidrecords/";
-
-}
-
-
-/* =========================================================
+/* =====================================================
    FORGOT PASSWORD
-========================================================= */
+===================================================== */
 
-const forgotLink =
-    document.querySelector(
-        ".password-label a"
+const forgotPassword =
+    document.getElementById(
+        "forgotPassword"
     );
 
 
-if (forgotLink) {
+if (forgotPassword) {
 
-    forgotLink.addEventListener(
+    forgotPassword.addEventListener(
         "click",
         async function(event) {
 
             event.preventDefault();
 
-
-            const emailInput =
-                document.getElementById(
-                    "email"
-                );
-
-
             const email =
-                emailInput.value.trim();
+                document
+                    .getElementById("email")
+                    .value
+                    .trim();
 
 
             if (!email) {
@@ -680,23 +436,17 @@ if (forgotLink) {
                     "Enter your email address first."
                 );
 
-
-                emailInput.focus();
-
-
                 return;
-
             }
 
 
             if (!supabaseClient) {
 
                 alert(
-                    "Supabase is currently unavailable."
+                    "Login system is not connected."
                 );
 
                 return;
-
             }
 
 
@@ -710,19 +460,15 @@ if (forgotLink) {
                             email,
                             {
                                 redirectTo:
-                                    window.location.origin
+                                    window.location.origin +
+                                    "/reset-password.html"
                             }
                         );
 
 
                 if (error) {
 
-                    alert(
-                        error.message
-                    );
-
-                    return;
-
+                    throw error;
                 }
 
 
@@ -737,41 +483,137 @@ if (forgotLink) {
                     error
                 );
 
-
                 alert(
-                    "Unable to send the password reset email."
+                    error.message ||
+                    "Unable to send password reset email."
                 );
-
             }
 
         }
     );
-
 }
 
 
-/* =========================================================
-   AUTH STATE
-========================================================= */
+/* =====================================================
+   REQUEST INVITE
+===================================================== */
 
-if (supabaseClient) {
+const requestInviteButton =
+    document.getElementById(
+        "requestInviteButton"
+    );
 
-    supabaseClient.auth.onAuthStateChange(
-        (event, session) => {
 
-            console.log(
-                "Auth event:",
-                event
+if (requestInviteButton) {
+
+    requestInviteButton.addEventListener(
+        "click",
+        function() {
+
+            alert(
+                "Invite requests will be available soon."
             );
 
         }
     );
-
 }
 
 
-/* =========================================================
-   START
-========================================================= */
+/* =====================================================
+   STARTUP
+===================================================== */
 
-checkExistingSession();
+async function startVoidRecords() {
+
+    updateLoadingBar(10);
+
+
+    /*
+        Initialize Supabase.
+    */
+
+    initializeSupabase();
+
+    updateLoadingBar(30);
+
+
+    /*
+        Give the browser a moment to finish
+        loading the page and CSS.
+    */
+
+    await new Promise(
+        resolve =>
+            setTimeout(resolve, 300)
+    );
+
+    updateLoadingBar(55);
+
+
+    /*
+        Check for an existing login.
+    */
+
+    await checkExistingSession();
+
+    updateLoadingBar(80);
+
+
+    /*
+        Finish regardless of whether
+        Supabase has an error.
+    */
+
+    clearInterval(
+        progressInterval
+    );
+
+    finishLoading();
+}
+
+
+/* =====================================================
+   EMERGENCY FAILSAFE
+===================================================== */
+
+setTimeout(() => {
+
+    if (
+        loadingScreen &&
+        !loadingScreen.classList.contains(
+            "fade-out"
+        )
+    ) {
+
+        console.warn(
+            "Loading timeout. Showing login page."
+        );
+
+        clearInterval(
+            progressInterval
+        );
+
+        finishLoading();
+    }
+
+}, 10000);
+
+
+/* =====================================================
+   RUN
+===================================================== */
+
+if (
+    document.readyState ===
+    "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        startVoidRecords
+    );
+
+} else {
+
+    startVoidRecords();
+}
