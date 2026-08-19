@@ -1,6 +1,5 @@
 /* =========================================================
-   VOIDRECORDS — APP.JS
-   Direct Supabase Authentication
+   VOIDRECORDS — SUPABASE LOGIN SYSTEM
 ========================================================= */
 
 
@@ -11,8 +10,28 @@
 const SUPABASE_URL =
     "https://kttpyshyutdmxhcqekxh.supabase.co";
 
-const SUPABASE_KEY =
+const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_W-r75b5qVPiikM20aF8NwA_I4h5lhau";
+
+
+/* =========================================================
+   CREATE SUPABASE CLIENT
+========================================================= */
+
+let supabaseClient = null;
+
+if (
+    window.supabase &&
+    typeof window.supabase.createClient === "function"
+) {
+
+    supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY
+        );
+
+}
 
 
 /* =========================================================
@@ -34,54 +53,44 @@ const loginPage =
 const loginForm =
     document.getElementById("loginForm");
 
-const forgotPassword =
-    document.getElementById("forgotPassword");
+const loginButton =
+    document.getElementById("loginButton");
+
+const loginButtonText =
+    document.getElementById("loginButtonText");
+
+const loginArrow =
+    document.getElementById("loginArrow");
+
+const loginMessage =
+    document.getElementById("loginMessage");
 
 const requestInviteButton =
     document.getElementById("requestInviteButton");
 
+const forgotPassword =
+    document.getElementById("forgotPassword");
+
 
 /* =========================================================
-   LOADING BAR
+   LOADING SCREEN
 ========================================================= */
 
 let progress = 0;
 
-function setProgress(value) {
+const loadingInterval = setInterval(() => {
 
-    progress = Math.min(
-        100,
-        Math.max(0, value)
-    );
+    progress += Math.random() * 12;
+
+    if (progress > 90) {
+        progress = 90;
+    }
 
     if (loadingProgress) {
-
-        loadingProgress.style.width =
-            progress + "%";
-
+        loadingProgress.style.width = `${progress}%`;
     }
 
-}
-
-
-/* Start loading */
-
-setProgress(10);
-
-
-/* Slowly move loading bar */
-
-const loadingTimer = setInterval(() => {
-
-    if (progress < 85) {
-
-        setProgress(
-            progress + Math.random() * 7
-        );
-
-    }
-
-}, 200);
+}, 150);
 
 
 /* =========================================================
@@ -90,31 +99,23 @@ const loadingTimer = setInterval(() => {
 
 function finishLoading() {
 
-    clearInterval(
-        loadingTimer
-    );
+    clearInterval(loadingInterval);
 
-    setProgress(100);
+    if (loadingProgress) {
+        loadingProgress.style.width = "100%";
+    }
 
     setTimeout(() => {
 
         if (loadingScreen) {
-
-            loadingScreen.classList.add(
-                "fade-out"
-            );
-
+            loadingScreen.classList.add("fade-out");
         }
 
         if (loginPage) {
-
-            loginPage.classList.add(
-                "ready"
-            );
-
+            loginPage.classList.add("ready");
         }
 
-    }, 400);
+    }, 300);
 
 }
 
@@ -125,74 +126,38 @@ function finishLoading() {
 
 setTimeout(() => {
 
-    if (
-        loadingScreen &&
-        !loadingScreen.classList.contains("fade-out")
-    ) {
-
-        if (slowMessage) {
-
-            slowMessage.classList.add(
-                "show"
-            );
-
-        }
-
+    if (slowMessage) {
+        slowMessage.classList.add("show");
     }
 
-}, 6000);
+}, 5000);
 
 
 /* =========================================================
-   TEST SUPABASE CONNECTION
+   START WEBSITE
 ========================================================= */
 
-async function testSupabaseConnection() {
+window.addEventListener("load", () => {
 
-    try {
+    finishLoading();
 
-        const response =
-            await fetch(
-                SUPABASE_URL +
-                "/auth/v1/settings",
-                {
-                    method: "GET",
-
-                    headers: {
-                        "apikey": SUPABASE_KEY
-                    }
-                }
-            );
+});
 
 
-        if (!response.ok) {
+/* =========================================================
+   CHECK SUPABASE
+========================================================= */
 
-            console.error(
-                "Supabase connection failed:",
-                response.status,
-                await response.text()
-            );
+if (!supabaseClient) {
 
-            return false;
+    console.error(
+        "VoidRecords: Supabase failed to initialize."
+    );
 
-        }
+    if (loginMessage) {
 
-
-        console.log(
-            "VoidRecords: Supabase connection successful."
-        );
-
-        return true;
-
-    }
-    catch (error) {
-
-        console.error(
-            "Supabase connection error:",
-            error
-        );
-
-        return false;
+        loginMessage.textContent =
+            "Login system is not connected yet.";
 
     }
 
@@ -200,106 +165,18 @@ async function testSupabaseConnection() {
 
 
 /* =========================================================
-   CHECK EXISTING SESSION
+   SHOW MESSAGE
 ========================================================= */
 
-function getSavedSession() {
+function showLoginMessage(message) {
 
-    const savedSession =
-        localStorage.getItem(
-            "voidrecords_session"
-        );
-
-    if (!savedSession) {
-
-        return null;
-
+    if (!loginMessage) {
+        return;
     }
 
-    try {
-
-        return JSON.parse(
-            savedSession
-        );
-
-    }
-    catch {
-
-        localStorage.removeItem(
-            "voidrecords_session"
-        );
-
-        return null;
-
-    }
+    loginMessage.textContent = message;
 
 }
-
-
-/* =========================================================
-   PAGE LOAD
-========================================================= */
-
-window.addEventListener(
-    "load",
-    async () => {
-
-        setProgress(30);
-
-
-        /*
-         * Test that GitHub Pages can
-         * reach your Supabase project.
-         */
-
-        const connected =
-            await testSupabaseConnection();
-
-
-        setProgress(70);
-
-
-        /*
-         * Check for an existing login.
-         */
-
-        const session =
-            getSavedSession();
-
-
-        setProgress(90);
-
-
-        /*
-         * If a valid saved session exists,
-         * send the user to dashboard.
-         */
-
-        if (
-            connected &&
-            session &&
-            session.access_token
-        ) {
-
-            console.log(
-                "Existing VoidRecords session found."
-            );
-
-
-            /*
-             * You can enable this once
-             * dashboard.html exists.
-             */
-
-            // window.location.href = "dashboard.html";
-
-        }
-
-
-        finishLoading();
-
-    }
-);
 
 
 /* =========================================================
@@ -310,191 +187,146 @@ if (loginForm) {
 
     loginForm.addEventListener(
         "submit",
-        async (event) => {
+        async function (event) {
 
             event.preventDefault();
 
 
-            const emailInput =
-                document.getElementById(
-                    "email"
+            /* -----------------------------------------
+               Check connection
+            ----------------------------------------- */
+
+            if (!supabaseClient) {
+
+                showLoginMessage(
+                    "Login system is not connected yet."
                 );
 
-            const passwordInput =
-                document.getElementById(
-                    "password"
-                );
+                return;
 
+            }
+
+
+            /* -----------------------------------------
+               Get form values
+            ----------------------------------------- */
 
             const email =
-                emailInput.value.trim();
+                document
+                    .getElementById("email")
+                    .value
+                    .trim();
 
             const password =
-                passwordInput.value;
+                document
+                    .getElementById("password")
+                    .value;
 
 
-            /* Validation */
+            /* -----------------------------------------
+               Validate
+            ----------------------------------------- */
 
-            if (!email) {
+            if (!email || !password) {
 
-                alert(
-                    "Please enter your email."
+                showLoginMessage(
+                    "Please enter your email and password."
                 );
-
-                emailInput.focus();
 
                 return;
 
             }
 
 
-            if (!password) {
+            /* -----------------------------------------
+               Loading state
+            ----------------------------------------- */
 
-                alert(
-                    "Please enter your password."
-                );
-
-                passwordInput.focus();
-
-                return;
-
+            if (loginButton) {
+                loginButton.disabled = true;
             }
 
-
-            /* Button */
-
-            const button =
-                loginForm.querySelector(
-                    ".login-button"
-                );
-
-
-            const originalHTML =
-                button.innerHTML;
-
-
-            button.disabled = true;
-
-            button.innerHTML =
-                "<span>SIGNING IN...</span><span>→</span>";
-
-
-            try {
-
-                console.log(
-                    "VoidRecords: attempting login..."
-                );
-
-
-                /*
-                 * Supabase password authentication
-                 */
-
-                const response =
-                    await fetch(
-                        SUPABASE_URL +
-                        "/auth/v1/token?grant_type=password",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json",
-
-                                "apikey":
-                                    SUPABASE_KEY
-                            },
-
-                            body: JSON.stringify({
-                                email: email,
-                                password: password
-                            })
-                        }
-                    );
-
-
-                const result =
-                    await response.json();
-
-
-                console.log(
-                    "Supabase login response:",
-                    result
-                );
-
-
-                /* Login failed */
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        result.error_description ||
-                        result.msg ||
-                        result.message ||
-                        "Invalid email or password."
-                    );
-
-                }
-
-
-                /*
-                 * Save the session.
-                 */
-
-                localStorage.setItem(
-                    "voidrecords_session",
-                    JSON.stringify(result)
-                );
-
-
-                /*
-                 * Save the access token separately.
-                 */
-
-                localStorage.setItem(
-                    "voidrecords_access_token",
-                    result.access_token
-                );
-
-
-                console.log(
-                    "VoidRecords: login successful."
-                );
-
-
-                button.innerHTML =
-                    "<span>SIGNED IN</span><span>✓</span>";
-
-
-                /*
-                 * Go to dashboard.
-                 */
-
-                setTimeout(() => {
-
-                    window.location.href =
-                        "dashboard.html";
-
-                }, 500);
-
+            if (loginButtonText) {
+                loginButtonText.textContent = "SIGNING IN";
             }
-            catch (error) {
+
+            if (loginArrow) {
+                loginArrow.textContent = "…";
+            }
+
+            showLoginMessage("");
+
+
+            /* -----------------------------------------
+               Supabase authentication
+            ----------------------------------------- */
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient.auth.signInWithPassword({
+
+                    email: email,
+
+                    password: password
+
+                });
+
+
+            /* -----------------------------------------
+               Login failed
+            ----------------------------------------- */
+
+            if (error) {
 
                 console.error(
                     "VoidRecords login error:",
                     error
                 );
 
-
-                alert(
+                showLoginMessage(
                     error.message
                 );
 
+                if (loginButton) {
+                    loginButton.disabled = false;
+                }
 
-                button.disabled = false;
+                if (loginButtonText) {
+                    loginButtonText.textContent = "SIGN IN";
+                }
 
-                button.innerHTML =
-                    originalHTML;
+                if (loginArrow) {
+                    loginArrow.textContent = "→";
+                }
+
+                return;
+
+            }
+
+
+            /* -----------------------------------------
+               Login successful
+            ----------------------------------------- */
+
+            if (data && data.session) {
+
+                if (loginButtonText) {
+                    loginButtonText.textContent = "SUCCESS";
+                }
+
+                if (loginArrow) {
+                    loginArrow.textContent = "✓";
+                }
+
+
+                /*
+                 * Send the user to the dashboard.
+                 */
+
+                window.location.href =
+                    "./dashboard.html";
 
             }
 
@@ -512,88 +344,67 @@ if (forgotPassword) {
 
     forgotPassword.addEventListener(
         "click",
-        async (event) => {
+        async function (event) {
 
             event.preventDefault();
 
 
-            const emailInput =
-                document.getElementById(
-                    "email"
+            if (!supabaseClient) {
+
+                showLoginMessage(
+                    "Login system is not connected yet."
                 );
-
-
-            const email =
-                emailInput.value.trim();
-
-
-            if (!email) {
-
-                alert(
-                    "Enter your email address first."
-                );
-
-                emailInput.focus();
 
                 return;
 
             }
 
 
-            try {
-
-                const response =
-                    await fetch(
-                        SUPABASE_URL +
-                        "/auth/v1/recover",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json",
-
-                                "apikey":
-                                    SUPABASE_KEY
-                            },
-
-                            body: JSON.stringify({
-                                email: email
-                            })
-                        }
-                    );
+            const email =
+                document
+                    .getElementById("email")
+                    .value
+                    .trim();
 
 
-                if (!response.ok) {
+            if (!email) {
 
-                    const result =
-                        await response.json();
-
-                    throw new Error(
-                        result.message ||
-                        "Unable to send reset email."
-                    );
-
-                }
-
-
-                alert(
-                    "Password reset instructions have been sent to your email."
+                showLoginMessage(
+                    "Enter your email first."
                 );
+
+                return;
 
             }
-            catch (error) {
 
-                console.error(
-                    "Password reset error:",
-                    error
+
+            const {
+                error
+            } =
+                await supabaseClient.auth.resetPasswordForEmail(
+                    email,
+                    {
+                        redirectTo:
+                            window.location.origin +
+                            "/reset-password.html"
+                    }
                 );
 
-                alert(
+
+            if (error) {
+
+                showLoginMessage(
                     error.message
                 );
 
+                return;
+
             }
+
+
+            showLoginMessage(
+                "Password reset email sent."
+            );
 
         }
     );
@@ -609,13 +420,27 @@ if (requestInviteButton) {
 
     requestInviteButton.addEventListener(
         "click",
-        () => {
+        function () {
 
             alert(
-                "VoidRecords is currently invite-only."
+                "VoidRecords distribution is invite-only. Please contact the label to request access."
             );
 
         }
     );
 
 }
+
+
+/* =========================================================
+   DEBUG
+========================================================= */
+
+console.log(
+    "VoidRecords app loaded."
+);
+
+console.log(
+    "Supabase connected:",
+    !!supabaseClient
+);
