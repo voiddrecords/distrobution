@@ -1,452 +1,231 @@
-/* =========================================================
-   VOIDRECORDS DASHBOARD
-   Authentication + User Profile
-========================================================= */
-
-
-/* =========================================================
-   SUPABASE
-========================================================= */
-
 const SUPABASE_URL =
     "https://kttpyshyutdmxhcqekxh.supabase.co";
-
 
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_W-r75b5qVPiikM20aF8NwA_I4h5lhau";
 
-
-const { createClient } = supabase;
-
-
-const supabaseClient = createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY,
-    {
-        auth: {
-            persistSession: true,
-            autoRefreshToken: true
-        }
-    }
-);
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
 
 
-/* =========================================================
-   LOAD DASHBOARD
-========================================================= */
 
-async function loadDashboard() {
+/* =========================================
+   INITIALIZE
+========================================= */
 
-    try {
+document.addEventListener("DOMContentLoaded", async () => {
 
-        const {
-            data: {
-                session
-            },
-            error
-        } =
-            await supabaseClient.auth.getSession();
+    await checkAuthentication();
 
+    setupNavigation();
 
-        /* -------------------------
-           Session error
-        ------------------------- */
+    setupModal();
 
-        if (error) {
-
-            console.error(error);
-
-            window.location.href =
-                "login.html";
-
-            return;
-
-        }
+});
 
 
-        /* -------------------------
-           No session
-        ------------------------- */
 
-        if (!session) {
+/* =========================================
+   AUTHENTICATION
+========================================= */
 
-            window.location.href =
-                "login.html";
+async function checkAuthentication() {
 
-            return;
-
-        }
-
-
-        const user =
-            session.user;
+    const {
+        data,
+        error
+    } = await supabaseClient.auth.getUser();
 
 
-        /* -------------------------
-           Get profile
-        ------------------------- */
+    if (error || !data.user) {
 
-        const {
-            data: profile,
-            error: profileError
-        } =
-            await supabaseClient
-                .from("profiles")
-                .select("*")
-                .eq("id", user.id)
-                .single();
+        window.location.href = "./index.html";
 
-
-        if (profileError || !profile) {
-
-            console.error(
-                "Could not load profile:",
-                profileError
-            );
-
-            await supabaseClient.auth.signOut();
-
-            window.location.href =
-                "login.html";
-
-            return;
-
-        }
-
-
-        /* -------------------------
-           Display user
-        ------------------------- */
-
-        displayUser(
-            user,
-            profile
-        );
-
-
-        /* -------------------------
-           Configure role
-        ------------------------- */
-
-        configureRole(
-            profile.role
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Dashboard error:",
-            error
-        );
-
-        window.location.href =
-            "login.html";
-
-    }
-
-}
-
-
-/* =========================================================
-   DISPLAY USER
-========================================================= */
-
-function displayUser(
-    user,
-    profile
-) {
-
-    const firstName =
-        profile.first_name || "";
-
-
-    const lastName =
-        profile.last_name || "";
-
-
-    const artistName =
-        profile.artist_name ||
-        "VoidRecords";
-
-
-    const role =
-        profile.role ||
-        "artist";
-
-
-    /* -------------------------
-       Welcome
-    ------------------------- */
-
-    const welcomeName =
-        document.getElementById(
-            "welcomeName"
-        );
-
-
-    if (welcomeName) {
-
-        welcomeName.textContent =
-            firstName || artistName;
+        return;
 
     }
 
 
-    /* -------------------------
-       Top name
-    ------------------------- */
-
-    const topArtistName =
-        document.getElementById(
-            "topArtistName"
-        );
+    const user = data.user;
 
 
-    if (topArtistName) {
+    const emailElement =
+        document.getElementById("userEmail");
 
-        topArtistName.textContent =
-            artistName;
+    if (emailElement) {
 
-    }
-
-
-    /* -------------------------
-       Role
-    ------------------------- */
-
-    const topRole =
-        document.getElementById(
-            "topRole"
-        );
-
-
-    if (topRole) {
-
-        topRole.textContent =
-            formatRole(role);
-
-    }
-
-
-    /* -------------------------
-       Avatar
-    ------------------------- */
-
-    const avatar =
-        document.getElementById(
-            "userAvatar"
-        );
-
-
-    if (avatar) {
-
-        const letter =
-            (
-                firstName ||
-                artistName ||
-                "V"
-            )
-                .charAt(0)
-                .toUpperCase();
-
-
-        avatar.textContent =
-            letter;
-
-    }
-
-
-    /* -------------------------
-       Settings
-    ------------------------- */
-
-    const settingsEmail =
-        document.getElementById(
-            "settingsEmail"
-        );
-
-
-    if (settingsEmail) {
-
-        settingsEmail.textContent =
+        emailElement.textContent =
             user.email || "";
 
     }
 
 
-    const settingsRole =
-        document.getElementById(
-            "settingsRole"
-        );
+    const welcomeName =
+        document.getElementById("welcomeName");
 
+    if (welcomeName) {
 
-    if (settingsRole) {
-
-        settingsRole.textContent =
-            "Role: " +
-            formatRole(role);
+        welcomeName.textContent =
+            "Welcome back.";
 
     }
 
 
-    /* -------------------------
-       Local storage
-    ------------------------- */
-
-    localStorage.setItem(
-        "vr_user_email",
-        user.email || ""
-    );
-
-
-    localStorage.setItem(
-        "vr_first_name",
-        firstName
-    );
-
-
-    localStorage.setItem(
-        "vr_last_name",
-        lastName
-    );
-
-
-    localStorage.setItem(
-        "vr_artist_name",
-        artistName
-    );
-
-
-    localStorage.setItem(
-        "vr_role",
-        role
-    );
+    await loadReleases(user.id);
 
 }
 
 
-/* =========================================================
-   ROLE FORMATTER
-========================================================= */
 
-function formatRole(role) {
+/* =========================================
+   LOAD RELEASES
+========================================= */
 
-    const roles = {
+async function loadReleases(userId) {
 
-        owner:
-            "OWNER",
+    const releaseList =
+        document.getElementById("releaseList");
 
-        label_manager:
-            "LABEL MANAGER",
-
-        ar:
-            "A&R",
-
-        artist:
-            "ARTIST"
-
-    };
+    const releaseCount =
+        document.getElementById("releaseCount");
 
 
-    return roles[role] ||
-        "ARTIST";
+    const {
+        data: releases,
+        error
+    } = await supabaseClient
+        .from("releases")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", {
+            ascending: false
+        });
+
+
+    if (error) {
+
+        console.error(
+            "Could not load releases:",
+            error
+        );
+
+        if (releaseList) {
+
+            releaseList.innerHTML = `
+                <div class="empty-state">
+                    Unable to load releases.
+                </div>
+            `;
+
+        }
+
+        return;
+
+    }
+
+
+    const releaseArray =
+        releases || [];
+
+
+    if (releaseCount) {
+
+        releaseCount.textContent =
+            releaseArray.length;
+
+    }
+
+
+    if (!releaseList) {
+        return;
+    }
+
+
+    if (releaseArray.length === 0) {
+
+        releaseList.innerHTML = `
+            <div class="empty-state">
+                No releases yet.
+                Create your first release to get started.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    releaseList.innerHTML = "";
+
+
+    releaseArray.forEach(release => {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "list-card";
+
+
+        const title =
+            release.title ||
+            release.name ||
+            "Untitled Release";
+
+
+        const artist =
+            release.artist ||
+            release.artist_name ||
+            "Unknown Artist";
+
+
+        const status =
+            release.status ||
+            "DRAFT";
+
+
+        card.innerHTML = `
+
+            <div>
+
+                <h3>
+                    ${escapeHtml(title)}
+                </h3>
+
+                <p>
+                    ${escapeHtml(artist)}
+                </p>
+
+            </div>
+
+            <span class="status">
+                ${escapeHtml(
+                    String(status).toUpperCase()
+                )}
+            </span>
+
+        `;
+
+
+        releaseList.appendChild(card);
+
+    });
 
 }
 
 
-/* =========================================================
-   ROLE PERMISSIONS
-========================================================= */
 
-function configureRole(role) {
-
-    const artistOnlyHidden = [
-
-        "artists"
-
-    ];
-
-
-    /* -------------------------
-       Artist
-    ------------------------- */
-
-    if (role === "artist") {
-
-        artistOnlyHidden.forEach(
-            section => {
-
-                const item =
-                    document.querySelector(
-                        `[data-section="${section}"]`
-                    );
-
-
-                if (item) {
-
-                    item.style.display =
-                        "none";
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* -------------------------
-       A&R
-    ------------------------- */
-
-    if (role === "ar") {
-
-        console.log(
-            "A&R access enabled"
-        );
-
-    }
-
-
-    /* -------------------------
-       Label Manager
-    ------------------------- */
-
-    if (role === "label_manager") {
-
-        console.log(
-            "Label Manager access enabled"
-        );
-
-    }
-
-
-    /* -------------------------
-       Owner
-    ------------------------- */
-
-    if (role === "owner") {
-
-        console.log(
-            "Owner access enabled"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
+/* =========================================
    NAVIGATION
-========================================================= */
+========================================= */
 
 function setupNavigation() {
 
     const navItems =
-        document.querySelectorAll(
-            ".nav-item"
-        );
+        document.querySelectorAll(".nav-item");
 
 
     const sections =
@@ -455,223 +234,297 @@ function setupNavigation() {
         );
 
 
-    navItems.forEach(
-        item => {
+    navItems.forEach(button => {
 
-            item.addEventListener(
-                "click",
-                event => {
+        button.addEventListener(
+            "click",
+            () => {
 
-                    event.preventDefault();
-
-
-                    const sectionName =
-                        item.dataset.section;
+                const target =
+                    button.dataset.section;
 
 
-                    if (!sectionName) {
-                        return;
-                    }
+                navItems.forEach(item => {
 
-
-                    navItems.forEach(
-                        nav => {
-
-                            nav.classList.remove(
-                                "active"
-                            );
-
-                        }
-                    );
-
-
-                    item.classList.add(
+                    item.classList.remove(
                         "active"
                     );
 
+                });
 
-                    sections.forEach(
-                        section => {
 
-                            section.classList.remove(
-                                "active-section"
-                            );
+                sections.forEach(section => {
 
-                        }
+                    section.classList.remove(
+                        "active-section"
+                    );
+
+                });
+
+
+                button.classList.add(
+                    "active"
+                );
+
+
+                const targetSection =
+                    document.getElementById(
+                        target
                     );
 
 
-                    const target =
-                        document.getElementById(
-                            sectionName
-                        );
+                if (targetSection) {
 
-
-                    if (target) {
-
-                        target.classList.add(
-                            "active-section"
-                        );
-
-                    }
+                    targetSection.classList.add(
+                        "active-section"
+                    );
 
                 }
-            );
-
-        }
-    );
-
-
-    /* -------------------------
-       View all button
-    ------------------------- */
-
-    const sectionLinks =
-        document.querySelectorAll(
-            "[data-section-link]"
-        );
-
-
-    sectionLinks.forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    const target =
-                        button.dataset.sectionLink;
-
-
-                    const nav =
-                        document.querySelector(
-                            `[data-section="${target}"]`
-                        );
-
-
-                    if (nav) {
-
-                        nav.click();
-
-                    }
-
-                }
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-function setupLogout() {
-
-    const logoutButton =
-        document.getElementById(
-            "logoutButton"
-        );
-
-
-    if (!logoutButton) {
-        return;
-    }
-
-
-    logoutButton.addEventListener(
-        "click",
-        async () => {
-
-            logoutButton.disabled =
-                true;
-
-
-            logoutButton.textContent =
-                "LOGGING OUT...";
-
-
-            const {
-                error
-            } =
-                await supabaseClient.auth.signOut();
-
-
-            if (error) {
-
-                console.error(
-                    error
-                );
-
-                logoutButton.disabled =
-                    false;
-
-                logoutButton.textContent =
-                    "LOG OUT";
-
-                return;
 
             }
+        );
 
-
-            /* Clear locally stored profile */
-
-            localStorage.removeItem(
-                "vr_user_email"
-            );
-
-            localStorage.removeItem(
-                "vr_first_name"
-            );
-
-            localStorage.removeItem(
-                "vr_last_name"
-            );
-
-            localStorage.removeItem(
-                "vr_artist_name"
-            );
-
-            localStorage.removeItem(
-                "vr_role"
-            );
-
-
-            window.location.href =
-                "login.html";
-
-        }
-    );
+    });
 
 }
 
 
-/* =========================================================
-   NEW RELEASE
-========================================================= */
 
-function setupNewRelease() {
+/* =========================================
+   MODAL
+========================================= */
 
-    const button =
+function setupModal() {
+
+    const modal =
+        document.getElementById(
+            "releaseModal"
+        );
+
+
+    const openButton =
         document.getElementById(
             "newReleaseButton"
         );
 
 
-    if (!button) {
-        return;
+    const closeButton =
+        document.getElementById(
+            "closeReleaseModal"
+        );
+
+
+    if (openButton) {
+
+        openButton.addEventListener(
+            "click",
+            () => {
+
+                modal.classList.remove(
+                    "hidden"
+                );
+
+            }
+        );
+
     }
 
 
-    button.addEventListener(
-        "click",
-        () => {
+    if (closeButton) {
 
-            alert(
-                "Release submission will be available here."
-            );
+        closeButton.addEventListener(
+            "click",
+            () => {
+
+                modal.classList.add(
+                    "hidden"
+                );
+
+            }
+        );
+
+    }
+
+
+    if (modal) {
+
+        modal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target === modal
+                ) {
+
+                    modal.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    const form =
+        document.getElementById(
+            "releaseForm"
+        );
+
+
+    if (form) {
+
+        form.addEventListener(
+            "submit",
+            createRelease
+        );
+
+    }
+
+}
+
+
+
+/* =========================================
+   CREATE RELEASE
+========================================= */
+
+async function createRelease(event) {
+
+    event.preventDefault();
+
+
+    const form =
+        event.target;
+
+
+    const formData =
+        new FormData(form);
+
+
+    const title =
+        formData.get("title");
+
+
+    const artist =
+        formData.get("artist");
+
+
+    const type =
+        formData.get("type");
+
+
+    const releaseDate =
+        formData.get("release_date");
+
+
+    const {
+        data: userData
+    } =
+        await supabaseClient.auth.getUser();
+
+
+    if (
+        !userData ||
+        !userData.user
+    ) {
+
+        window.location.href =
+            "./index.html";
+
+        return;
+
+    }
+
+
+    const user =
+        userData.user;
+
+
+    /*
+     * These are the basic fields.
+     * Your releases table must contain
+     * matching columns for this insert.
+     */
+
+    const {
+        error
+    } = await supabaseClient
+        .from("releases")
+        .insert({
+
+            user_id: user.id,
+
+            title: title,
+
+            artist: artist,
+
+            type: type,
+
+            release_date:
+                releaseDate || null
+
+        });
+
+
+    if (error) {
+
+        console.error(
+            "Release creation error:",
+            error
+        );
+
+        alert(
+            "Could not create release: " +
+            error.message
+        );
+
+        return;
+
+    }
+
+
+    document
+        .getElementById("releaseModal")
+        .classList.add("hidden");
+
+
+    form.reset();
+
+
+    await loadReleases(user.id);
+
+
+    alert(
+        "Release created successfully."
+    );
+
+}
+
+
+
+/* =========================================
+   LOGOUT
+========================================= */
+
+const logoutButton =
+    document.getElementById(
+        "logoutButton"
+    );
+
+
+if (logoutButton) {
+
+    logoutButton.addEventListener(
+        "click",
+        async () => {
+
+            await supabaseClient.auth.signOut();
+
+            window.location.href =
+                "./index.html";
 
         }
     );
@@ -679,21 +532,23 @@ function setupNewRelease() {
 }
 
 
-/* =========================================================
-   START
-========================================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+/* =========================================
+   HTML ESCAPING
+========================================= */
 
-        setupNavigation();
+function escapeHtml(value) {
 
-        setupLogout();
+    return String(value)
 
-        setupNewRelease();
+        .replaceAll("&", "&amp;")
 
-        loadDashboard();
+        .replaceAll("<", "&lt;")
 
-    }
-);
+        .replaceAll(">", "&gt;")
+
+        .replaceAll('"', "&quot;")
+
+        .replaceAll("'", "&#039;");
+
+}
