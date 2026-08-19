@@ -12,14 +12,12 @@
 
     <title>VoidRecords — Distribution</title>
 
-    <!-- Favicon -->
     <link
         rel="icon"
         type="image/png"
-        href="favicon.png"
+        href="./favicon.png"
     >
 
-    <!-- Main stylesheet -->
     <link
         rel="stylesheet"
         href="./css/style.css"
@@ -27,20 +25,16 @@
 
 </head>
 
-
 <body>
 
-
-    <!-- =====================================================
+    <!-- =========================================
          LOADING SCREEN
-    ====================================================== -->
+    ========================================== -->
 
     <div
         class="loading-screen"
         id="loadingScreen"
     >
-
-        <!-- Top loading bar -->
 
         <div class="loading-bar">
 
@@ -50,9 +44,6 @@
             ></div>
 
         </div>
-
-
-        <!-- Loading content -->
 
         <div class="loading-content">
 
@@ -74,29 +65,23 @@
     </div>
 
 
-
-    <!-- =====================================================
+    <!-- =========================================
          LOGIN PAGE
-    ====================================================== -->
+    ========================================== -->
 
     <main class="login-page">
 
-
-        <!-- =================================================
-             LEFT VISUAL PANEL
-        ================================================== -->
+        <!-- LEFT SIDE -->
 
         <section class="login-visual">
 
             <div class="visual-overlay"></div>
-
 
             <div class="visual-content">
 
                 <div class="brand-mark">
                     VOIDRECORDS
                 </div>
-
 
                 <div class="visual-bottom">
 
@@ -115,32 +100,15 @@
         </section>
 
 
-
-        <!-- =================================================
-             RIGHT LOGIN PANEL
-        ================================================== -->
+        <!-- RIGHT SIDE -->
 
         <section class="login-panel">
 
-
-            <!-- Everything inside the login box -->
-
             <div class="login-container">
-
-
-                <!-- =================================================
-                     BRAND
-                ================================================== -->
 
                 <div class="mobile-brand">
                     VOIDRECORDS
                 </div>
-
-
-
-                <!-- =================================================
-                     LOGIN HEADER
-                ================================================== -->
 
                 <div class="login-header">
 
@@ -148,11 +116,9 @@
                         ARTIST / LABEL PORTAL
                     </p>
 
-
                     <h1>
                         Welcome back!
                     </h1>
-
 
                     <p class="subtitle">
                         Sign in to manage your releases,
@@ -162,25 +128,15 @@
                 </div>
 
 
+                <!-- LOGIN FORM -->
 
-                <!-- =================================================
-                     LOGIN FORM
-                ================================================== -->
-
-                <form
-                    id="loginForm"
-                    novalidate
-                >
-
-
-                    <!-- EMAIL -->
+                <form id="loginForm">
 
                     <div class="input-group">
 
                         <label for="email">
                             EMAIL
                         </label>
-
 
                         <input
                             type="email"
@@ -194,9 +150,6 @@
                     </div>
 
 
-
-                    <!-- PASSWORD -->
-
                     <div class="input-group">
 
                         <div class="password-label">
@@ -204,7 +157,6 @@
                             <label for="password">
                                 PASSWORD
                             </label>
-
 
                             <a
                                 href="#"
@@ -214,7 +166,6 @@
                             </a>
 
                         </div>
-
 
                         <input
                             type="password"
@@ -227,11 +178,6 @@
 
                     </div>
 
-
-
-                    <!-- =================================================
-                         REMEMBER ME
-                    ================================================== -->
 
                     <div class="remember-row">
 
@@ -252,20 +198,15 @@
                     </div>
 
 
-
-                    <!-- =================================================
-                         SIGN IN BUTTON
-                    ================================================== -->
-
                     <button
                         type="submit"
                         class="login-button"
+                        id="loginButton"
                     >
 
                         <span>
                             SIGN IN
                         </span>
-
 
                         <span>
                             →
@@ -276,10 +217,7 @@
                 </form>
 
 
-
-                <!-- =================================================
-                     INVITE DIVIDER
-                ================================================== -->
+                <!-- DIVIDER -->
 
                 <div class="divider">
 
@@ -294,10 +232,7 @@
                 </div>
 
 
-
-                <!-- =================================================
-                     REQUEST INVITE
-                ================================================== -->
+                <!-- INVITE -->
 
                 <div class="invite-section">
 
@@ -305,7 +240,6 @@
                         Distribution access is currently
                         available by invitation only.
                     </p>
-
 
                     <button
                         type="button"
@@ -318,10 +252,7 @@
                 </div>
 
 
-
-                <!-- =================================================
-                     FOOTER
-                ================================================== -->
+                <!-- FOOTER -->
 
                 <footer>
 
@@ -329,13 +260,11 @@
                         © 2026 VoidRecords Music & Entertainment.
                     </span>
 
-
                     <div>
 
                         <a href="#">
                             Privacy
                         </a>
-
 
                         <a href="#">
                             Terms
@@ -345,7 +274,6 @@
 
                 </footer>
 
-
             </div>
 
         </section>
@@ -353,27 +281,18 @@
     </main>
 
 
-
-    <!-- =====================================================
+    <!-- =========================================
          SUPABASE
-         
-         IMPORTANT:
-         Supabase must load BEFORE app.js.
-    ====================================================== -->
+    ========================================== -->
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
-    <!-- =====================================================
+    <!-- =========================================
          VOIDRECORDS JAVASCRIPT
-    ====================================================== -->
+    ========================================== -->
 
-    <script
-        src="./js/app.js"
-    ></script>
-
+    <script src="./js/app.js"></script>
 
 </body>
 
