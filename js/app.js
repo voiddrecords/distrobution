@@ -1,573 +1,619 @@
-document.addEventListener("DOMContentLoaded", () => {
+/* =========================================================
+   VOIDRECORDS
+   Authentication System
+   ========================================================= */
 
-    /* =========================================
-       ELEMENTS
-    ========================================= */
+/* -------------------------
+   SUPABASE CONFIG
+------------------------- */
 
-    const loadingScreen =
-        document.getElementById("loadingScreen");
+const SUPABASE_URL =
+    "https://kttpyshyutdmxhcqekxh.supabase.co";
 
-    const loadingProgress =
-        document.getElementById("loadingProgress");
-
-    const slowMessage =
-        document.getElementById("slowMessage");
-
-    const loginPage =
-        document.querySelector(".login-page");
-
-    const loginForm =
-        document.getElementById("loginForm");
+const SUPABASE_PUBLISHABLE_KEY =
+    "PASTE_YOUR_SB_PUBLISHABLE_KEY_HERE";
 
 
-    /* =========================================
-       LOADING PROGRESS
-    ========================================= */
+/* -------------------------
+   SUPABASE CLIENT
+------------------------- */
 
-    let progress = 0;
+const { createClient } = supabase;
 
-
-    function setProgress(value) {
-
-        progress = Math.min(
-            Math.max(value, 0),
-            100
-        );
-
-        if (loadingProgress) {
-
-            loadingProgress.style.width =
-                progress + "%";
-
+const supabaseClient = createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY,
+    {
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
         }
     }
+);
 
 
-    function increaseProgress(value) {
+/* =========================================================
+   LOADING SCREEN
+   ========================================================= */
 
-        setProgress(progress + value);
+const loadingScreen =
+    document.getElementById("loadingScreen");
+
+const loadingLogo =
+    document.getElementById("loadingLogo");
+
+const loadingWarning =
+    document.getElementById("loadingWarning");
+
+const loadingBar =
+    document.getElementById("loadingBar");
+
+let loadingProgress = 0;
+let loadingFinished = false;
+
+
+/* -------------------------
+   Loading progress
+------------------------- */
+
+function updateLoadingProgress(amount) {
+
+    loadingProgress += amount;
+
+    if (loadingProgress > 100) {
+        loadingProgress = 100;
+    }
+
+    if (loadingBar) {
+        loadingBar.style.width =
+            loadingProgress + "%";
+    }
+}
+
+
+/* -------------------------
+   Slow loading warning
+------------------------- */
+
+setTimeout(() => {
+
+    if (!loadingFinished && loadingWarning) {
+
+        loadingWarning.style.display = "block";
 
     }
 
-
-    /* =========================================
-       INITIAL PROGRESS
-    ========================================= */
-
-    setProgress(5);
+}, 8000);
 
 
-    /* =========================================
-       FINISH LOADING
-    ========================================= */
+/* -------------------------
+   Hide loading screen
+------------------------- */
 
-    function finishLoading() {
+function finishLoading() {
 
-        setProgress(100);
+    if (loadingFinished) return;
 
-        setTimeout(() => {
+    loadingFinished = true;
 
-            if (loginPage) {
+    updateLoadingProgress(100);
 
-                loginPage.classList.add(
-                    "ready"
-                );
+    setTimeout(() => {
 
-            }
+        if (loadingScreen) {
 
-            if (loadingScreen) {
+            loadingScreen.classList.add("loading-hidden");
 
-                loadingScreen.classList.add(
-                    "fade-out"
-                );
+        }
 
-            }
+    }, 500);
 
-            setTimeout(() => {
-
-                if (loadingScreen) {
-
-                    loadingScreen.style.display =
-                        "none";
-
-                }
-
-            }, 900);
-
-        }, 250);
-    }
+}
 
 
-    /* =========================================
-       GET REMEMBERED USER
-    ========================================= */
+/* =========================================================
+   GET CURRENT USER
+   ========================================================= */
 
-    function getRememberedUser() {
+async function checkUser() {
 
-        try {
+    try {
 
-            const savedUser =
-                localStorage.getItem(
-                    "voidrecords_user"
-                );
+        updateLoadingProgress(20);
 
-            if (!savedUser) {
+        const {
+            data: {
+                session
+            },
+            error
+        } = await supabaseClient.auth.getSession();
 
-                return null;
+        updateLoadingProgress(30);
 
-            }
 
-            return JSON.parse(savedUser);
-
-        } catch (error) {
+        if (error) {
 
             console.error(
-                "Error reading remembered user:",
+                "Session error:",
                 error
             );
 
-            return null;
+            finishLoading();
+
+            return;
 
         }
 
+
+        /* -------------------------
+           No logged-in user
+        ------------------------- */
+
+        if (!session) {
+
+            updateLoadingProgress(50);
+
+            finishLoading();
+
+            return;
+
+        }
+
+
+        /* -------------------------
+           Logged-in user
+        ------------------------- */
+
+        const user =
+            session.user;
+
+        console.log(
+            "Logged in user:",
+            user.email
+        );
+
+
+        updateLoadingProgress(60);
+
+
+        /* -------------------------
+           Get profile
+        ------------------------- */
+
+        const {
+            data: profile,
+            error: profileError
+        } = await supabaseClient
+            .from("profiles")
+            .select("*")
+            .eq("id", user.id)
+            .single();
+
+
+        if (profileError) {
+
+            console.error(
+                "Profile error:",
+                profileError
+            );
+
+            finishLoading();
+
+            return;
+
+        }
+
+
+        updateLoadingProgress(80);
+
+
+        /* -------------------------
+           Save user information
+        ------------------------- */
+
+        localStorage.setItem(
+            "vr_user_email",
+            user.email || ""
+        );
+
+        localStorage.setItem(
+            "vr_first_name",
+            profile.first_name || ""
+        );
+
+        localStorage.setItem(
+            "vr_last_name",
+            profile.last_name || ""
+        );
+
+        localStorage.setItem(
+            "vr_artist_name",
+            profile.artist_name || ""
+        );
+
+        localStorage.setItem(
+            "vr_role",
+            profile.role || "artist"
+        );
+
+
+        /* -------------------------
+           Redirect to dashboard
+        ------------------------- */
+
+        updateLoadingProgress(95);
+
+        window.location.href =
+            "dashboard.html";
+
+    } catch (error) {
+
+        console.error(
+            "Website loading error:",
+            error
+        );
+
+        finishLoading();
+
     }
 
+}
 
-    /* =========================================
-       BACKGROUND CHECKS
-    ========================================= */
 
-    function runBackgroundChecks() {
+/* =========================================================
+   LOGIN
+   ========================================================= */
 
-        return new Promise((resolve) => {
+const loginForm =
+    document.getElementById("loginForm");
 
-            /* -------------------------------
-               STEP 1 — Browser check
-            -------------------------------- */
 
-            setTimeout(() => {
+if (loginForm) {
 
-                try {
+    loginForm.addEventListener(
+        "submit",
+        async function(event) {
 
-                    localStorage.setItem(
-                        "voidrecords_test",
-                        "true"
+            event.preventDefault();
+
+
+            const emailInput =
+                document.getElementById("email");
+
+            const passwordInput =
+                document.getElementById("password");
+
+            const rememberInput =
+                document.getElementById("remember");
+
+
+            const email =
+                emailInput.value.trim();
+
+            const password =
+                passwordInput.value;
+
+
+            if (!email || !password) {
+
+                alert(
+                    "Please enter your email and password."
+                );
+
+                return;
+
+            }
+
+
+            /* -------------------------
+               Login button
+            ------------------------- */
+
+            const loginButton =
+                loginForm.querySelector(
+                    ".login-button"
+                );
+
+
+            const originalButtonText =
+                loginButton.innerHTML;
+
+
+            loginButton.disabled = true;
+
+            loginButton.innerHTML =
+                "SIGNING IN...";
+
+
+            try {
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+
+
+                if (error) {
+
+                    console.error(
+                        "Login error:",
+                        error
                     );
 
-                    localStorage.removeItem(
-                        "voidrecords_test"
+                    alert(
+                        "Invalid email or password."
                     );
 
-                    increaseProgress(20);
+                    loginButton.disabled =
+                        false;
 
-                } catch (error) {
+                    loginButton.innerHTML =
+                        originalButtonText;
 
-                    console.warn(
-                        "Local storage unavailable."
-                    );
-
-                    increaseProgress(10);
+                    return;
 
                 }
 
 
-                /* -------------------------------
-                   STEP 2 — User check
-                -------------------------------- */
+                /* -------------------------
+                   Remember me
+                ------------------------- */
 
-                setTimeout(() => {
+                if (rememberInput) {
 
-                    const rememberedUser =
-                        getRememberedUser();
+                    if (rememberInput.checked) {
 
-                    if (rememberedUser) {
-
-                        console.log(
-                            "Remembered user:",
-                            rememberedUser.artistName ||
-                            rememberedUser.email
+                        localStorage.setItem(
+                            "vr_remember_me",
+                            "true"
                         );
 
                     } else {
 
-                        console.log(
-                            "No remembered user found."
+                        localStorage.removeItem(
+                            "vr_remember_me"
                         );
 
                     }
 
-                    increaseProgress(25);
+                }
 
 
-                    /* -------------------------------
-                       STEP 3 — Website initialization
-                    -------------------------------- */
+                /* -------------------------
+                   Get profile
+                ------------------------- */
 
-                    setTimeout(() => {
-
-                        increaseProgress(25);
-
-
-                        /* -------------------------------
-                           STEP 4 — Final check
-                        -------------------------------- */
-
-                        setTimeout(() => {
-
-                            increaseProgress(15);
-
-                            resolve();
-
-                        }, 250);
-
-                    }, 250);
-
-                }, 250);
-
-            }, 200);
-
-        });
-
-    }
+                const {
+                    data: profile,
+                    error: profileError
+                } =
+                    await supabaseClient
+                        .from("profiles")
+                        .select("*")
+                        .eq(
+                            "id",
+                            data.user.id
+                        )
+                        .single();
 
 
-    /* =========================================
-       START LOADING
-    ========================================= */
+                if (profileError) {
 
-    runBackgroundChecks()
+                    console.error(
+                        profileError
+                    );
 
-        .then(() => {
+                    alert(
+                        "Your account exists, but your VoidRecords profile could not be found."
+                    );
 
-            finishLoading();
+                    await supabaseClient.auth.signOut();
 
-        })
+                    loginButton.disabled =
+                        false;
 
-        .catch((error) => {
+                    loginButton.innerHTML =
+                        originalButtonText;
 
-            console.error(
-                "Website initialization error:",
-                error
-            );
+                    return;
 
-            finishLoading();
-
-        });
+                }
 
 
-    /* =========================================
-       SLOW WEBSITE WARNING
-    ========================================= */
+                /* -------------------------
+                   Store profile
+                ------------------------- */
 
-    setTimeout(() => {
+                localStorage.setItem(
+                    "vr_user_email",
+                    data.user.email || ""
+                );
 
-        if (
-            loadingScreen &&
-            !loadingScreen.classList.contains(
-                "fade-out"
-            )
-        ) {
+                localStorage.setItem(
+                    "vr_first_name",
+                    profile.first_name || ""
+                );
 
-            if (slowMessage) {
+                localStorage.setItem(
+                    "vr_last_name",
+                    profile.last_name || ""
+                );
 
-                slowMessage.classList.add(
-                    "show"
+                localStorage.setItem(
+                    "vr_artist_name",
+                    profile.artist_name || ""
+                );
+
+                localStorage.setItem(
+                    "vr_role",
+                    profile.role || "artist"
+                );
+
+
+                /* -------------------------
+                   Redirect
+                ------------------------- */
+
+                window.location.href =
+                    "dashboard.html";
+
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+                alert(
+                    "Something went wrong. Please try again."
+                );
+
+                loginButton.disabled =
+                    false;
+
+                loginButton.innerHTML =
+                    originalButtonText;
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   REQUEST INVITE
+   ========================================================= */
+
+function requestInvite() {
+
+    window.location.href =
+        "https://fiya8.github.io/voidrecords/";
+
+}
+
+
+/* =========================================================
+   FORGOT PASSWORD
+   ========================================================= */
+
+const forgotLink =
+    document.querySelector(
+        ".password-label a"
+    );
+
+
+if (forgotLink) {
+
+    forgotLink.addEventListener(
+        "click",
+        async function(event) {
+
+            event.preventDefault();
+
+
+            const emailInput =
+                document.getElementById("email");
+
+            const email =
+                emailInput.value.trim();
+
+
+            if (!email) {
+
+                alert(
+                    "Enter your email address first."
+                );
+
+                emailInput.focus();
+
+                return;
+
+            }
+
+
+            try {
+
+                const {
+                    error
+                } =
+                    await supabaseClient.auth
+                        .resetPasswordForEmail(
+                            email,
+                            {
+                                redirectTo:
+                                    window.location.origin
+                            }
+                        );
+
+
+                if (error) {
+
+                    alert(
+                        error.message
+                    );
+
+                    return;
+
+                }
+
+
+                alert(
+                    "Password reset instructions have been sent to your email."
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+                alert(
+                    "Unable to send the password reset email."
                 );
 
             }
 
         }
+    );
 
-    }, 8000);
-
-
-    /* =========================================
-       EMERGENCY TIMEOUT
-    ========================================= */
-
-    setTimeout(() => {
-
-        if (
-            loadingScreen &&
-            !loadingScreen.classList.contains(
-                "fade-out"
-            )
-        ) {
-
-            console.warn(
-                "Loading took too long."
-            );
-
-            finishLoading();
-
-        }
-
-    }, 15000);
+}
 
 
-    /* =========================================
-       LOGIN
-    ========================================= */
+/* =========================================================
+   AUTH STATE LISTENER
+   ========================================================= */
 
-    if (loginForm) {
+supabaseClient.auth.onAuthStateChange(
+    (event, session) => {
 
-        loginForm.addEventListener(
-            "submit",
-            (event) => {
-
-                event.preventDefault();
-
-
-                const emailInput =
-                    document.getElementById(
-                        "email"
-                    );
-
-                const passwordInput =
-                    document.getElementById(
-                        "password"
-                    );
-
-                const rememberInput =
-                    document.getElementById(
-                        "remember"
-                    );
-
-
-                if (
-                    !emailInput ||
-                    !passwordInput
-                ) {
-
-                    console.error(
-                        "Login fields are missing."
-                    );
-
-                    return;
-
-                }
-
-
-                const email =
-                    emailInput.value.trim();
-
-                const password =
-                    passwordInput.value;
-
-                const remember =
-                    rememberInput
-                        ? rememberInput.checked
-                        : false;
-
-
-                /* -------------------------------
-                   Validate
-                -------------------------------- */
-
-                if (!email) {
-
-                    alert(
-                        "Please enter your email."
-                    );
-
-                    emailInput.focus();
-
-                    return;
-
-                }
-
-
-                if (!password) {
-
-                    alert(
-                        "Please enter your password."
-                    );
-
-                    passwordInput.focus();
-
-                    return;
-
-                }
-
-
-                /* -------------------------------
-                   User information
-                -------------------------------- */
-
-                const user = {
-
-                    email: email,
-
-                    artistName: "Artist",
-
-                    firstName: "",
-
-                    lastName: "",
-
-                    role: "artist"
-
-                };
-
-
-                /* -------------------------------
-                   Remember me
-                -------------------------------- */
-
-                if (remember) {
-
-                    localStorage.setItem(
-                        "voidrecords_user",
-                        JSON.stringify(user)
-                    );
-
-                } else {
-
-                    localStorage.removeItem(
-                        "voidrecords_user"
-                    );
-
-                }
-
-
-                /* -------------------------------
-                   Dashboard
-                -------------------------------- */
-
-                window.location.href =
-                    "dashboard.html";
-
-            }
+        console.log(
+            "Auth event:",
+            event
         );
 
     }
+);
 
 
-    /* =========================================
-       REQUEST INVITE
-    ========================================= */
+/* =========================================================
+   START WEBSITE
+   ========================================================= */
 
-    window.requestInvite = function () {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-        window.location.href =
-            "https://fiya8.github.io/voidrecords/";
+        updateLoadingProgress(10);
 
-    };
-
-
-    /* =========================================
-       LOGOUT
-    ========================================= */
-
-    window.logoutUser = function () {
-
-        localStorage.removeItem(
-            "voidrecords_user"
-        );
-
-        window.location.href =
-            "index.html";
-
-    };
-
-
-    /* =========================================
-       CURRENT USER
-    ========================================= */
-
-    window.getCurrentUser = function () {
-
-        return getRememberedUser();
-
-    };
-
-
-    /* =========================================
-       DASHBOARD USER DATA
-    ========================================= */
-
-    const currentUser =
-        getRememberedUser();
-
-
-    if (
-        currentUser &&
-        document.body.classList.contains(
-            "dashboard-page"
-        )
-    ) {
-
-
-        /* Artist */
-
-        document
-            .querySelectorAll(
-                "[data-user-artist]"
-            )
-            .forEach((element) => {
-
-                element.textContent =
-                    currentUser.artistName ||
-                    "Artist";
-
-            });
-
-
-        /* Email */
-
-        document
-            .querySelectorAll(
-                "[data-user-email]"
-            )
-            .forEach((element) => {
-
-                element.textContent =
-                    currentUser.email || "";
-
-            });
-
-
-        /* First name */
-
-        document
-            .querySelectorAll(
-                "[data-user-first-name]"
-            )
-            .forEach((element) => {
-
-                element.textContent =
-                    currentUser.firstName || "";
-
-            });
-
-
-        /* Last name */
-
-        document
-            .querySelectorAll(
-                "[data-user-last-name]"
-            )
-            .forEach((element) => {
-
-                element.textContent =
-                    currentUser.lastName || "";
-
-            });
-
-
-        /* Role */
-
-        document
-            .querySelectorAll(
-                "[data-user-role]"
-            )
-            .forEach((element) => {
-
-                element.textContent =
-                    currentUser.role ||
-                    "artist";
-
-            });
+        checkUser();
 
     }
-
-});
+);
