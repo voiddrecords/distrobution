@@ -1,22 +1,22 @@
 /* =========================================================
-   VOIDRECORDS
-   Authentication System
-   ========================================================= */
+   VOIDRECORDS — LOGIN / AUTHENTICATION
+========================================================= */
 
-/* -------------------------
+
+/* =========================================================
    SUPABASE CONFIG
-------------------------- */
+========================================================= */
 
 const SUPABASE_URL =
     "https://kttpyshyutdmxhcqekxh.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_W-r75b5qVPiikM20aF8NwA_I4h5lhau";
+    "PASTE_YOUR_SB_PUBLISHABLE_KEY_HERE";
 
 
-/* -------------------------
+/* =========================================================
    SUPABASE CLIENT
-------------------------- */
+========================================================= */
 
 const { createClient } = supabase;
 
@@ -35,101 +35,119 @@ const supabaseClient = createClient(
 
 /* =========================================================
    LOADING SCREEN
-   ========================================================= */
+========================================================= */
 
 const loadingScreen =
     document.getElementById("loadingScreen");
 
-const loadingLogo =
-    document.getElementById("loadingLogo");
+const loadingProgress =
+    document.getElementById("loadingProgress");
 
-const loadingWarning =
-    document.getElementById("loadingWarning");
+const slowMessage =
+    document.getElementById("slowMessage");
 
-const loadingBar =
-    document.getElementById("loadingBar");
 
-let loadingProgress = 0;
+let progress = 0;
 let loadingFinished = false;
 
 
-/* -------------------------
-   Loading progress
-------------------------- */
+/* =========================================================
+   LOADING PROGRESS
+========================================================= */
 
-function updateLoadingProgress(amount) {
+function setProgress(value) {
 
-    loadingProgress += amount;
+    progress = Math.max(
+        0,
+        Math.min(100, value)
+    );
 
-    if (loadingProgress > 100) {
-        loadingProgress = 100;
-    }
+    if (loadingProgress) {
 
-    if (loadingBar) {
-        loadingBar.style.width =
-            loadingProgress + "%";
+        loadingProgress.style.width =
+            progress + "%";
+
     }
 }
 
 
-/* -------------------------
-   Slow loading warning
-------------------------- */
+/* =========================================================
+   SLOW WEBSITE MESSAGE
+========================================================= */
+
+if (slowMessage) {
+
+    slowMessage.style.display = "none";
+
+}
+
 
 setTimeout(() => {
 
-    if (!loadingFinished && loadingWarning) {
+    if (
+        !loadingFinished &&
+        slowMessage
+    ) {
 
-        loadingWarning.style.display = "block";
+        slowMessage.style.display =
+            "block";
 
     }
 
 }, 8000);
 
 
-/* -------------------------
-   Hide loading screen
-------------------------- */
+/* =========================================================
+   FINISH LOADING
+========================================================= */
 
 function finishLoading() {
 
-    if (loadingFinished) return;
+    if (loadingFinished) {
+        return;
+    }
 
     loadingFinished = true;
 
-    updateLoadingProgress(100);
+    setProgress(100);
+
 
     setTimeout(() => {
 
         if (loadingScreen) {
 
-            loadingScreen.classList.add("loading-hidden");
+            loadingScreen.classList.add(
+                "loading-hidden"
+            );
 
         }
 
-    }, 500);
+    }, 600);
 
 }
 
 
 /* =========================================================
-   GET CURRENT USER
-   ========================================================= */
+   CHECK EXISTING SESSION
+========================================================= */
 
-async function checkUser() {
+async function checkExistingSession() {
 
     try {
 
-        updateLoadingProgress(20);
+        setProgress(15);
+
 
         const {
             data: {
                 session
             },
             error
-        } = await supabaseClient.auth.getSession();
+        } =
+            await supabaseClient.auth.getSession();
 
-        updateLoadingProgress(30);
+
+        setProgress(40);
 
 
         if (error) {
@@ -146,13 +164,13 @@ async function checkUser() {
         }
 
 
-        /* -------------------------
-           No logged-in user
-        ------------------------- */
+        /* -----------------------------------------
+           NO USER LOGGED IN
+        ----------------------------------------- */
 
         if (!session) {
 
-            updateLoadingProgress(50);
+            setProgress(100);
 
             finishLoading();
 
@@ -161,96 +179,33 @@ async function checkUser() {
         }
 
 
-        /* -------------------------
-           Logged-in user
-        ------------------------- */
-
-        const user =
-            session.user;
+        /* -----------------------------------------
+           USER IS ALREADY LOGGED IN
+        ----------------------------------------- */
 
         console.log(
-            "Logged in user:",
-            user.email
+            "Existing session:",
+            session.user.email
         );
 
 
-        updateLoadingProgress(60);
+        setProgress(55);
 
 
-        /* -------------------------
-           Get profile
-        ------------------------- */
-
-        const {
-            data: profile,
-            error: profileError
-        } = await supabaseClient
-            .from("profiles")
-            .select("*")
-            .eq("id", user.id)
-            .single();
-
-
-        if (profileError) {
-
-            console.error(
-                "Profile error:",
-                profileError
-            );
-
-            finishLoading();
-
-            return;
-
-        }
-
-
-        updateLoadingProgress(80);
-
-
-        /* -------------------------
-           Save user information
-        ------------------------- */
-
-        localStorage.setItem(
-            "vr_user_email",
-            user.email || ""
-        );
-
-        localStorage.setItem(
-            "vr_first_name",
-            profile.first_name || ""
-        );
-
-        localStorage.setItem(
-            "vr_last_name",
-            profile.last_name || ""
-        );
-
-        localStorage.setItem(
-            "vr_artist_name",
-            profile.artist_name || ""
-        );
-
-        localStorage.setItem(
-            "vr_role",
-            profile.role || "artist"
-        );
-
-
-        /* -------------------------
-           Redirect to dashboard
-        ------------------------- */
-
-        updateLoadingProgress(95);
+        /*
+         * The user already has a valid Supabase
+         * session, so send them directly to
+         * their dashboard.
+         */
 
         window.location.href =
             "dashboard.html";
 
+
     } catch (error) {
 
         console.error(
-            "Website loading error:",
+            "Loading error:",
             error
         );
 
@@ -262,11 +217,13 @@ async function checkUser() {
 
 
 /* =========================================================
-   LOGIN
-   ========================================================= */
+   LOGIN FORM
+========================================================= */
 
 const loginForm =
-    document.getElementById("loginForm");
+    document.getElementById(
+        "loginForm"
+    );
 
 
 if (loginForm) {
@@ -279,23 +236,39 @@ if (loginForm) {
 
 
             const emailInput =
-                document.getElementById("email");
+                document.getElementById(
+                    "email"
+                );
+
 
             const passwordInput =
-                document.getElementById("password");
+                document.getElementById(
+                    "password"
+                );
+
 
             const rememberInput =
-                document.getElementById("remember");
+                document.getElementById(
+                    "remember"
+                );
 
 
             const email =
                 emailInput.value.trim();
 
+
             const password =
                 passwordInput.value;
 
 
-            if (!email || !password) {
+            /* -----------------------------------------
+               VALIDATION
+            ----------------------------------------- */
+
+            if (
+                !email ||
+                !password
+            ) {
 
                 alert(
                     "Please enter your email and password."
@@ -306,9 +279,9 @@ if (loginForm) {
             }
 
 
-            /* -------------------------
-               Login button
-            ------------------------- */
+            /* -----------------------------------------
+               BUTTON
+            ----------------------------------------- */
 
             const loginButton =
                 loginForm.querySelector(
@@ -316,26 +289,39 @@ if (loginForm) {
                 );
 
 
-            const originalButtonText =
+            const originalButton =
                 loginButton.innerHTML;
 
 
-            loginButton.disabled = true;
+            loginButton.disabled =
+                true;
+
 
             loginButton.innerHTML =
-                "SIGNING IN...";
+                "<span>SIGNING IN...</span><span>→</span>";
 
 
             try {
+
+                setProgress(20);
+
+
+                /* -----------------------------------------
+                   SUPABASE LOGIN
+                ----------------------------------------- */
 
                 const {
                     data,
                     error
                 } =
-                    await supabaseClient.auth.signInWithPassword({
-                        email: email,
-                        password: password
-                    });
+                    await supabaseClient.auth
+                        .signInWithPassword({
+
+                            email: email,
+
+                            password: password
+
+                        });
 
 
                 if (error) {
@@ -345,48 +331,70 @@ if (loginForm) {
                         error
                     );
 
+
                     alert(
                         "Invalid email or password."
                     );
 
+
                     loginButton.disabled =
                         false;
 
+
                     loginButton.innerHTML =
-                        originalButtonText;
+                        originalButton;
+
 
                     return;
 
                 }
 
 
-                /* -------------------------
-                   Remember me
-                ------------------------- */
+                setProgress(50);
 
-                if (rememberInput) {
 
-                    if (rememberInput.checked) {
+                const user =
+                    data.user;
 
-                        localStorage.setItem(
-                            "vr_remember_me",
-                            "true"
-                        );
 
-                    } else {
+                if (!user) {
 
-                        localStorage.removeItem(
-                            "vr_remember_me"
-                        );
-
-                    }
+                    throw new Error(
+                        "No user returned from Supabase."
+                    );
 
                 }
 
 
-                /* -------------------------
-                   Get profile
-                ------------------------- */
+                /* -----------------------------------------
+                   REMEMBER ME
+                ----------------------------------------- */
+
+                if (
+                    rememberInput &&
+                    rememberInput.checked
+                ) {
+
+                    localStorage.setItem(
+                        "vr_remember_me",
+                        "true"
+                    );
+
+                } else {
+
+                    localStorage.removeItem(
+                        "vr_remember_me"
+                    );
+
+                }
+
+
+                setProgress(65);
+
+
+                /* -----------------------------------------
+                   GET USER PROFILE
+                ----------------------------------------- */
 
                 const {
                     data: profile,
@@ -397,7 +405,7 @@ if (loginForm) {
                         .select("*")
                         .eq(
                             "id",
-                            data.user.id
+                            user.id
                         )
                         .single();
 
@@ -405,49 +413,68 @@ if (loginForm) {
                 if (profileError) {
 
                     console.error(
+                        "Profile error:",
                         profileError
                     );
 
+
+                    /*
+                     * Authentication worked,
+                     * but there isn't a profile
+                     * connected to this account.
+                     */
+
                     alert(
-                        "Your account exists, but your VoidRecords profile could not be found."
+                        "Your account was found, but your VoidRecords profile could not be found."
                     );
 
+
                     await supabaseClient.auth.signOut();
+
 
                     loginButton.disabled =
                         false;
 
+
                     loginButton.innerHTML =
-                        originalButtonText;
+                        originalButton;
+
 
                     return;
 
                 }
 
 
-                /* -------------------------
-                   Store profile
-                ------------------------- */
+                setProgress(80);
+
+
+                /* -----------------------------------------
+                   SAVE USER INFORMATION
+                ----------------------------------------- */
 
                 localStorage.setItem(
                     "vr_user_email",
-                    data.user.email || ""
+                    user.email || ""
                 );
+
 
                 localStorage.setItem(
                     "vr_first_name",
                     profile.first_name || ""
                 );
 
+
                 localStorage.setItem(
                     "vr_last_name",
                     profile.last_name || ""
                 );
 
+
                 localStorage.setItem(
                     "vr_artist_name",
                     profile.artist_name || ""
                 );
+
 
                 localStorage.setItem(
                     "vr_role",
@@ -455,29 +482,40 @@ if (loginForm) {
                 );
 
 
-                /* -------------------------
-                   Redirect
-                ------------------------- */
+                setProgress(95);
 
-                window.location.href =
-                    "dashboard.html";
+
+                /* -----------------------------------------
+                   GO TO DASHBOARD
+                ----------------------------------------- */
+
+                setTimeout(() => {
+
+                    window.location.href =
+                        "dashboard.html";
+
+                }, 300);
 
 
             } catch (error) {
 
                 console.error(
+                    "Login error:",
                     error
                 );
 
+
                 alert(
-                    "Something went wrong. Please try again."
+                    "Something went wrong while signing in."
                 );
+
 
                 loginButton.disabled =
                     false;
 
+
                 loginButton.innerHTML =
-                    originalButtonText;
+                    originalButton;
 
             }
 
@@ -488,8 +526,8 @@ if (loginForm) {
 
 
 /* =========================================================
-   REQUEST INVITE
-   ========================================================= */
+   REQUEST AN INVITE
+========================================================= */
 
 function requestInvite() {
 
@@ -501,7 +539,7 @@ function requestInvite() {
 
 /* =========================================================
    FORGOT PASSWORD
-   ========================================================= */
+========================================================= */
 
 const forgotLink =
     document.querySelector(
@@ -519,7 +557,10 @@ if (forgotLink) {
 
 
             const emailInput =
-                document.getElementById("email");
+                document.getElementById(
+                    "email"
+                );
+
 
             const email =
                 emailInput.value.trim();
@@ -531,7 +572,9 @@ if (forgotLink) {
                     "Enter your email address first."
                 );
 
+
                 emailInput.focus();
+
 
                 return;
 
@@ -555,9 +598,15 @@ if (forgotLink) {
 
                 if (error) {
 
+                    console.error(
+                        error
+                    );
+
+
                     alert(
                         error.message
                     );
+
 
                     return;
 
@@ -575,6 +624,7 @@ if (forgotLink) {
                     error
                 );
 
+
                 alert(
                     "Unable to send the password reset email."
                 );
@@ -589,13 +639,13 @@ if (forgotLink) {
 
 /* =========================================================
    AUTH STATE LISTENER
-   ========================================================= */
+========================================================= */
 
 supabaseClient.auth.onAuthStateChange(
     (event, session) => {
 
         console.log(
-            "Auth event:",
+            "Supabase auth:",
             event
         );
 
@@ -604,16 +654,16 @@ supabaseClient.auth.onAuthStateChange(
 
 
 /* =========================================================
-   START WEBSITE
-   ========================================================= */
+   START
+========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
     () => {
 
-        updateLoadingProgress(10);
+        setProgress(5);
 
-        checkUser();
+        checkExistingSession();
 
     }
 );
