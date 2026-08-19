@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -21,10 +22,12 @@
         rel="stylesheet"
         href="./css/dashboard.css"
     >
+
 </head>
 
 
 <body>
+
 
     <!-- =========================================
          SIDEBAR
@@ -94,7 +97,7 @@
 
 
     <!-- =========================================
-         MAIN DASHBOARD
+         DASHBOARD
     ========================================== -->
 
     <main class="dashboard">
@@ -107,10 +110,10 @@
             <div>
 
                 <p class="eyebrow">
-                    VOIDRECORDS DISTRIBUTION
+                    VOIDRECORDS
                 </p>
 
-                <h1 id="dashboardTitle">
+                <h1>
                     Dashboard
                 </h1>
 
@@ -140,11 +143,11 @@
             <div class="welcome-card">
 
                 <p class="eyebrow">
-                    ARTIST / LABEL PORTAL
+                    DISTRIBUTION PORTAL
                 </p>
 
-                <h2 id="welcomeName">
-                    Welcome back.
+                <h2>
+                    Welcome to VoidRecords.
                 </h2>
 
                 <p>
@@ -157,10 +160,11 @@
 
             <div class="stats-grid">
 
+
                 <div class="stat-card">
 
                     <span>
-                        TOTAL RELEASES
+                        RELEASES
                     </span>
 
                     <strong id="releaseCount">
@@ -189,11 +193,12 @@
                         ACCOUNT
                     </span>
 
-                    <strong id="accountStatus">
+                    <strong>
                         ACTIVE
                     </strong>
 
                 </div>
+
 
             </div>
 
@@ -218,9 +223,9 @@
 
                 <button
                     class="primary-button"
-                    id="newReleaseButton"
+                    id="createReleaseButton"
                 >
-                    NEW RELEASE
+                    CREATE RELEASE
                 </button>
 
             </div>
@@ -232,7 +237,14 @@
             >
 
                 <div class="empty-state">
-                    Loading releases...
+
+                    No releases yet.
+
+                    <br><br>
+
+                    Create your first release to
+                    begin building your catalog.
+
                 </div>
 
             </div>
@@ -261,7 +273,7 @@
 
             <div class="empty-state">
 
-                Artist management will appear here.
+                No artists added yet.
 
             </div>
 
@@ -289,18 +301,19 @@
 
             <div class="empty-state">
 
-                Your distributed catalog will appear here.
+                Your catalog will appear here.
 
             </div>
 
         </section>
+
 
     </main>
 
 
 
     <!-- =========================================
-         NEW RELEASE MODAL
+         CREATE RELEASE MODAL
     ========================================== -->
 
     <div
@@ -309,6 +322,7 @@
     >
 
         <div class="modal-box">
+
 
             <button
                 class="modal-close"
@@ -320,33 +334,34 @@
 
 
             <h2>
-                New Release
+                Create Release
             </h2>
 
 
             <form id="releaseForm">
+
 
                 <label for="releaseTitle">
                     RELEASE TITLE
                 </label>
 
                 <input
+                    type="text"
                     id="releaseTitle"
                     name="title"
-                    type="text"
                     placeholder="Release title"
                     required
                 >
 
 
-                <label for="releaseArtist">
+                <label for="artistName">
                     ARTIST
                 </label>
 
                 <input
-                    id="releaseArtist"
-                    name="artist"
                     type="text"
+                    id="artistName"
+                    name="artist"
                     placeholder="Artist name"
                     required
                 >
@@ -358,18 +373,18 @@
 
                 <select
                     id="releaseType"
-                    name="type"
+                    name="release_type"
                 >
 
-                    <option value="single">
+                    <option value="Single">
                         Single
                     </option>
 
-                    <option value="ep">
+                    <option value="EP">
                         EP
                     </option>
 
-                    <option value="album">
+                    <option value="Album">
                         Album
                     </option>
 
@@ -381,10 +396,22 @@
                 </label>
 
                 <input
+                    type="date"
                     id="releaseDate"
                     name="release_date"
-                    type="date"
+                    required
                 >
+
+
+                <label for="releaseDescription">
+                    DESCRIPTION
+                </label>
+
+                <textarea
+                    id="releaseDescription"
+                    name="description"
+                    placeholder="Optional release description"
+                ></textarea>
 
 
                 <button
@@ -393,6 +420,7 @@
                 >
                     CREATE RELEASE
                 </button>
+
 
             </form>
 
@@ -414,6 +442,7 @@
     ========================================== -->
 
     <script src="./js/dashboard.js"></script>
+
 
 </body>
 
