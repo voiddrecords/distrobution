@@ -6,9 +6,9 @@
 
 :root {
     --black: #050505;
-    --dark: #0b0b0b;
+    --dark: #080808;
     --white: #ffffff;
-    --gray: #999999;
+    --gray: #888888;
     --border: #242424;
 }
 
@@ -25,23 +25,156 @@ body {
 }
 
 
-/* =========================
-   LOGIN PAGE
-========================= */
+/* =========================================
+   LOADING SCREEN
+========================================= */
 
-.login-page {
-    min-height: 100vh;
-    display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
+.loading-screen {
+    position: fixed;
+    inset: 0;
+
+    z-index: 99999;
+
+    background: #050505;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 1;
+    visibility: visible;
+
+    transition:
+        opacity 0.8s ease,
+        visibility 0.8s ease;
+}
+
+.loading-screen.fade-out {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-logo {
+    width: 72px;
+    height: 72px;
+
+    object-fit: contain;
+
+    animation:
+        heartbeat 1.35s ease-in-out infinite;
+
+    filter: grayscale(100%);
+}
+
+@keyframes heartbeat {
+
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    12% {
+        transform: scale(1.13);
+    }
+
+    24% {
+        transform: scale(1);
+    }
+
+    36% {
+        transform: scale(1.08);
+    }
+
+    52% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 
-/* =========================
-   VISUAL SIDE
-========================= */
+/* =========================================
+   SLOW LOAD MESSAGE
+========================================= */
+
+.slow-message {
+    display: none;
+
+    margin-top: 22px;
+
+    max-width: 300px;
+
+    text-align: center;
+
+    color: #d00000;
+
+    font-size: 10px;
+
+    line-height: 1.5;
+}
+
+.slow-message.show {
+    display: block;
+
+    animation:
+        warningAppear 0.5s ease;
+}
+
+@keyframes warningAppear {
+
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================
+   LOGIN PAGE
+========================================= */
+
+.login-page {
+    min-height: 100vh;
+
+    display: grid;
+
+    grid-template-columns:
+        1.15fr 0.85fr;
+
+    opacity: 0;
+
+    transition:
+        opacity 0.8s ease;
+}
+
+.login-page.ready {
+    opacity: 1;
+}
+
+
+/* =========================================
+   VISUAL
+========================================= */
 
 .login-visual {
     position: relative;
+
     overflow: hidden;
 
     background:
@@ -57,6 +190,7 @@ body {
     content: "";
 
     position: absolute;
+
     inset: -20%;
 
     background:
@@ -68,13 +202,16 @@ body {
             transparent 52px
         );
 
-    transform: rotate(-15deg) scale(1.2);
+    transform:
+        rotate(-15deg)
+        scale(1.2);
 }
 
 .login-visual::after {
     content: "";
 
     position: absolute;
+
     inset: 0;
 
     background:
@@ -84,12 +221,11 @@ body {
             rgba(255,255,255,0.035) 45%,
             transparent 60%
         );
-
-    pointer-events: none;
 }
 
 .visual-overlay {
     position: absolute;
+
     inset: 0;
 
     background:
@@ -102,6 +238,7 @@ body {
 
 .visual-content {
     position: relative;
+
     z-index: 2;
 
     height: 100%;
@@ -109,35 +246,44 @@ body {
     padding: 42px;
 
     display: flex;
+
     flex-direction: column;
+
     justify-content: space-between;
 }
 
 .brand-mark {
     font-size: 15px;
+
     font-weight: 800;
+
     letter-spacing: 4px;
 }
 
 .visual-bottom {
     display: flex;
+
     justify-content: space-between;
 
     font-size: 10px;
+
     letter-spacing: 2px;
+
     color: #b5b5b5;
 }
 
 
-/* =========================
+/* =========================================
    LOGIN PANEL
-========================= */
+========================================= */
 
 .login-panel {
     background: #080808;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     border-left: 1px solid var(--border);
@@ -149,13 +295,22 @@ body {
     padding: 50px 0;
 }
 
+.mobile-brand {
+    display: none;
+}
 
-/* =========================
+
+/* =========================================
    HEADER
-========================= */
+========================================= */
+
+.login-header {
+    margin-bottom: 42px;
+}
 
 .eyebrow {
     font-size: 10px;
+
     font-weight: 700;
 
     letter-spacing: 2.5px;
@@ -185,14 +340,10 @@ body {
     color: #888;
 }
 
-.login-header {
-    margin-bottom: 42px;
-}
 
-
-/* =========================
+/* =========================================
    INPUTS
-========================= */
+========================================= */
 
 .input-group {
     margin-bottom: 25px;
@@ -203,6 +354,7 @@ body {
     display: block;
 
     font-size: 10px;
+
     font-weight: 700;
 
     letter-spacing: 2px;
@@ -214,7 +366,9 @@ body {
 
 .password-label {
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 }
 
@@ -261,9 +415,9 @@ input::placeholder {
 }
 
 
-/* =========================
-   REMEMBER
-========================= */
+/* =========================================
+   REMEMBER ME
+========================================= */
 
 .remember-row {
     margin-bottom: 25px;
@@ -273,6 +427,7 @@ input::placeholder {
     display: flex;
 
     align-items: center;
+
     gap: 9px;
 
     font-size: 11px;
@@ -287,9 +442,9 @@ input::placeholder {
 }
 
 
-/* =========================
+/* =========================================
    LOGIN BUTTON
-========================= */
+========================================= */
 
 .login-button {
     width: 100%;
@@ -299,9 +454,11 @@ input::placeholder {
     border: none;
 
     background: white;
+
     color: black;
 
     font-size: 11px;
+
     font-weight: 800;
 
     letter-spacing: 2px;
@@ -309,7 +466,9 @@ input::placeholder {
     cursor: pointer;
 
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     padding: 0 20px;
@@ -321,14 +480,14 @@ input::placeholder {
     background: #dcdcdc;
 }
 
-.login-button span {
+.login-button span:last-child {
     font-size: 20px;
 }
 
 
-/* =========================
+/* =========================================
    DIVIDER
-========================= */
+========================================= */
 
 .divider {
     display: flex;
@@ -357,9 +516,9 @@ input::placeholder {
 }
 
 
-/* =========================
+/* =========================================
    INVITE
-========================= */
+========================================= */
 
 .invite-section {
     text-align: center;
@@ -400,9 +559,9 @@ input::placeholder {
 }
 
 
-/* =========================
+/* =========================================
    FOOTER
-========================= */
+========================================= */
 
 footer {
     margin-top: 45px;
@@ -420,6 +579,7 @@ footer {
 
 footer div {
     display: flex;
+
     gap: 18px;
 }
 
@@ -434,18 +594,9 @@ footer a:hover {
 }
 
 
-/* =========================
+/* =========================================
    MOBILE
-========================= */
-
-.mobile-brand {
-    display: none;
-}
-
-
-/* =========================
-   RESPONSIVE
-========================= */
+========================================= */
 
 @media (max-width: 850px) {
 
