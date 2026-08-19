@@ -11,33 +11,70 @@
 
 <body>
 
-    <main class="login-page">
+    <!-- =========================
+         LOADING SCREEN
+    ========================== -->
 
-        <!-- Left side -->
+    <div id="loadingScreen" class="loading-screen">
+
+        <div class="loading-content">
+
+            <img
+                src="favicon.png"
+                alt="VoidRecords"
+                class="loading-logo"
+            >
+
+            <p id="slowMessage" class="slow-message">
+                if the website if the website is taking too long please refresh
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         LOGIN PAGE
+    ========================== -->
+
+    <main class="login-page" id="loginPage">
+
         <section class="login-visual">
 
             <div class="visual-overlay"></div>
 
             <div class="visual-content">
-                <div class="brand-mark">YOUR LABEL</div>
+
+                <div class="brand-mark">
+                    VOIDRECORDS
+                </div>
 
                 <div class="visual-bottom">
-                    <span>INDEPENDENT MUSIC DISTRIBUTION</span>
-                    <span>EST. 2026</span>
+
+                    <span>
+                        INDEPENDENT MUSIC DISTRIBUTION
+                    </span>
+
+                    <span>
+                        EST. 2026
+                    </span>
+
                 </div>
+
             </div>
 
         </section>
 
 
-        <!-- Right side -->
         <section class="login-panel">
 
             <div class="login-container">
 
                 <div class="mobile-brand">
-                    YOUR LABEL
+                    VOIDRECORDS
                 </div>
+
 
                 <div class="login-header">
 
@@ -85,7 +122,7 @@
                                 PASSWORD
                             </label>
 
-                            <a href="#">
+                            <a href="#" id="forgotPassword">
                                 Forgot?
                             </a>
 
@@ -125,17 +162,30 @@
                         type="submit"
                         class="login-button"
                     >
-                        SIGN IN
-                        <span>→</span>
+
+                        <span>
+                            SIGN IN
+                        </span>
+
+                        <span>
+                            →
+                        </span>
+
                     </button>
 
                 </form>
 
 
                 <div class="divider">
+
                     <span></span>
-                    <p>INVITE ONLY</p>
+
+                    <p>
+                        INVITE ONLY
+                    </p>
+
                     <span></span>
+
                 </div>
 
 
@@ -147,8 +197,9 @@
                     </p>
 
                     <button
+                        type="button"
                         class="request-button"
-                        onclick="requestInvite()"
+                        id="requestInviteButton"
                     >
                         REQUEST AN INVITE
                     </button>
@@ -163,8 +214,15 @@
                     </span>
 
                     <div>
-                        <a href="#">Privacy</a>
-                        <a href="#">Terms</a>
+
+                        <a href="#">
+                            Privacy
+                        </a>
+
+                        <a href="#">
+                            Terms
+                        </a>
+
                     </div>
 
                 </footer>
