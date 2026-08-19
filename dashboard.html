@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
 
@@ -13,1136 +14,478 @@
     <link
         rel="icon"
         type="image/png"
-        href="favicon.png"
+        href="./favicon.png"
     >
 
     <link
         rel="stylesheet"
-        href="css/dashboard.css"
+        href="./css/dashboard.css"
     >
 </head>
 
 <body>
 
-    <!-- =========================
-         TOP BAR
-    ========================== -->
+    <!-- SIDEBAR -->
 
-    <header class="topbar">
+    <aside class="sidebar">
 
-        <div class="topbar-left">
+        <div class="sidebar-brand">
+            VOIDRECORDS
+        </div>
 
-            <div class="dashboard-logo">
-                VOID<span>RECORDS</span>
-            </div>
+        <div class="portal-label">
+            DISTRIBUTION PORTAL
+        </div>
+
+        <nav>
+
+            <button
+                class="nav-item active"
+                data-section="overview"
+            >
+                Overview
+            </button>
+
+            <button
+                class="nav-item"
+                data-section="artists"
+            >
+                Artists
+            </button>
+
+            <button
+                class="nav-item"
+                data-section="releases"
+            >
+                Releases
+            </button>
+
+            <button
+                class="nav-item"
+                data-section="distribution"
+            >
+                Distribution
+            </button>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <button
+                id="logoutButton"
+                class="logout-button"
+            >
+                SIGN OUT
+            </button>
 
         </div>
 
+    </aside>
 
-        <div class="topbar-right">
 
-            <div class="account-info">
+    <!-- MAIN -->
 
-                <span
-                    id="topArtistName"
-                    class="account-name"
-                >
+    <main class="dashboard">
+
+        <header class="dashboard-header">
+
+            <div>
+
+                <p class="eyebrow">
+                    ARTIST / LABEL PORTAL
+                </p>
+
+                <h1 id="pageTitle">
+                    Dashboard
+                </h1>
+
+            </div>
+
+            <div class="user-area">
+
+                <span id="userEmail">
                     Loading...
                 </span>
 
-                <span
-                    id="topRole"
-                    class="account-role"
-                >
-                    —
-                </span>
+            </div>
+
+        </header>
+
+
+        <!-- ==============================
+             OVERVIEW
+        =============================== -->
+
+        <section
+            id="overview"
+            class="dashboard-section active-section"
+        >
+
+            <div class="welcome-card">
+
+                <p class="eyebrow">
+                    VOIDRECORDS
+                </p>
+
+                <h2>
+                    Welcome back.
+                </h2>
+
+                <p>
+                    Manage your artists, releases and distribution
+                    from one place.
+                </p>
 
             </div>
 
-            <div class="avatar" id="userAvatar">
-                V
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <span>
+                        ARTISTS
+                    </span>
+
+                    <strong id="artistCount">
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="stat-card">
+
+                    <span>
+                        RELEASES
+                    </span>
+
+                    <strong id="releaseCount">
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="stat-card">
+
+                    <span>
+                        DELIVERIES
+                    </span>
+
+                    <strong id="deliveryCount">
+                        0
+                    </strong>
+
+                </div>
+
             </div>
 
-        </div>
+        </section>
 
-    </header>
 
+        <!-- ==============================
+             ARTISTS
+        =============================== -->
 
-    <!-- =========================
-         APP LAYOUT
-    ========================== -->
+        <section
+            id="artists"
+            class="dashboard-section"
+        >
 
-    <div class="app-layout">
+            <div class="section-header">
 
+                <div>
 
-        <!-- =========================
-             SIDEBAR
-        ========================== -->
+                    <p class="eyebrow">
+                        CATALOG
+                    </p>
 
-        <aside class="sidebar">
+                    <h2>
+                        Artists
+                    </h2>
 
-            <nav class="sidebar-nav">
-
-
-                <a
-                    href="#"
-                    class="nav-item active"
-                    data-section="overview"
-                >
-
-                    <span class="nav-icon">⌂</span>
-
-                    <span>Dashboard</span>
-
-                </a>
-
-
-                <a
-                    href="#"
-                    class="nav-item"
-                    data-section="releases"
-                >
-
-                    <span class="nav-icon">◫</span>
-
-                    <span>Releases</span>
-
-                </a>
-
-
-                <a
-                    href="#"
-                    class="nav-item"
-                    data-section="artists"
-                >
-
-                    <span class="nav-icon">♙</span>
-
-                    <span>Artists</span>
-
-                </a>
-
-
-                <a
-                    href="#"
-                    class="nav-item"
-                    data-section="catalog"
-                >
-
-                    <span class="nav-icon">▤</span>
-
-                    <span>Catalog</span>
-
-                </a>
-
-
-                <a
-                    href="#"
-                    class="nav-item"
-                    data-section="analytics"
-                >
-
-                    <span class="nav-icon">⌁</span>
-
-                    <span>Analytics</span>
-
-                </a>
-
-
-                <a
-                    href="#"
-                    class="nav-item"
-                    data-section="reports"
-                >
-
-                    <span class="nav-icon">▧</span>
-
-                    <span>Reports</span>
-
-                </a>
-
-
-                <div class="sidebar-divider"></div>
-
-
-                <a
-                    href="#"
-                    class="nav-item"
-                    data-section="royalties"
-                >
-
-                    <span class="nav-icon">$</span>
-
-                    <span>Royalty Splits</span>
-
-                </a>
-
-
-                <a
-                    href="#"
-                    class="nav-item"
-                    data-section="storefront"
-                >
-
-                    <span class="nav-icon">◇</span>
-
-                    <span>Storefront</span>
-
-                </a>
-
-
-                <a
-                    href="#"
-                    class="nav-item"
-                    data-section="links"
-                >
-
-                    <span class="nav-icon">↗</span>
-
-                    <span>Release Links</span>
-
-                </a>
-
-
-                <a
-                    href="#"
-                    class="nav-item"
-                    data-section="playlist"
-                >
-
-                    <span class="nav-icon">♫</span>
-
-                    <span>Playlist Pitch</span>
-
-                </a>
-
-
-                <a
-                    href="#"
-                    class="nav-item"
-                    data-section="settings"
-                >
-
-                    <span class="nav-icon">⚙</span>
-
-                    <span>Settings</span>
-
-                </a>
-
-            </nav>
-
-
-            <!-- SIDEBAR BOTTOM -->
-
-            <div class="sidebar-bottom">
+                </div>
 
                 <button
-                    id="logoutButton"
-                    class="logout-button"
+                    id="addArtistButton"
+                    class="primary-button"
                 >
-
-                    <span>↪</span>
-
-                    LOG OUT
-
+                    + ADD ARTIST
                 </button>
 
             </div>
 
-        </aside>
 
-
-        <!-- =========================
-             MAIN CONTENT
-        ========================== -->
-
-        <main class="main-content">
-
-
-            <!-- =========================
-                 OVERVIEW
-            ========================== -->
-
-            <section
-                id="overview"
-                class="dashboard-section active-section"
+            <div
+                id="artistList"
+                class="card-list"
             >
 
-                <div class="page-header">
-
-                    <div>
-
-                        <p class="eyebrow">
-                            VOIDRECORDS / OVERVIEW
-                        </p>
-
-                        <h1>
-                            Welcome back,
-                            <span id="welcomeName">
-                                Artist
-                            </span>.
-                        </h1>
-
-                        <p class="page-description">
-                            Here's what's happening with
-                            your music and catalog.
-                        </p>
-
-                    </div>
-
-
-                    <button
-                        class="primary-button"
-                        id="newReleaseButton"
-                    >
-                        + NEW RELEASE
-                    </button>
-
+                <div class="empty-state">
+                    No artists yet.
                 </div>
 
+            </div>
 
-                <!-- =========================
-                     STAT CARDS
-                ========================== -->
+        </section>
 
-                <div class="stats-grid">
 
+        <!-- ==============================
+             RELEASES
+        =============================== -->
 
-                    <div class="stat-card">
+        <section
+            id="releases"
+            class="dashboard-section"
+        >
 
-                        <div class="stat-top">
+            <div class="section-header">
 
-                            <span>
-                                TOTAL STREAMS
-                            </span>
+                <div>
 
-                            <span class="stat-icon">
-                                ▶
-                            </span>
-
-                        </div>
-
-                        <div
-                            class="stat-value"
-                            id="totalStreams"
-                        >
-                            0
-                        </div>
-
-                        <div class="stat-change positive">
-                            +0% this month
-                        </div>
-
-                    </div>
-
-
-                    <div class="stat-card">
-
-                        <div class="stat-top">
-
-                            <span>
-                                RELEASES
-                            </span>
-
-                            <span class="stat-icon">
-                                ◫
-                            </span>
-
-                        </div>
-
-                        <div
-                            class="stat-value"
-                            id="releaseCount"
-                        >
-                            0
-                        </div>
-
-                        <div class="stat-change">
-                            Distributed releases
-                        </div>
-
-                    </div>
-
-
-                    <div class="stat-card">
-
-                        <div class="stat-top">
-
-                            <span>
-                                ARTISTS
-                            </span>
-
-                            <span class="stat-icon">
-                                ♙
-                            </span>
-
-                        </div>
-
-                        <div
-                            class="stat-value"
-                            id="artistCount"
-                        >
-                            0
-                        </div>
-
-                        <div class="stat-change">
-                            Active artists
-                        </div>
-
-                    </div>
-
-
-                    <div class="stat-card">
-
-                        <div class="stat-top">
-
-                            <span>
-                                CATALOG
-                            </span>
-
-                            <span class="stat-icon">
-                                ▤
-                            </span>
-
-                        </div>
-
-                        <div
-                            class="stat-value"
-                            id="catalogCount"
-                        >
-                            0
-                        </div>
-
-                        <div class="stat-change">
-                            Tracks distributed
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- =========================
-                     ANALYTICS
-                ========================== -->
-
-                <div class="content-grid">
-
-
-                    <div class="panel analytics-panel">
-
-                        <div class="panel-header">
-
-                            <div>
-
-                                <h2>
-                                    Streaming Analytics
-                                </h2>
-
-                                <p>
-                                    Overview of your music
-                                    performance.
-                                </p>
-
-                            </div>
-
-
-                            <select id="analyticsRange">
-
-                                <option>
-                                    Last 7 days
-                                </option>
-
-                                <option selected>
-                                    Last 30 days
-                                </option>
-
-                                <option>
-                                    Last 90 days
-                                </option>
-
-                                <option>
-                                    This year
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <div class="chart">
-
-                            <div class="chart-y">
-
-                                <span>100K</span>
-                                <span>75K</span>
-                                <span>50K</span>
-                                <span>25K</span>
-                                <span>0</span>
-
-                            </div>
-
-
-                            <div class="chart-area">
-
-                                <div class="grid-line"></div>
-                                <div class="grid-line"></div>
-                                <div class="grid-line"></div>
-                                <div class="grid-line"></div>
-                                <div class="grid-line"></div>
-
-
-                                <svg
-                                    viewBox="0 0 800 260"
-                                    preserveAspectRatio="none"
-                                    class="chart-line"
-                                >
-
-                                    <polyline
-                                        points="
-                                        0,210
-                                        50,190
-                                        100,195
-                                        150,165
-                                        200,180
-                                        250,135
-                                        300,155
-                                        350,115
-                                        400,145
-                                        450,105
-                                        500,130
-                                        550,90
-                                        600,120
-                                        650,80
-                                        700,105
-                                        750,65
-                                        800,90
-                                        "
-                                    />
-
-                                </svg>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="chart-dates">
-
-                            <span>JUL 20</span>
-                            <span>JUL 25</span>
-                            <span>JUL 30</span>
-                            <span>AUG 05</span>
-                            <span>AUG 10</span>
-                            <span>TODAY</span>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- =========================
-                         PLATFORM BREAKDOWN
-                    ========================== -->
-
-                    <div class="panel platform-panel">
-
-                        <div class="panel-header">
-
-                            <div>
-
-                                <h2>
-                                    By Platform
-                                </h2>
-
-                                <p>
-                                    Streaming distribution.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="platform-list">
-
-
-                            <div class="platform-row">
-
-                                <div class="platform-name">
-                                    Spotify
-                                </div>
-
-                                <div class="platform-bar">
-
-                                    <span
-                                        style="width: 78%"
-                                    ></span>
-
-                                </div>
-
-                                <div class="platform-number">
-                                    78%
-                                </div>
-
-                            </div>
-
-
-                            <div class="platform-row">
-
-                                <div class="platform-name">
-                                    Apple Music
-                                </div>
-
-                                <div class="platform-bar">
-
-                                    <span
-                                        style="width: 52%"
-                                    ></span>
-
-                                </div>
-
-                                <div class="platform-number">
-                                    52%
-                                </div>
-
-                            </div>
-
-
-                            <div class="platform-row">
-
-                                <div class="platform-name">
-                                    YouTube
-                                </div>
-
-                                <div class="platform-bar">
-
-                                    <span
-                                        style="width: 39%"
-                                    ></span>
-
-                                </div>
-
-                                <div class="platform-number">
-                                    39%
-                                </div>
-
-                            </div>
-
-
-                            <div class="platform-row">
-
-                                <div class="platform-name">
-                                    Amazon
-                                </div>
-
-                                <div class="platform-bar">
-
-                                    <span
-                                        style="width: 21%"
-                                    ></span>
-
-                                </div>
-
-                                <div class="platform-number">
-                                    21%
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- =========================
-                     RECENT RELEASES
-                ========================== -->
-
-                <div class="panel releases-panel">
-
-                    <div class="panel-header">
-
-                        <div>
-
-                            <h2>
-                                Recent Releases
-                            </h2>
-
-                            <p>
-                                Your latest distributed music.
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            class="text-button"
-                            data-section-link="releases"
-                        >
-                            VIEW ALL →
-                        </button>
-
-                    </div>
-
-
-                    <div class="release-table">
-
-                        <div class="release-table-header">
-
-                            <span>RELEASE</span>
-                            <span>ARTIST</span>
-                            <span>STATUS</span>
-                            <span>DATE</span>
-
-                        </div>
-
-
-                        <div
-                            id="recentReleases"
-                            class="release-table-body"
-                        >
-
-                            <div class="empty-state">
-
-                                <div class="empty-icon">
-                                    ♫
-                                </div>
-
-                                <h3>
-                                    No releases yet
-                                </h3>
-
-                                <p>
-                                    Your distributed releases
-                                    will appear here.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =========================
-                 PLACEHOLDER SECTIONS
-            ========================== -->
-
-            <section
-                id="releases"
-                class="dashboard-section"
-            >
-
-                <div class="page-header">
-
-                    <div>
-
-                        <p class="eyebrow">
-                            MUSIC / DISTRIBUTION
-                        </p>
-
-                        <h1>
-                            Releases
-                        </h1>
-
-                        <p class="page-description">
-                            Manage your music releases and
-                            distribution.
-                        </p>
-
-                    </div>
-
-                    <button class="primary-button">
-                        + NEW RELEASE
-                    </button>
-
-                </div>
-
-
-                <div class="large-empty-panel">
-
-                    <div class="empty-icon">
-                        ♫
-                    </div>
+                    <p class="eyebrow">
+                        MUSIC
+                    </p>
 
                     <h2>
-                        No releases yet
+                        Releases
                     </h2>
-
-                    <p>
-                        Your releases will appear here once
-                        you distribute music through VoidRecords.
-                    </p>
 
                 </div>
 
-            </section>
+                <button
+                    id="addReleaseButton"
+                    class="primary-button"
+                >
+                    + NEW RELEASE
+                </button>
+
+            </div>
 
 
-            <section
-                id="artists"
-                class="dashboard-section"
+            <div
+                id="releaseList"
+                class="card-list"
             >
 
-                <div class="page-header">
-
-                    <div>
-
-                        <p class="eyebrow">
-                            VOIDRECORDS / ARTISTS
-                        </p>
-
-                        <h1>
-                            Artists
-                        </h1>
-
-                        <p class="page-description">
-                            Manage artists connected to your label.
-                        </p>
-
-                    </div>
-
+                <div class="empty-state">
+                    No releases yet.
                 </div>
 
+            </div>
 
-                <div class="large-empty-panel">
+        </section>
 
-                    <div class="empty-icon">
-                        ♙
-                    </div>
 
-                    <h2>
-                        Artist management
-                    </h2>
+        <!-- ==============================
+             DISTRIBUTION
+        =============================== -->
 
-                    <p>
-                        Your artist roster will appear here.
+        <section
+            id="distribution"
+            class="dashboard-section"
+        >
+
+            <div class="section-header">
+
+                <div>
+
+                    <p class="eyebrow">
+                        DELIVERY
                     </p>
 
+                    <h2>
+                        Distribution
+                    </h2>
+
                 </div>
 
-            </section>
+            </div>
 
 
-            <section
-                id="catalog"
-                class="dashboard-section"
+            <div
+                id="deliveryList"
+                class="card-list"
             >
 
-                <div class="page-header">
-
-                    <div>
-
-                        <p class="eyebrow">
-                            MUSIC / CATALOG
-                        </p>
-
-                        <h1>
-                            Catalog
-                        </h1>
-
-                        <p class="page-description">
-                            Your complete music catalog.
-                        </p>
-
-                    </div>
-
+                <div class="empty-state">
+                    No distribution deliveries yet.
                 </div>
 
-                <div class="large-empty-panel">
+            </div>
 
-                    <div class="empty-icon">
-                        ▤
-                    </div>
+        </section>
 
-                    <h2>
-                        Catalog
-                    </h2>
-
-                    <p>
-                        Your catalog will appear here.
-                    </p>
-
-                </div>
-
-            </section>
+    </main>
 
 
-            <section
-                id="analytics"
-                class="dashboard-section"
+    <!-- ==============================
+         ARTIST MODAL
+    =============================== -->
+
+    <div
+        id="artistModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-box">
+
+            <button
+                class="modal-close"
+                data-close="artistModal"
             >
+                ×
+            </button>
 
-                <div class="page-header">
+            <p class="eyebrow">
+                NEW ARTIST
+            </p>
 
-                    <div>
+            <h2>
+                Add artist
+            </h2>
 
-                        <p class="eyebrow">
-                            DATA / ANALYTICS
-                        </p>
+            <form id="artistForm">
 
-                        <h1>
-                            Analytics
-                        </h1>
+                <label>
+                    ARTIST NAME
+                </label>
 
-                        <p class="page-description">
-                            Detailed performance analytics.
-                        </p>
+                <input
+                    id="artistName"
+                    type="text"
+                    required
+                    placeholder="Artist name"
+                >
 
-                    </div>
+                <label>
+                    BIO
+                </label>
 
-                </div>
+                <textarea
+                    id="artistBio"
+                    placeholder="Artist bio"
+                ></textarea>
 
-                <div class="large-empty-panel">
+                <button
+                    type="submit"
+                    class="primary-button full"
+                >
+                    CREATE ARTIST
+                </button>
 
-                    <div class="empty-icon">
-                        ⌁
-                    </div>
+            </form>
 
-                    <h2>
-                        Analytics
-                    </h2>
+        </div>
 
-                    <p>
-                        Detailed analytics will appear here.
-                    </p>
-
-                </div>
-
-            </section>
+    </div>
 
 
-            <section
-                id="reports"
-                class="dashboard-section"
+    <!-- ==============================
+         RELEASE MODAL
+    =============================== -->
+
+    <div
+        id="releaseModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-box">
+
+            <button
+                class="modal-close"
+                data-close="releaseModal"
             >
+                ×
+            </button>
 
-                <div class="page-header">
+            <p class="eyebrow">
+                NEW RELEASE
+            </p>
 
-                    <div>
+            <h2>
+                Create release
+            </h2>
 
-                        <p class="eyebrow">
-                            DATA / REPORTS
-                        </p>
+            <form id="releaseForm">
 
-                        <h1>
-                            Reports
-                        </h1>
+                <label>
+                    RELEASE TITLE
+                </label>
 
-                    </div>
+                <input
+                    id="releaseTitle"
+                    type="text"
+                    required
+                    placeholder="Release title"
+                >
 
-                </div>
 
-                <div class="large-empty-panel">
+                <label>
+                    RELEASE TYPE
+                </label>
 
-                    <h2>
-                        Reports
-                    </h2>
+                <select id="releaseType">
 
-                    <p>
-                        Your distribution reports will appear here.
-                    </p>
+                    <option value="single">
+                        Single
+                    </option>
 
-                </div>
+                    <option value="EP">
+                        EP
+                    </option>
 
-            </section>
+                    <option value="album">
+                        Album
+                    </option>
 
+                </select>
 
-            <section
-                id="royalties"
-                class="dashboard-section"
-            >
 
-                <div class="page-header">
+                <label>
+                    ARTIST
+                </label>
 
-                    <div>
+                <select
+                    id="releaseArtist"
+                    required
+                >
+                    <option value="">
+                        Select artist
+                    </option>
+                </select>
 
-                        <p class="eyebrow">
-                            MONEY / ROYALTIES
-                        </p>
 
-                        <h1>
-                            Royalty Splits
-                        </h1>
+                <label>
+                    GENRE
+                </label>
 
-                    </div>
+                <input
+                    id="releaseGenre"
+                    type="text"
+                    placeholder="Hip-Hop, Pop, R&B..."
+                >
 
-                </div>
 
-                <div class="large-empty-panel">
+                <label>
+                    RELEASE DATE
+                </label>
 
-                    <div class="empty-icon">
-                        $
-                    </div>
+                <input
+                    id="releaseDate"
+                    type="date"
+                >
 
-                    <h2>
-                        Royalty management
-                    </h2>
 
-                    <p>
-                        Manage royalty splits and earnings.
-                    </p>
+                <button
+                    type="submit"
+                    class="primary-button full"
+                >
+                    CREATE RELEASE
+                </button>
 
-                </div>
+            </form>
 
-            </section>
-
-
-            <section
-                id="storefront"
-                class="dashboard-section"
-            >
-
-                <div class="page-header">
-
-                    <div>
-
-                        <p class="eyebrow">
-                            LABEL / STOREFRONT
-                        </p>
-
-                        <h1>
-                            Storefront
-                        </h1>
-
-                    </div>
-
-                </div>
-
-                <div class="large-empty-panel">
-
-                    <h2>
-                        Storefront
-                    </h2>
-
-                    <p>
-                        Your VoidRecords storefront will appear here.
-                    </p>
-
-                </div>
-
-            </section>
-
-
-            <section
-                id="links"
-                class="dashboard-section"
-            >
-
-                <div class="page-header">
-
-                    <div>
-
-                        <p class="eyebrow">
-                            DISTRIBUTION / LINKS
-                        </p>
-
-                        <h1>
-                            Release Links
-                        </h1>
-
-                    </div>
-
-                </div>
-
-                <div class="large-empty-panel">
-
-                    <h2>
-                        Release links
-                    </h2>
-
-                    <p>
-                        DSP links for your releases will appear here.
-                    </p>
-
-                </div>
-
-            </section>
-
-
-            <section
-                id="playlist"
-                class="dashboard-section"
-            >
-
-                <div class="page-header">
-
-                    <div>
-
-                        <p class="eyebrow">
-                            PROMOTION / PLAYLISTS
-                        </p>
-
-                        <h1>
-                            Playlist Pitch
-                        </h1>
-
-                    </div>
-
-                </div>
-
-                <div class="large-empty-panel">
-
-                    <h2>
-                        Playlist Pitch
-                    </h2>
-
-                    <p>
-                        Submit music for playlist consideration.
-                    </p>
-
-                </div>
-
-            </section>
-
-
-            <section
-                id="settings"
-                class="dashboard-section"
-            >
-
-                <div class="page-header">
-
-                    <div>
-
-                        <p class="eyebrow">
-                            ACCOUNT / SETTINGS
-                        </p>
-
-                        <h1>
-                            Settings
-                        </h1>
-
-                    </div>
-
-                </div>
-
-                <div class="large-empty-panel">
-
-                    <h2>
-                        Account settings
-                    </h2>
-
-                    <p id="settingsEmail">
-                        Loading account...
-                    </p>
-
-                    <p id="settingsRole">
-                        Loading role...
-                    </p>
-
-                </div>
-
-            </section>
-
-        </main>
+        </div>
 
     </div>
 
@@ -1151,7 +494,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="js/dashboard.js"></script>
+    <!-- DASHBOARD -->
+
+    <script src="./js/dashboard.js"></script>
 
 </body>
+
 </html>
