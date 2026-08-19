@@ -89,8 +89,7 @@ setTimeout(() => {
         slowMessage
     ) {
 
-        slowMessage.style.display =
-            "block";
+        slowMessage.style.display = "block";
 
     }
 
@@ -138,17 +137,68 @@ async function checkExistingSession() {
         setProgress(15);
 
 
+        /*
+         * Give Supabase a maximum of 5 seconds.
+         * If it takes longer, show the login page
+         * instead of leaving the loading screen stuck.
+         */
+
+        const sessionRequest =
+            supabaseClient.auth.getSession();
+
+
+        const timeout =
+            new Promise((resolve) => {
+
+                setTimeout(() => {
+
+                    resolve(null);
+
+                }, 5000);
+
+            });
+
+
+        const result =
+            await Promise.race([
+                sessionRequest,
+                timeout
+            ]);
+
+
+        /* -----------------------------------------
+           SUPABASE TOOK TOO LONG
+        ----------------------------------------- */
+
+        if (!result) {
+
+            console.warn(
+                "Supabase is taking too long. Showing login screen."
+            );
+
+            setProgress(100);
+
+            finishLoading();
+
+            return;
+
+        }
+
+
         const {
             data: {
                 session
             },
             error
-        } =
-            await supabaseClient.auth.getSession();
+        } = result;
 
 
-        setProgress(40);
+        setProgress(50);
 
+
+        /* -----------------------------------------
+           SESSION ERROR
+        ----------------------------------------- */
 
         if (error) {
 
@@ -170,6 +220,10 @@ async function checkExistingSession() {
 
         if (!session) {
 
+            console.log(
+                "No active session."
+            );
+
             setProgress(100);
 
             finishLoading();
@@ -180,7 +234,7 @@ async function checkExistingSession() {
 
 
         /* -----------------------------------------
-           USER IS ALREADY LOGGED IN
+           USER ALREADY LOGGED IN
         ----------------------------------------- */
 
         console.log(
@@ -189,13 +243,13 @@ async function checkExistingSession() {
         );
 
 
-        setProgress(55);
+        setProgress(100);
 
 
         /*
-         * The user already has a valid Supabase
-         * session, so send them directly to
-         * their dashboard.
+         * User already has an active Supabase
+         * session, so send them directly
+         * to their dashboard.
          */
 
         window.location.href =
@@ -208,6 +262,14 @@ async function checkExistingSession() {
             "Loading error:",
             error
         );
+
+
+        /*
+         * Never leave the user trapped
+         * on the loading screen.
+         */
+
+        setProgress(100);
 
         finishLoading();
 
@@ -280,7 +342,7 @@ if (loginForm) {
 
 
             /* -----------------------------------------
-               BUTTON
+               LOGIN BUTTON
             ----------------------------------------- */
 
             const loginButton =
@@ -323,6 +385,10 @@ if (loginForm) {
 
                         });
 
+
+                /* -----------------------------------------
+                   LOGIN FAILED
+                ----------------------------------------- */
 
                 if (error) {
 
@@ -393,7 +459,7 @@ if (loginForm) {
 
 
                 /* -----------------------------------------
-                   GET USER PROFILE
+                   GET PROFILE
                 ----------------------------------------- */
 
                 const {
@@ -410,6 +476,10 @@ if (loginForm) {
                         .single();
 
 
+                /* -----------------------------------------
+                   PROFILE NOT FOUND
+                ----------------------------------------- */
+
                 if (profileError) {
 
                     console.error(
@@ -417,12 +487,6 @@ if (loginForm) {
                         profileError
                     );
 
-
-                    /*
-                     * Authentication worked,
-                     * but there isn't a profile
-                     * connected to this account.
-                     */
 
                     alert(
                         "Your account was found, but your VoidRecords profile could not be found."
@@ -654,7 +718,7 @@ supabaseClient.auth.onAuthStateChange(
 
 
 /* =========================================================
-   START
+   START WEBSITE
 ========================================================= */
 
 document.addEventListener(
