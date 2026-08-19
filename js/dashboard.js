@@ -13,7 +13,7 @@ const SUPABASE_URL =
 
 
 const SUPABASE_PUBLISHABLE_KEY =
-    "PASTE_YOUR_SB_PUBLISHABLE_KEY_HERE";
+    "sb_publishable_W-r75b5qVPiikM20aF8NwA_I4h5lhau";
 
 
 const { createClient } = supabase;
