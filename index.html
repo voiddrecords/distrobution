@@ -12,7 +12,6 @@
 
     <title>VoidRecords — Distribution</title>
 
-    <!-- FAVICON -->
     <link
         rel="icon"
         type="image/png"
@@ -30,14 +29,24 @@
 <body>
 
 
-    <!-- =========================================
+    <!-- =====================================
          LOADING SCREEN
-    ========================================== -->
+    ====================================== -->
 
     <div
-        id="loadingScreen"
         class="loading-screen"
+        id="loadingScreen"
     >
+
+        <div class="loading-bar">
+
+            <div
+                class="loading-progress"
+                id="loadingProgress"
+            ></div>
+
+        </div>
+
 
         <div class="loading-content">
 
@@ -48,10 +57,11 @@
             >
 
             <p
-                id="slowMessage"
                 class="slow-message"
+                id="slowMessage"
             >
-                if the website if the website is taking too long please refresh
+                if the website if the website is taking
+                too long please refresh
             </p>
 
         </div>
@@ -60,17 +70,14 @@
 
 
 
-    <!-- =========================================
+    <!-- =====================================
          LOGIN PAGE
-    ========================================== -->
+    ====================================== -->
 
-    <main
-        class="login-page"
-        id="loginPage"
-    >
+    <main class="login-page">
 
 
-        <!-- LEFT VISUAL -->
+        <!-- LEFT SIDE -->
 
         <section class="login-visual">
 
@@ -81,7 +88,6 @@
                 <div class="brand-mark">
                     VOIDRECORDS
                 </div>
-
 
                 <div class="visual-bottom">
 
@@ -101,20 +107,17 @@
 
 
 
-        <!-- RIGHT LOGIN AREA -->
+        <!-- RIGHT SIDE -->
 
         <section class="login-panel">
+
+
+            <!-- EVERYTHING IS INSIDE THIS BOX -->
 
             <div class="login-container">
 
 
-                <div class="mobile-brand">
-                    VOIDRECORDS
-                </div>
-
-
-
-                <!-- LOGIN HEADER -->
+                <!-- HEADER -->
 
                 <div class="login-header">
 
@@ -171,15 +174,11 @@
                                 PASSWORD
                             </label>
 
-                            <a
-                                href="#"
-                                id="forgotPassword"
-                            >
+                            <a href="#">
                                 Forgot?
                             </a>
 
                         </div>
-
 
                         <input
                             type="password"
@@ -194,7 +193,7 @@
 
 
 
-                    <!-- REMEMBER ME -->
+                    <!-- REMEMBER -->
 
                     <div class="remember-row">
 
@@ -252,7 +251,7 @@
 
 
 
-                <!-- INVITE -->
+                <!-- REQUEST INVITE -->
 
                 <div class="invite-section">
 
@@ -264,7 +263,7 @@
                     <button
                         type="button"
                         class="request-button"
-                        id="requestInviteButton"
+                        onclick="requestInvite()"
                     >
                         REQUEST AN INVITE
                     </button>
@@ -301,7 +300,6 @@
         </section>
 
     </main>
-
 
 
     <script src="js/app.js"></script>
