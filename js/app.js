@@ -48,6 +48,14 @@ function hideLoadingScreen() {
         "loading-hidden"
     );
 
+    // Extra fail-safe
+    setTimeout(() => {
+
+        loadingScreen.style.display =
+            "none";
+
+    }, 700);
+
 }
 
 
