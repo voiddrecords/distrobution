@@ -35,9 +35,15 @@ document.addEventListener(
 
         setupReleaseModal();
 
+        setupArtistModal();
+
         setupLogout();
 
         await loadReleaseCount();
+
+        await loadReleases();
+
+        await loadArtists();
 
     }
 );
@@ -156,6 +162,11 @@ function setupNavigation() {
     });
 
 }
+
+
+// =========================================
+// RELEASES
+// =========================================
 
 
 // -----------------------------------------
@@ -478,20 +489,23 @@ async function loadReleases() {
 
                         <h3>
                             ${escapeHtml(
-                                release.title || "Untitled Release"
+                                release.title ||
+                                "Untitled Release"
                             )}
                         </h3>
 
                         <p>
 
                             ${escapeHtml(
-                                release.artist || "Unknown Artist"
+                                release.artist ||
+                                "Unknown Artist"
                             )}
 
                             ·
 
                             ${escapeHtml(
-                                release.release_type || "Release"
+                                release.release_type ||
+                                "Release"
                             )}
 
                         </p>
@@ -502,7 +516,459 @@ async function loadReleases() {
                     <div class="status">
 
                         ${escapeHtml(
-                            release.status || "DRAFT"
+                            release.status ||
+                            "DRAFT"
+                        )}
+
+                    </div>
+
+                </div>
+
+            `
+        ).join("");
+
+}
+
+
+// =========================================
+// ARTISTS
+// =========================================
+
+
+// -----------------------------------------
+// ARTIST MODAL
+// -----------------------------------------
+
+function setupArtistModal() {
+
+    const modal =
+        document.getElementById(
+            "artistModal"
+        );
+
+
+    const openButton =
+        document.getElementById(
+            "addArtistButton"
+        );
+
+
+    const closeButton =
+        document.getElementById(
+            "closeArtistModal"
+        );
+
+
+    const form =
+        document.getElementById(
+            "artistForm"
+        );
+
+
+    if (!modal) return;
+
+
+    // OPEN
+
+    openButton?.addEventListener(
+        "click",
+        () => {
+
+            modal.classList.remove(
+                "hidden"
+            );
+
+            clearArtistMessage();
+
+        }
+    );
+
+
+    // CLOSE
+
+    closeButton?.addEventListener(
+        "click",
+        () => {
+
+            modal.classList.add(
+                "hidden"
+            );
+
+        }
+    );
+
+
+    // CLICK OUTSIDE
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === modal
+            ) {
+
+                modal.classList.add(
+                    "hidden"
+                );
+
+            }
+
+        }
+    );
+
+
+    // SUBMIT
+
+    form?.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            await createArtist(
+                form
+            );
+
+        }
+    );
+
+}
+
+
+// -----------------------------------------
+// CREATE ARTIST
+// -----------------------------------------
+
+async function createArtist(form) {
+
+    const button =
+        document.getElementById(
+            "createArtistButton"
+        );
+
+
+    const message =
+        document.getElementById(
+            "artistFormMessage"
+        );
+
+
+    const {
+        data: userData,
+        error: userError
+    } =
+        await supabaseClient.auth.getUser();
+
+
+    if (
+        userError ||
+        !userData.user
+    ) {
+
+        window.location.href =
+            "./index.html";
+
+        return;
+
+    }
+
+
+    const formData =
+        new FormData(form);
+
+
+    const artistName =
+        String(
+            formData.get(
+                "artist_name"
+            ) || ""
+        ).trim();
+
+
+    const firstName =
+        String(
+            formData.get(
+                "first_name"
+            ) || ""
+        ).trim();
+
+
+    const lastName =
+        String(
+            formData.get(
+                "last_name"
+            ) || ""
+        ).trim();
+
+
+    const email =
+        String(
+            formData.get(
+                "email"
+            ) || ""
+        ).trim();
+
+
+    if (
+        !artistName ||
+        !firstName ||
+        !lastName ||
+        !email
+    ) {
+
+        showArtistMessage(
+            "Please complete all fields."
+        );
+
+        return;
+
+    }
+
+
+    // BUTTON STATE
+
+    if (button) {
+
+        button.disabled = true;
+
+        button.textContent =
+            "CREATING...";
+
+    }
+
+
+    clearArtistMessage();
+
+
+    try {
+
+        // ---------------------------------
+        // CALL SUPABASE EDGE FUNCTION
+        // ---------------------------------
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.functions.invoke(
+                "create-artist",
+                {
+                    body: {
+
+                        artist_name:
+                            artistName,
+
+                        first_name:
+                            firstName,
+
+                        last_name:
+                            lastName,
+
+                        email:
+                            email
+
+                    }
+                }
+            );
+
+
+        if (error) {
+
+            console.error(
+                "Create artist error:",
+                error
+            );
+
+            throw new Error(
+                error.message ||
+                "Unable to create artist."
+            );
+
+        }
+
+
+        if (
+            data &&
+            data.error
+        ) {
+
+            throw new Error(
+                data.error
+            );
+
+        }
+
+
+        // ---------------------------------
+        // SUCCESS
+        // ---------------------------------
+
+        showArtistMessage(
+            "Artist created successfully. Invitation email sent.",
+            true
+        );
+
+
+        form.reset();
+
+
+        await loadArtists();
+
+
+        setTimeout(
+            () => {
+
+                const modal =
+                    document.getElementById(
+                        "artistModal"
+                    );
+
+
+                modal?.classList.add(
+                    "hidden"
+                );
+
+
+                clearArtistMessage();
+
+            },
+            1500
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        showArtistMessage(
+            error.message ||
+            "Unable to create artist."
+        );
+
+    } finally {
+
+        if (button) {
+
+            button.disabled = false;
+
+            button.textContent =
+                "CREATE ARTIST";
+
+        }
+
+    }
+
+}
+
+
+// -----------------------------------------
+// LOAD ARTISTS
+// -----------------------------------------
+
+async function loadArtists() {
+
+    const list =
+        document.getElementById(
+            "artistList"
+        );
+
+
+    if (!list) return;
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+
+            .from("artists")
+
+            .select("*")
+
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Unable to load artists:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !data ||
+        data.length === 0
+    ) {
+
+        list.innerHTML = `
+
+            <div
+                class="empty-state"
+                id="artistEmptyState"
+            >
+
+                No artists added yet.
+
+                <br><br>
+
+                Add an artist to begin managing
+                their releases and distribution.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    list.innerHTML =
+        data.map(
+            artist => `
+
+                <div class="list-card">
+
+                    <div>
+
+                        <h3>
+                            ${escapeHtml(
+                                artist.artist_name ||
+                                artist.name ||
+                                "Unnamed Artist"
+                            )}
+                        </h3>
+
+                        <p>
+
+                            ${escapeHtml(
+                                artist.email ||
+                                "No portal email"
+                            )}
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="status">
+
+                        ${escapeHtml(
+                            artist.status ||
+                            "ACTIVE"
                         )}
 
                     </div>
@@ -516,8 +982,58 @@ async function loadReleases() {
 
 
 // -----------------------------------------
-// LOGOUT
+// ARTIST MESSAGE
 // -----------------------------------------
+
+function showArtistMessage(
+    text,
+    success = false
+) {
+
+    const message =
+        document.getElementById(
+            "artistFormMessage"
+        );
+
+
+    if (!message) return;
+
+
+    message.textContent =
+        text;
+
+
+    message.style.color =
+        success
+            ? "#ffffff"
+            : "#ff7777";
+
+}
+
+
+// -----------------------------------------
+// CLEAR ARTIST MESSAGE
+// -----------------------------------------
+
+function clearArtistMessage() {
+
+    const message =
+        document.getElementById(
+            "artistFormMessage"
+        );
+
+
+    if (!message) return;
+
+
+    message.textContent = "";
+
+}
+
+
+// =========================================
+// LOGOUT
+// =========================================
 
 function setupLogout() {
 
@@ -542,9 +1058,9 @@ function setupLogout() {
 }
 
 
-// -----------------------------------------
+// =========================================
 // HTML ESCAPE
-// -----------------------------------------
+// =========================================
 
 function escapeHtml(value) {
 
