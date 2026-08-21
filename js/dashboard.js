@@ -10,14 +10,14 @@
 const SUPABASE_URL =
     "YOUR_SUPABASE_PROJECT_URL";
 
-const supabaseKey =
+const SUPABASE_PUBLISHABLE_KEY =
     "YOUR_SUPABASE_PUBLISHABLE_KEY";
 
 
 const supabaseClient =
     window.supabase.createClient(
         SUPABASE_URL,
-        supabaseKey
+        SUPABASE_PUBLISHABLE_KEY
     );
 
 
@@ -29,27 +29,46 @@ document.addEventListener(
     "DOMContentLoaded",
     async () => {
 
-        // Set up interface first
+        // Start the interface first.
+        // This prevents the whole dashboard
+        // from becoming unclickable if
+        // Supabase has a temporary problem.
+
         setupNavigation();
+
         setupReleaseModal();
+
         setupArtistModal();
+
         setupLogout();
 
-        // Then load account
-        await loadUser();
 
-        // Load dashboard data
+        // Then authenticate.
+
+        const loggedIn =
+            await loadUser();
+
+
+        if (!loggedIn) {
+            return;
+        }
+
+
+        // Load dashboard data.
+
         await loadReleaseCount();
+
         await loadReleases();
+
         await loadArtists();
 
     }
 );
 
 
-// -----------------------------------------
-// LOAD USER
-// -----------------------------------------
+// =========================================
+// USER
+// =========================================
 
 async function loadUser() {
 
@@ -68,7 +87,7 @@ async function loadUser() {
         window.location.href =
             "./index.html";
 
-        return;
+        return false;
 
     }
 
@@ -86,12 +105,15 @@ async function loadUser() {
 
     }
 
+
+    return true;
+
 }
 
 
-// -----------------------------------------
+// =========================================
 // NAVIGATION
-// -----------------------------------------
+// =========================================
 
 function setupNavigation() {
 
@@ -107,69 +129,70 @@ function setupNavigation() {
         );
 
 
-    buttons.forEach(button => {
+    buttons.forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                const target =
-                    button.dataset.section;
+                    const target =
+                        button.dataset.section;
 
 
-                buttons.forEach(item => {
+                    buttons.forEach(
+                        item => {
 
-                    item.classList.remove(
+                            item.classList.remove(
+                                "active"
+                            );
+
+                        }
+                    );
+
+
+                    sections.forEach(
+                        section => {
+
+                            section.classList.remove(
+                                "active-section"
+                            );
+
+                        }
+                    );
+
+
+                    button.classList.add(
                         "active"
                     );
 
-                });
+
+                    const targetSection =
+                        document.getElementById(
+                            target
+                        );
 
 
-                sections.forEach(section => {
+                    if (targetSection) {
 
-                    section.classList.remove(
-                        "active-section"
-                    );
+                        targetSection.classList.add(
+                            "active-section"
+                        );
 
-                });
-
-
-                button.classList.add(
-                    "active"
-                );
-
-
-                const targetSection =
-                    document.getElementById(
-                        target
-                    );
-
-
-                if (targetSection) {
-
-                    targetSection.classList.add(
-                        "active-section"
-                    );
+                    }
 
                 }
+            );
 
-            }
-        );
-
-    });
+        }
+    );
 
 }
 
 
 // =========================================
-// RELEASES
-// =========================================
-
-
-// -----------------------------------------
 // RELEASE MODAL
-// -----------------------------------------
+// =========================================
 
 function setupReleaseModal() {
 
@@ -197,7 +220,9 @@ function setupReleaseModal() {
         );
 
 
-    if (!modal) return;
+    if (!modal) {
+        return;
+    }
 
 
     openButton?.addEventListener(
@@ -259,9 +284,9 @@ function setupReleaseModal() {
 }
 
 
-// -----------------------------------------
+// =========================================
 // CREATE RELEASE
-// -----------------------------------------
+// =========================================
 
 async function createRelease(
     form,
@@ -346,11 +371,6 @@ async function createRelease(
     }
 
 
-    alert(
-        "Release created successfully."
-    );
-
-
     form.reset();
 
     modal.classList.add(
@@ -359,14 +379,20 @@ async function createRelease(
 
 
     await loadReleaseCount();
+
     await loadReleases();
+
+
+    alert(
+        "Release created successfully."
+    );
 
 }
 
 
-// -----------------------------------------
+// =========================================
 // RELEASE COUNT
-// -----------------------------------------
+// =========================================
 
 async function loadReleaseCount() {
 
@@ -415,9 +441,9 @@ async function loadReleaseCount() {
 }
 
 
-// -----------------------------------------
+// =========================================
 // LOAD RELEASES
-// -----------------------------------------
+// =========================================
 
 async function loadReleases() {
 
@@ -427,7 +453,9 @@ async function loadReleases() {
         );
 
 
-    if (!list) return;
+    if (!list) {
+        return;
+    }
 
 
     const {
@@ -537,13 +565,8 @@ async function loadReleases() {
 
 
 // =========================================
-// ARTISTS
-// =========================================
-
-
-// -----------------------------------------
 // ARTIST MODAL
-// -----------------------------------------
+// =========================================
 
 function setupArtistModal() {
 
@@ -571,7 +594,9 @@ function setupArtistModal() {
         );
 
 
-    if (!modal) return;
+    if (!modal) {
+        return;
+    }
 
 
     openButton?.addEventListener(
@@ -635,9 +660,9 @@ function setupArtistModal() {
 }
 
 
-// -----------------------------------------
+// =========================================
 // CREATE ARTIST
-// -----------------------------------------
+// =========================================
 
 async function createArtist(
     form,
@@ -647,12 +672,6 @@ async function createArtist(
     const button =
         document.getElementById(
             "createArtistButton"
-        );
-
-
-    const message =
-        document.getElementById(
-            "artistFormMessage"
         );
 
 
@@ -667,7 +686,8 @@ async function createArtist(
         clearArtistMessage();
 
 
-        // Check current user
+        // Check label user's session.
+
         const {
             data: userData,
             error: userError
@@ -737,14 +757,7 @@ async function createArtist(
         }
 
 
-        // ---------------------------------
-        // CREATE ARTIST
-        // ---------------------------------
-        //
-        // This calls your Supabase Edge
-        // Function instead of putting a
-        // service-role key in the browser.
-        //
+        // Call Supabase Edge Function.
 
         const {
             data,
@@ -753,6 +766,7 @@ async function createArtist(
             await supabaseClient.functions.invoke(
                 "create-artist",
                 {
+
                     body: {
 
                         artist_name:
@@ -765,10 +779,7 @@ async function createArtist(
                             lastName,
 
                         email:
-                            email,
-
-                        created_by:
-                            userData.user.id
+                            email
 
                     }
 
@@ -779,7 +790,7 @@ async function createArtist(
         if (error) {
 
             console.error(
-                "Create artist function error:",
+                "Edge Function error:",
                 error
             );
 
@@ -792,8 +803,7 @@ async function createArtist(
 
 
         if (
-            data &&
-            data.error
+            data?.error
         ) {
 
             throw new Error(
@@ -803,14 +813,11 @@ async function createArtist(
         }
 
 
-        // ---------------------------------
-        // SUCCESS
-        // ---------------------------------
-
         form.reset();
 
+
         showArtistMessage(
-            "Artist created successfully.",
+            "Artist created. An invitation email has been sent.",
             "success"
         );
 
@@ -828,7 +835,7 @@ async function createArtist(
                 clearArtistMessage();
 
             },
-            1000
+            1200
         );
 
 
@@ -859,9 +866,9 @@ async function createArtist(
 }
 
 
-// -----------------------------------------
+// =========================================
 // LOAD ARTISTS
-// -----------------------------------------
+// =========================================
 
 async function loadArtists() {
 
@@ -871,7 +878,9 @@ async function loadArtists() {
         );
 
 
-    if (!list) return;
+    if (!list) {
+        return;
+    }
 
 
     const {
@@ -911,10 +920,7 @@ async function loadArtists() {
 
         list.innerHTML = `
 
-            <div
-                class="empty-state"
-                id="artistEmptyState"
-            >
+            <div class="empty-state">
 
                 No artists added yet.
 
@@ -948,12 +954,10 @@ async function loadArtists() {
                         </h3>
 
                         <p>
-
                             ${escapeHtml(
                                 artist.email ||
                                 "No portal email"
                             )}
-
                         </p>
 
                     </div>
@@ -976,9 +980,9 @@ async function loadArtists() {
 }
 
 
-// -----------------------------------------
+// =========================================
 // ARTIST MESSAGE
-// -----------------------------------------
+// =========================================
 
 function showArtistMessage(
     text,
@@ -991,7 +995,9 @@ function showArtistMessage(
         );
 
 
-    if (!message) return;
+    if (!message) {
+        return;
+    }
 
 
     message.textContent =
@@ -1002,24 +1008,16 @@ function showArtistMessage(
         "block";
 
 
-    if (type === "success") {
-
-        message.style.color =
-            "#8cff8c";
-
-    } else {
-
-        message.style.color =
-            "#ff7777";
-
-    }
+    message.className =
+        "login-message " +
+        type;
 
 }
 
 
-// -----------------------------------------
+// =========================================
 // CLEAR ARTIST MESSAGE
-// -----------------------------------------
+// =========================================
 
 function clearArtistMessage() {
 
@@ -1029,7 +1027,9 @@ function clearArtistMessage() {
         );
 
 
-    if (!message) return;
+    if (!message) {
+        return;
+    }
 
 
     message.textContent =
