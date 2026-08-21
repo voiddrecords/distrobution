@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -51,6 +52,7 @@
                 <button
                     class="nav-item active"
                     data-section="overview"
+                    type="button"
                 >
                     OVERVIEW
                 </button>
@@ -58,6 +60,7 @@
                 <button
                     class="nav-item"
                     data-section="releases"
+                    type="button"
                 >
                     RELEASES
                 </button>
@@ -65,6 +68,7 @@
                 <button
                     class="nav-item"
                     data-section="artists"
+                    type="button"
                 >
                     ARTISTS
                 </button>
@@ -72,6 +76,7 @@
                 <button
                     class="nav-item"
                     data-section="catalog"
+                    type="button"
                 >
                     CATALOG
                 </button>
@@ -86,6 +91,7 @@
             <button
                 class="logout-button"
                 id="logoutButton"
+                type="button"
             >
                 SIGN OUT
             </button>
@@ -103,7 +109,9 @@
     <main class="dashboard">
 
 
-        <!-- HEADER -->
+        <!-- =====================================
+             HEADER
+        ====================================== -->
 
         <header class="dashboard-header">
 
@@ -151,8 +159,9 @@
                 </h2>
 
                 <p>
-                    Manage your releases, artists,
-                    catalog and distribution from here.
+                    Manage your releases,
+                    artists, catalog and
+                    distribution from here.
                 </p>
 
             </div>
@@ -217,13 +226,23 @@
 
             <div class="section-header">
 
-                <h2>
-                    Releases
-                </h2>
+                <div>
+
+                    <p class="eyebrow">
+                        DISTRIBUTION
+                    </p>
+
+                    <h2>
+                        Releases
+                    </h2>
+
+                </div>
+
 
                 <button
                     class="primary-button"
                     id="createReleaseButton"
+                    type="button"
                 >
                     CREATE RELEASE
                 </button>
@@ -264,16 +283,48 @@
 
             <div class="section-header">
 
-                <h2>
-                    Artists
-                </h2>
+                <div>
+
+                    <p class="eyebrow">
+                        MANAGEMENT
+                    </p>
+
+                    <h2>
+                        Artists
+                    </h2>
+
+                </div>
+
+
+                <button
+                    class="primary-button"
+                    id="addArtistButton"
+                    type="button"
+                >
+                    ADD ARTIST
+                </button>
 
             </div>
 
 
-            <div class="empty-state">
+            <div
+                class="card-list"
+                id="artistList"
+            >
 
-                No artists added yet.
+                <div
+                    class="empty-state"
+                    id="artistEmptyState"
+                >
+
+                    No artists added yet.
+
+                    <br><br>
+
+                    Add an artist to begin managing
+                    their releases and distribution.
+
+                </div>
 
             </div>
 
@@ -292,9 +343,17 @@
 
             <div class="section-header">
 
-                <h2>
-                    Catalog
-                </h2>
+                <div>
+
+                    <p class="eyebrow">
+                        LIBRARY
+                    </p>
+
+                    <h2>
+                        Catalog
+                    </h2>
+
+                </div>
 
             </div>
 
@@ -332,6 +391,10 @@
                 ×
             </button>
 
+
+            <p class="eyebrow">
+                DISTRIBUTION
+            </p>
 
             <h2>
                 Create Release
@@ -431,10 +494,121 @@
 
 
     <!-- =========================================
+         ADD ARTIST MODAL
+    ========================================== -->
+
+    <div
+        class="modal hidden"
+        id="artistModal"
+    >
+
+        <div class="modal-box">
+
+
+            <button
+                class="modal-close"
+                id="closeArtistModal"
+                type="button"
+            >
+                ×
+            </button>
+
+
+            <p class="eyebrow">
+                ARTIST MANAGEMENT
+            </p>
+
+
+            <h2>
+                Add Artist
+            </h2>
+
+
+            <form id="artistForm">
+
+
+                <label for="newArtistName">
+                    ARTIST NAME
+                </label>
+
+                <input
+                    type="text"
+                    id="newArtistName"
+                    name="artist_name"
+                    placeholder="Artist name"
+                    required
+                >
+
+
+                <label for="artistFirstName">
+                    FIRST NAME
+                </label>
+
+                <input
+                    type="text"
+                    id="artistFirstName"
+                    name="first_name"
+                    placeholder="First name"
+                    required
+                >
+
+
+                <label for="artistLastName">
+                    LAST NAME
+                </label>
+
+                <input
+                    type="text"
+                    id="artistLastName"
+                    name="last_name"
+                    placeholder="Last name"
+                    required
+                >
+
+
+                <label for="artistEmail">
+                    PORTAL EMAIL
+                </label>
+
+                <input
+                    type="email"
+                    id="artistEmail"
+                    name="email"
+                    placeholder="artist@example.com"
+                    autocomplete="email"
+                    required
+                >
+
+
+                <p
+                    id="artistFormMessage"
+                    class="login-message"
+                ></p>
+
+
+                <button
+                    type="submit"
+                    class="primary-button full"
+                    id="createArtistButton"
+                >
+                    CREATE ARTIST
+                </button>
+
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================
          SUPABASE
     ========================================== -->
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
 
     <!-- =========================================
@@ -447,3 +621,4 @@
 </body>
 
 </html>
+```
