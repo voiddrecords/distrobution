@@ -22,27 +22,25 @@ const supabaseClient =
 
 
 // -----------------------------------------
-// PAGE
+// PAGE START
 // -----------------------------------------
 
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
 
-        await loadUser();
-
+        // Set up interface first
         setupNavigation();
-
         setupReleaseModal();
-
         setupArtistModal();
-
         setupLogout();
 
+        // Then load account
+        await loadUser();
+
+        // Load dashboard data
         await loadReleaseCount();
-
         await loadReleases();
-
         await loadArtists();
 
     }
@@ -333,7 +331,10 @@ async function createRelease(
 
     if (error) {
 
-        console.error(error);
+        console.error(
+            "Create release error:",
+            error
+        );
 
         alert(
             "Unable to create release:\n\n" +
@@ -358,7 +359,6 @@ async function createRelease(
 
 
     await loadReleaseCount();
-
     await loadReleases();
 
 }
@@ -389,7 +389,10 @@ async function loadReleaseCount() {
 
     if (error) {
 
-        console.error(error);
+        console.error(
+            "Release count error:",
+            error
+        );
 
         return;
 
@@ -447,7 +450,10 @@ async function loadReleases() {
 
     if (error) {
 
-        console.error(error);
+        console.error(
+            "Load releases error:",
+            error
+        );
 
         return;
 
@@ -568,23 +574,19 @@ function setupArtistModal() {
     if (!modal) return;
 
 
-    // OPEN
-
     openButton?.addEventListener(
         "click",
         () => {
+
+            clearArtistMessage();
 
             modal.classList.remove(
                 "hidden"
             );
 
-            clearArtistMessage();
-
         }
     );
 
-
-    // CLOSE
 
     closeButton?.addEventListener(
         "click",
@@ -597,8 +599,6 @@ function setupArtistModal() {
         }
     );
 
-
-    // CLICK OUTSIDE
 
     modal.addEventListener(
         "click",
@@ -618,8 +618,6 @@ function setupArtistModal() {
     );
 
 
-    // SUBMIT
-
     form?.addEventListener(
         "submit",
         async event => {
@@ -627,7 +625,8 @@ function setupArtistModal() {
             event.preventDefault();
 
             await createArtist(
-                form
+                form,
+                modal
             );
 
         }
@@ -640,7 +639,10 @@ function setupArtistModal() {
 // CREATE ARTIST
 // -----------------------------------------
 
-async function createArtist(form) {
+async function createArtist(
+    form,
+    modal
+) {
 
     const button =
         document.getElementById(
@@ -654,98 +656,95 @@ async function createArtist(form) {
         );
 
 
-    const {
-        data: userData,
-        error: userError
-    } =
-        await supabaseClient.auth.getUser();
-
-
-    if (
-        userError ||
-        !userData.user
-    ) {
-
-        window.location.href =
-            "./index.html";
-
-        return;
-
-    }
-
-
-    const formData =
-        new FormData(form);
-
-
-    const artistName =
-        String(
-            formData.get(
-                "artist_name"
-            ) || ""
-        ).trim();
-
-
-    const firstName =
-        String(
-            formData.get(
-                "first_name"
-            ) || ""
-        ).trim();
-
-
-    const lastName =
-        String(
-            formData.get(
-                "last_name"
-            ) || ""
-        ).trim();
-
-
-    const email =
-        String(
-            formData.get(
-                "email"
-            ) || ""
-        ).trim();
-
-
-    if (
-        !artistName ||
-        !firstName ||
-        !lastName ||
-        !email
-    ) {
-
-        showArtistMessage(
-            "Please complete all fields."
-        );
-
-        return;
-
-    }
-
-
-    // BUTTON STATE
-
-    if (button) {
+    try {
 
         button.disabled = true;
 
         button.textContent =
             "CREATING...";
 
-    }
+
+        clearArtistMessage();
 
 
-    clearArtistMessage();
+        // Check current user
+        const {
+            data: userData,
+            error: userError
+        } =
+            await supabaseClient.auth.getUser();
 
 
-    try {
+        if (
+            userError ||
+            !userData.user
+        ) {
+
+            throw new Error(
+                "Your session has expired. Please sign in again."
+            );
+
+        }
+
+
+        const formData =
+            new FormData(form);
+
+
+        const artistName =
+            String(
+                formData.get(
+                    "artist_name"
+                ) || ""
+            ).trim();
+
+
+        const firstName =
+            String(
+                formData.get(
+                    "first_name"
+                ) || ""
+            ).trim();
+
+
+        const lastName =
+            String(
+                formData.get(
+                    "last_name"
+                ) || ""
+            ).trim();
+
+
+        const email =
+            String(
+                formData.get(
+                    "email"
+                ) || ""
+            ).trim();
+
+
+        if (
+            !artistName ||
+            !firstName ||
+            !lastName ||
+            !email
+        ) {
+
+            throw new Error(
+                "Please complete every artist field."
+            );
+
+        }
+
 
         // ---------------------------------
-        // CALL SUPABASE EDGE FUNCTION
+        // CREATE ARTIST
         // ---------------------------------
+        //
+        // This calls your Supabase Edge
+        // Function instead of putting a
+        // service-role key in the browser.
+        //
 
         const {
             data,
@@ -766,9 +765,13 @@ async function createArtist(form) {
                             lastName,
 
                         email:
-                            email
+                            email,
+
+                        created_by:
+                            userData.user.id
 
                     }
+
                 }
             );
 
@@ -776,7 +779,7 @@ async function createArtist(form) {
         if (error) {
 
             console.error(
-                "Create artist error:",
+                "Create artist function error:",
                 error
             );
 
@@ -804,13 +807,12 @@ async function createArtist(form) {
         // SUCCESS
         // ---------------------------------
 
-        showArtistMessage(
-            "Artist created successfully. Invitation email sent.",
-            true
-        );
-
-
         form.reset();
+
+        showArtistMessage(
+            "Artist created successfully.",
+            "success"
+        );
 
 
         await loadArtists();
@@ -819,44 +821,38 @@ async function createArtist(form) {
         setTimeout(
             () => {
 
-                const modal =
-                    document.getElementById(
-                        "artistModal"
-                    );
-
-
-                modal?.classList.add(
+                modal.classList.add(
                     "hidden"
                 );
-
 
                 clearArtistMessage();
 
             },
-            1500
+            1000
         );
 
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Artist creation failed:",
+            error
+        );
 
 
         showArtistMessage(
             error.message ||
-            "Unable to create artist."
+            "Unable to create artist.",
+            "error"
         );
+
 
     } finally {
 
-        if (button) {
+        button.disabled = false;
 
-            button.disabled = false;
-
-            button.textContent =
-                "CREATE ARTIST";
-
-        }
+        button.textContent =
+            "CREATE ARTIST";
 
     }
 
@@ -899,7 +895,7 @@ async function loadArtists() {
     if (error) {
 
         console.error(
-            "Unable to load artists:",
+            "Load artists error:",
             error
         );
 
@@ -947,7 +943,6 @@ async function loadArtists() {
                         <h3>
                             ${escapeHtml(
                                 artist.artist_name ||
-                                artist.name ||
                                 "Unnamed Artist"
                             )}
                         </h3>
@@ -987,7 +982,7 @@ async function loadArtists() {
 
 function showArtistMessage(
     text,
-    success = false
+    type
 ) {
 
     const message =
@@ -1003,10 +998,21 @@ function showArtistMessage(
         text;
 
 
-    message.style.color =
-        success
-            ? "#ffffff"
-            : "#ff7777";
+    message.style.display =
+        "block";
+
+
+    if (type === "success") {
+
+        message.style.color =
+            "#8cff8c";
+
+    } else {
+
+        message.style.color =
+            "#ff7777";
+
+    }
 
 }
 
@@ -1026,7 +1032,11 @@ function clearArtistMessage() {
     if (!message) return;
 
 
-    message.textContent = "";
+    message.textContent =
+        "";
+
+    message.style.display =
+        "none";
 
 }
 
