@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -10,29 +12,26 @@
 
     <title>VoidRecords — Dashboard</title>
 
-    <!-- Favicon -->
     <link
         rel="icon"
         type="image/png"
         href="./favicon.png"
     >
 
-    <!-- Dashboard CSS -->
     <link
         rel="stylesheet"
-        href="./css/dashboard.css"
+        href="./css/dashboard.css?v=3"
     >
+
 </head>
 
 <body>
 
-    <!-- =========================================
-         SIDEBAR
-    ========================================== -->
+    <!-- SIDEBAR -->
 
     <aside class="sidebar">
 
-        <div class="sidebar-top">
+        <div>
 
             <div class="sidebar-brand">
                 VOIDRECORDS
@@ -45,33 +44,33 @@
             <nav>
 
                 <button
-                    type="button"
                     class="nav-item active"
                     data-section="overview"
+                    type="button"
                 >
                     OVERVIEW
                 </button>
 
                 <button
-                    type="button"
                     class="nav-item"
                     data-section="releases"
+                    type="button"
                 >
                     RELEASES
                 </button>
 
                 <button
-                    type="button"
                     class="nav-item"
                     data-section="artists"
+                    type="button"
                 >
                     ARTISTS
                 </button>
 
                 <button
-                    type="button"
                     class="nav-item"
                     data-section="catalog"
+                    type="button"
                 >
                     CATALOG
                 </button>
@@ -83,9 +82,9 @@
         <div class="sidebar-bottom">
 
             <button
-                type="button"
                 class="logout-button"
                 id="logoutButton"
+                type="button"
             >
                 SIGN OUT
             </button>
@@ -95,13 +94,9 @@
     </aside>
 
 
-    <!-- =========================================
-         MAIN DASHBOARD
-    ========================================== -->
+    <!-- MAIN DASHBOARD -->
 
     <main class="dashboard">
-
-        <!-- HEADER -->
 
         <header class="dashboard-header">
 
@@ -127,13 +122,11 @@
         </header>
 
 
-        <!-- =====================================
-             OVERVIEW
-        ====================================== -->
+        <!-- OVERVIEW -->
 
         <section
-            id="overview"
             class="dashboard-section active-section"
+            id="overview"
         >
 
             <div class="welcome-card">
@@ -199,13 +192,11 @@
         </section>
 
 
-        <!-- =====================================
-             RELEASES
-        ====================================== -->
+        <!-- RELEASES -->
 
         <section
-            id="releases"
             class="dashboard-section"
+            id="releases"
         >
 
             <div class="section-header">
@@ -223,9 +214,9 @@
                 </div>
 
                 <button
-                    type="button"
                     class="primary-button"
                     id="createReleaseButton"
+                    type="button"
                 >
                     CREATE RELEASE
                 </button>
@@ -254,13 +245,11 @@
         </section>
 
 
-        <!-- =====================================
-             ARTISTS
-        ====================================== -->
+        <!-- ARTISTS -->
 
         <section
-            id="artists"
             class="dashboard-section"
+            id="artists"
         >
 
             <div class="section-header">
@@ -278,9 +267,9 @@
                 </div>
 
                 <button
-                    type="button"
                     class="primary-button"
                     id="addArtistButton"
+                    type="button"
                 >
                     ADD ARTIST
                 </button>
@@ -293,7 +282,10 @@
                 id="artistList"
             >
 
-                <div class="empty-state">
+                <div
+                    class="empty-state"
+                    id="artistEmptyState"
+                >
 
                     No artists added yet.
 
@@ -309,13 +301,11 @@
         </section>
 
 
-        <!-- =====================================
-             CATALOG
-        ====================================== -->
+        <!-- CATALOG -->
 
         <section
-            id="catalog"
             class="dashboard-section"
+            id="catalog"
         >
 
             <div class="section-header">
@@ -346,9 +336,7 @@
     </main>
 
 
-    <!-- =========================================
-         CREATE RELEASE MODAL
-    ========================================== -->
+    <!-- CREATE RELEASE MODAL -->
 
     <div
         class="modal hidden"
@@ -358,10 +346,9 @@
         <div class="modal-box">
 
             <button
-                type="button"
                 class="modal-close"
                 id="closeReleaseModal"
-                aria-label="Close"
+                type="button"
             >
                 ×
             </button>
@@ -410,7 +397,6 @@
                 <select
                     id="releaseType"
                     name="release_type"
-                    required
                 >
 
                     <option value="Single">
@@ -465,9 +451,7 @@
     </div>
 
 
-    <!-- =========================================
-         ADD ARTIST MODAL
-    ========================================== -->
+    <!-- ADD ARTIST MODAL -->
 
     <div
         class="modal hidden"
@@ -477,10 +461,9 @@
         <div class="modal-box">
 
             <button
-                type="button"
                 class="modal-close"
                 id="closeArtistModal"
-                aria-label="Close"
+                type="button"
             >
                 ×
             </button>
@@ -570,22 +553,17 @@
     </div>
 
 
-    <!-- =========================================
-         SUPABASE
-    ========================================== -->
+    <!-- SUPABASE -->
 
     <script
         src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
 
 
-    <!-- =========================================
-         DASHBOARD JAVASCRIPT
-    ========================================== -->
+    <!-- DASHBOARD JS -->
 
-    <script
-        src="./js/dashboard.js"
-    ></script>
+    <script src="./js/dashboard.js?v=3"></script>
 
 </body>
+
 </html>
