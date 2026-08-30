@@ -4,8 +4,15 @@
 
 
 // =========================================
-// SUPABASE
+// SUPABASE CONFIGURATION
 // =========================================
+//
+// IMPORTANT:
+// Replace these with your actual Supabase
+// Project URL and Publishable Key.
+//
+// Do NOT use your service_role key here.
+//
 
 const SUPABASE_URL =
     "YOUR_SUPABASE_PROJECT_URL";
@@ -14,19 +21,46 @@ const SUPABASE_PUBLISHABLE_KEY =
     "YOUR_SUPABASE_PUBLISHABLE_KEY";
 
 
-const supabaseClient =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
-    );
-
-
 // =========================================
-// GLOBAL USER
+// SUPABASE CLIENT
 // =========================================
 
-let currentUser = null;
-let currentProfile = null;
+let supabaseClient = null;
+
+function initializeSupabase() {
+
+    if (
+        !window.supabase ||
+        typeof window.supabase.createClient !== "function"
+    ) {
+
+        console.error(
+            "Supabase library was not loaded."
+        );
+
+        return false;
+    }
+
+    try {
+
+        supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_PUBLISHABLE_KEY
+            );
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "Supabase initialization failed:",
+            error
+        );
+
+        return false;
+    }
+}
 
 
 // =========================================
@@ -37,7 +71,12 @@ document.addEventListener(
     "DOMContentLoaded",
     async () => {
 
-        // Start interface first.
+        console.log(
+            "VoidRecords dashboard starting..."
+        );
+
+
+        // Always initialize the UI first.
 
         setupNavigation();
 
@@ -47,10 +86,24 @@ document.addEventListener(
 
         setupLogout();
 
-        setupDistributionForm();
+
+        // Then initialize Supabase.
+
+        const supabaseReady =
+            initializeSupabase();
 
 
-        // Authenticate.
+        if (!supabaseReady) {
+
+            setDashboardStatus(
+                "OFFLINE"
+            );
+
+            return;
+        }
+
+
+        // Authenticate user.
 
         const loggedIn =
             await loadUser();
@@ -61,7 +114,7 @@ document.addEventListener(
         }
 
 
-        // Load dashboard.
+        // Load dashboard information.
 
         await loadReleaseCount();
 
@@ -69,10 +122,44 @@ document.addEventListener(
 
         await loadArtists();
 
-        await loadDistributionRequests();
+
+        setDashboardStatus(
+            "READY"
+        );
+
+
+        console.log(
+            "VoidRecords dashboard loaded."
+        );
 
     }
 );
+
+
+// =========================================
+// DASHBOARD STATUS
+// =========================================
+
+function setDashboardStatus(
+    status
+) {
+
+    const statusElements =
+        document.querySelectorAll(
+            "[data-dashboard-status]"
+        );
+
+
+    statusElements.forEach(
+        element => {
+
+            element.textContent =
+                status;
+
+        }
+    );
+
+}
 
 
 // =========================================
@@ -81,73 +168,81 @@ document.addEventListener(
 
 async function loadUser() {
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient.auth.getUser();
+    if (!supabaseClient) {
+        return false;
+    }
 
 
-    if (
-        error ||
-        !data.user
-    ) {
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth.getUser();
+
+
+        if (
+            error ||
+            !data ||
+            !data.user
+        ) {
+
+            console.warn(
+                "No authenticated user.",
+                error
+            );
+
+
+            window.location.href =
+                "./index.html";
+
+
+            return false;
+        }
+
+
+        const user =
+            data.user;
+
+
+        const userEmail =
+            document.getElementById(
+                "userEmail"
+            );
+
+
+        if (userEmail) {
+
+            userEmail.textContent =
+                user.email || "";
+
+        }
+
+
+        // Store useful information for
+        // other dashboard functions.
+
+        window.voidRecordsUser =
+            user;
+
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "Authentication error:",
+            error
+        );
+
 
         window.location.href =
             "./index.html";
 
+
         return false;
-
     }
-
-
-    currentUser =
-        data.user;
-
-
-    const userEmail =
-        document.getElementById(
-            "userEmail"
-        );
-
-
-    if (userEmail) {
-
-        userEmail.textContent =
-            data.user.email || "";
-
-    }
-
-
-    // Try to load the user's profile.
-
-    const {
-        data: profile,
-        error: profileError
-    } =
-        await supabaseClient
-
-            .from("profiles")
-
-            .select("*")
-
-            .eq(
-                "id",
-                data.user.id
-            )
-
-            .maybeSingle();
-
-
-    if (!profileError) {
-
-        currentProfile =
-            profile;
-
-    }
-
-
-    return true;
 
 }
 
@@ -170,16 +265,36 @@ function setupNavigation() {
         );
 
 
+    if (!buttons.length) {
+
+        console.warn(
+            "No navigation buttons found."
+        );
+
+        return;
+    }
+
+
     buttons.forEach(
         button => {
 
             button.addEventListener(
                 "click",
-                async () => {
+                event => {
+
+                    event.preventDefault();
+
 
                     const target =
                         button.dataset.section;
 
+
+                    if (!target) {
+                        return;
+                    }
+
+
+                    // Remove active state.
 
                     buttons.forEach(
                         item => {
@@ -203,10 +318,14 @@ function setupNavigation() {
                     );
 
 
+                    // Activate clicked button.
+
                     button.classList.add(
                         "active"
                     );
 
+
+                    // Activate requested section.
 
                     const targetSection =
                         document.getElementById(
@@ -219,36 +338,6 @@ function setupNavigation() {
                         targetSection.classList.add(
                             "active-section"
                         );
-
-                    }
-
-
-                    // Refresh data when
-                    // entering important sections.
-
-                    if (
-                        target === "releases"
-                    ) {
-
-                        await loadReleases();
-
-                    }
-
-
-                    if (
-                        target === "artists"
-                    ) {
-
-                        await loadArtists();
-
-                    }
-
-
-                    if (
-                        target === "distribution"
-                    ) {
-
-                        await loadDistributionRequests();
 
                     }
 
@@ -296,9 +385,13 @@ function setupReleaseModal() {
     }
 
 
+    // OPEN
+
     openButton?.addEventListener(
         "click",
-        () => {
+        event => {
+
+            event.preventDefault();
 
             modal.classList.remove(
                 "hidden"
@@ -308,17 +401,21 @@ function setupReleaseModal() {
     );
 
 
+    // CLOSE
+
     closeButton?.addEventListener(
         "click",
-        () => {
+        event => {
 
-            modal.classList.add(
-                "hidden"
-            );
+            event.preventDefault();
+
+            closeReleaseModal();
 
         }
     );
 
+
+    // CLICK OUTSIDE
 
     modal.addEventListener(
         "click",
@@ -328,15 +425,34 @@ function setupReleaseModal() {
                 event.target === modal
             ) {
 
-                modal.classList.add(
-                    "hidden"
-                );
+                closeReleaseModal();
 
             }
 
         }
     );
 
+
+    // ESCAPE KEY
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Escape" &&
+                !modal.classList.contains("hidden")
+            ) {
+
+                closeReleaseModal();
+
+            }
+
+        }
+    );
+
+
+    // SUBMIT
 
     form?.addEventListener(
         "submit",
@@ -356,6 +472,30 @@ function setupReleaseModal() {
 
 
 // =========================================
+// CLOSE RELEASE MODAL
+// =========================================
+
+function closeReleaseModal() {
+
+    const modal =
+        document.getElementById(
+            "releaseModal"
+        );
+
+
+    if (!modal) {
+        return;
+    }
+
+
+    modal.classList.add(
+        "hidden"
+    );
+
+}
+
+
+// =========================================
 // CREATE RELEASE
 // =========================================
 
@@ -364,123 +504,176 @@ async function createRelease(
     modal
 ) {
 
-    if (!currentUser) {
+    if (!supabaseClient) {
 
         alert(
-            "Your session has expired."
+            "Supabase is not connected yet."
         );
 
         return;
-
     }
 
 
-    const formData =
-        new FormData(form);
+    try {
+
+        const {
+            data: userData,
+            error: userError
+        } =
+            await supabaseClient.auth.getUser();
 
 
-    const release = {
+        if (
+            userError ||
+            !userData ||
+            !userData.user
+        ) {
 
-        user_id:
-            currentUser.id,
+            alert(
+                "Your session has expired. Please sign in again."
+            );
 
-        title:
+
+            window.location.href =
+                "./index.html";
+
+
+            return;
+        }
+
+
+        const formData =
+            new FormData(form);
+
+
+        const title =
             String(
                 formData.get("title") || ""
-            ).trim(),
+            ).trim();
 
-        artist:
+
+        const artist =
             String(
                 formData.get("artist") || ""
-            ).trim(),
+            ).trim();
 
-        release_type:
-            formData.get(
-                "release_type"
-            ),
 
-        release_date:
-            formData.get(
-                "release_date"
-            ),
-
-        description:
+        const releaseType =
             String(
-                formData.get(
-                    "description"
-                ) || ""
-            ).trim(),
-
-        status:
-            "DRAFT"
-
-    };
+                formData.get("release_type") || ""
+            ).trim();
 
 
-    if (!release.title) {
+        const releaseDate =
+            String(
+                formData.get("release_date") || ""
+            ).trim();
 
-        alert(
-            "Enter a release title."
+
+        const description =
+            String(
+                formData.get("description") || ""
+            ).trim();
+
+
+        if (
+            !title ||
+            !artist ||
+            !releaseType ||
+            !releaseDate
+        ) {
+
+            alert(
+                "Please complete all required release fields."
+            );
+
+            return;
+        }
+
+
+        const release = {
+
+            user_id:
+                userData.user.id,
+
+            title:
+                title,
+
+            artist:
+                artist,
+
+            release_type:
+                releaseType,
+
+            release_date:
+                releaseDate,
+
+            description:
+                description,
+
+            status:
+                "PENDING"
+
+        };
+
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("releases")
+                .insert(release);
+
+
+        if (error) {
+
+            console.error(
+                "Create release error:",
+                error
+            );
+
+
+            alert(
+                "Unable to create release:\n\n" +
+                error.message
+            );
+
+
+            return;
+        }
+
+
+        form.reset();
+
+
+        modal.classList.add(
+            "hidden"
         );
 
-        return;
 
-    }
+        await loadReleaseCount();
 
+        await loadReleases();
 
-    if (!release.artist) {
 
         alert(
-            "Enter an artist name."
+            "Release submitted successfully."
         );
 
-        return;
 
-    }
-
-
-    const {
-        error
-    } =
-        await supabaseClient
-
-            .from("releases")
-
-            .insert(release);
-
-
-    if (error) {
+    } catch (error) {
 
         console.error(
-            "Create release error:",
+            "Create release failed:",
             error
         );
 
+
         alert(
-            "Unable to create release:\n\n" +
-            error.message
+            "Something went wrong while creating the release."
         );
 
-        return;
-
     }
-
-
-    form.reset();
-
-    modal.classList.add(
-        "hidden"
-    );
-
-
-    await loadReleaseCount();
-
-    await loadReleases();
-
-
-    alert(
-        "Release created successfully."
-    );
 
 }
 
@@ -491,32 +684,8 @@ async function createRelease(
 
 async function loadReleaseCount() {
 
-    const {
-        count,
-        error
-    } =
-        await supabaseClient
-
-            .from("releases")
-
-            .select(
-                "*",
-                {
-                    count: "exact",
-                    head: true
-                }
-            );
-
-
-    if (error) {
-
-        console.error(
-            "Release count error:",
-            error
-        );
-
+    if (!supabaseClient) {
         return;
-
     }
 
 
@@ -526,10 +695,50 @@ async function loadReleaseCount() {
         );
 
 
-    if (element) {
+    if (!element) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            count,
+            error
+        } =
+            await supabaseClient
+                .from("releases")
+                .select(
+                    "*",
+                    {
+                        count: "exact",
+                        head: true
+                    }
+                );
+
+
+        if (error) {
+
+            console.error(
+                "Release count error:",
+                error
+            );
+
+
+            return;
+        }
+
 
         element.textContent =
             count || 0;
+
+
+    } catch (error) {
+
+        console.error(
+            "Release count failed:",
+            error
+        );
 
     }
 
@@ -553,1340 +762,146 @@ async function loadReleases() {
     }
 
 
-    let query =
-        supabaseClient
-
-            .from("releases")
-
-            .select("*")
-
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    // Artists only see their own releases.
-
-    if (
-        currentProfile?.role === "artist"
-    ) {
-
-        query =
-            query.eq(
-                "user_id",
-                currentUser.id
-            );
-
-    }
-
-
-    const {
-        data,
-        error
-    } =
-        await query;
-
-
-    if (error) {
-
-        console.error(
-            "Load releases error:",
-            error
-        );
+    if (!supabaseClient) {
 
         list.innerHTML = `
-
             <div class="empty-state">
-
-                Unable to load releases.
-
-                <br><br>
-
-                ${escapeHtml(
-                    error.message
-                )}
-
+                Supabase is not connected.
             </div>
-
         `;
 
         return;
-
-    }
-
-
-    if (
-        !data ||
-        data.length === 0
-    ) {
-
-        list.innerHTML = `
-
-            <div class="empty-state">
-
-                No releases yet.
-
-                <br><br>
-
-                Create your first release to
-                begin building your catalog.
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    list.innerHTML =
-        data.map(
-            release => {
-
-                const status =
-                    String(
-                        release.status ||
-                        "DRAFT"
-                    ).toUpperCase();
-
-
-                const ownerActions =
-                    isOwner() &&
-                    (
-                        status === "PENDING" ||
-                        status === "APPROVED"
-                    )
-                    ?
-                    getOwnerReleaseActions(
-                        release
-                    )
-                    :
-                    "";
-
-
-                return `
-
-                    <div class="list-card">
-
-                        <div>
-
-                            <h3>
-                                ${escapeHtml(
-                                    release.title ||
-                                    "Untitled Release"
-                                )}
-                            </h3>
-
-                            <p>
-
-                                ${escapeHtml(
-                                    release.artist ||
-                                    "Unknown Artist"
-                                )}
-
-                                ·
-
-                                ${escapeHtml(
-                                    release.release_type ||
-                                    "Release"
-                                )}
-
-                            </p>
-
-                        </div>
-
-
-                        <div
-                            style="
-                                display:flex;
-                                align-items:center;
-                                gap:10px;
-                            "
-                        >
-
-                            <div
-                                class="status ${status.toLowerCase().replaceAll("_", "-")}"
-                            >
-
-                                ${escapeHtml(
-                                    status
-                                )}
-
-                            </div>
-
-                            ${ownerActions}
-
-                        </div>
-
-                    </div>
-
-                `;
-
-            }
-        ).join("");
-
-}
-
-
-// =========================================
-// OWNER RELEASE ACTIONS
-// =========================================
-
-function getOwnerReleaseActions(
-    release
-) {
-
-    const status =
-        String(
-            release.status ||
-            "DRAFT"
-        ).toUpperCase();
-
-
-    if (
-        status === "PENDING"
-    ) {
-
-        return `
-
-            <button
-                class="approve-button"
-                type="button"
-                onclick="approveRelease('${release.id}')"
-            >
-                APPROVE
-            </button>
-
-            <button
-                class="decline-button"
-                type="button"
-                onclick="declineRelease('${release.id}')"
-            >
-                DECLINE
-            </button>
-
-        `;
-
-    }
-
-
-    if (
-        status === "APPROVED"
-    ) {
-
-        return `
-
-            <button
-                class="takedown-button"
-                type="button"
-                onclick="takedownRelease('${release.id}')"
-            >
-                TAKE DOWN
-            </button>
-
-        `;
-
-    }
-
-
-    return "";
-
-}
-
-
-// =========================================
-// APPROVE RELEASE
-// =========================================
-
-async function approveRelease(
-    releaseId
-) {
-
-    if (!isOwner()) {
-
-        alert(
-            "Only an owner can approve releases."
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            "Approve this release for distribution?"
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    const {
-        error
-    } =
-        await supabaseClient
-
-            .from("releases")
-
-            .update({
-
-                status:
-                    "APPROVED",
-
-                reviewed_by:
-                    currentUser.id,
-
-                reviewed_at:
-                    new Date().toISOString()
-
-            })
-
-            .eq(
-                "id",
-                releaseId
-            );
-
-
-    if (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to approve release:\n\n" +
-            error.message
-        );
-
-        return;
-
-    }
-
-
-    await loadReleases();
-
-    await loadDistributionRequests();
-
-
-    alert(
-        "Release approved."
-    );
-
-}
-
-
-// =========================================
-// DECLINE RELEASE
-// =========================================
-
-async function declineRelease(
-    releaseId
-) {
-
-    if (!isOwner()) {
-
-        alert(
-            "Only an owner can decline releases."
-        );
-
-        return;
-
-    }
-
-
-    const reason =
-        prompt(
-            "Optional reason for declining this release:"
-        );
-
-
-    const {
-        error
-    } =
-        await supabaseClient
-
-            .from("releases")
-
-            .update({
-
-                status:
-                    "DECLINED",
-
-                review_note:
-                    reason || null,
-
-                reviewed_by:
-                    currentUser.id,
-
-                reviewed_at:
-                    new Date().toISOString()
-
-            })
-
-            .eq(
-                "id",
-                releaseId
-            );
-
-
-    if (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to decline release:\n\n" +
-            error.message
-        );
-
-        return;
-
-    }
-
-
-    await loadReleases();
-
-    await loadDistributionRequests();
-
-
-    alert(
-        "Release declined."
-    );
-
-}
-
-
-// =========================================
-// TAKE DOWN RELEASE
-// =========================================
-
-async function takedownRelease(
-    releaseId
-) {
-
-    if (!isOwner()) {
-
-        alert(
-            "Only an owner can take down releases."
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            "Take this release down?"
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    const {
-        error
-    } =
-        await supabaseClient
-
-            .from("releases")
-
-            .update({
-
-                status:
-                    "TAKEN_DOWN",
-
-                reviewed_by:
-                    currentUser.id,
-
-                reviewed_at:
-                    new Date().toISOString()
-
-            })
-
-            .eq(
-                "id",
-                releaseId
-            );
-
-
-    if (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to take down release:\n\n" +
-            error.message
-        );
-
-        return;
-
-    }
-
-
-    await loadReleases();
-
-    await loadDistributionRequests();
-
-
-    alert(
-        "Release taken down."
-    );
-
-}
-
-
-// =========================================
-// DISTRIBUTION FORM
-// =========================================
-
-function setupDistributionForm() {
-
-    const form =
-        document.getElementById(
-            "distributionForm"
-        );
-
-
-    if (!form) {
-        return;
-    }
-
-
-    const audioInput =
-        document.getElementById(
-            "audioFile"
-        );
-
-
-    const artworkInput =
-        document.getElementById(
-            "artworkFile"
-        );
-
-
-    audioInput?.addEventListener(
-        "change",
-        () => {
-
-            validateAudioFile(
-                audioInput
-            );
-
-        }
-    );
-
-
-    artworkInput?.addEventListener(
-        "change",
-        async () => {
-
-            await validateArtwork(
-                artworkInput
-            );
-
-        }
-    );
-
-
-    form.addEventListener(
-        "submit",
-        async event => {
-
-            event.preventDefault();
-
-            await submitDistributionRequest(
-                form
-            );
-
-        }
-    );
-
-}
-
-
-// =========================================
-// AUDIO VALIDATION
-// =========================================
-
-function validateAudioFile(
-    input
-) {
-
-    const file =
-        input.files?.[0];
-
-
-    if (!file) {
-        return false;
-    }
-
-
-    const extension =
-        getExtension(
-            file.name
-        );
-
-
-    if (
-        extension !== "wav"
-    ) {
-
-        input.value = "";
-
-
-        alert(
-            "The audio file must be a WAV file."
-        );
-
-
-        return false;
-
-    }
-
-
-    return true;
-
-}
-
-
-// =========================================
-// ARTWORK VALIDATION
-// =========================================
-
-async function validateArtwork(
-    input
-) {
-
-    const file =
-        input.files?.[0];
-
-
-    if (!file) {
-        return false;
-    }
-
-
-    const extension =
-        getExtension(
-            file.name
-        );
-
-
-    if (
-        extension !== "jpg" &&
-        extension !== "jpeg"
-    ) {
-
-        input.value = "";
-
-
-        alert(
-            "The cover artwork must be a JPG or JPEG file."
-        );
-
-
-        return false;
-
     }
 
 
     try {
 
-        const dimensions =
-            await getImageDimensions(
-                file
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("releases")
+                .select("*")
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                );
+
+
+        if (error) {
+
+            console.error(
+                "Load releases error:",
+                error
             );
+
+
+            list.innerHTML = `
+                <div class="empty-state">
+                    Unable to load releases.
+                </div>
+            `;
+
+
+            return;
+        }
 
 
         if (
-            dimensions.width !== 3000 ||
-            dimensions.height !== 3000
+            !data ||
+            data.length === 0
         ) {
 
-            input.value = "";
+            list.innerHTML = `
+
+                <div class="empty-state">
+
+                    No releases yet.
+
+                    <br><br>
+
+                    Create your first release to
+                    begin building your catalog.
+
+                </div>
+
+            `;
 
 
-            alert(
-                "Artwork must be exactly 3000 × 3000 pixels."
-            );
-
-
-            return false;
-
+            return;
         }
 
 
-        return true;
+        list.innerHTML =
+            data
+                .map(
+                    release => {
 
-    } catch (error) {
+                        const status =
+                            release.status ||
+                            "PENDING";
 
-        console.error(error);
 
-        input.value = "";
+                        return `
 
+                            <div class="list-card">
 
-        alert(
-            "Unable to read the artwork file."
-        );
+                                <div>
 
+                                    <h3>
+                                        ${escapeHtml(
+                                            release.title ||
+                                            "Untitled Release"
+                                        )}
+                                    </h3>
 
-        return false;
+                                    <p>
 
-    }
+                                        ${escapeHtml(
+                                            release.artist ||
+                                            "Unknown Artist"
+                                        )}
 
-}
+                                        ·
 
+                                        ${escapeHtml(
+                                            release.release_type ||
+                                            "Release"
+                                        )}
 
-// =========================================
-// IMAGE DIMENSIONS
-// =========================================
+                                    </p>
 
-function getImageDimensions(
-    file
-) {
+                                </div>
 
-    return new Promise(
-        (
-            resolve,
-            reject
-        ) => {
 
-            const image =
-                new Image();
+                                <div class="status">
 
+                                    ${escapeHtml(
+                                        status
+                                    )}
 
-            const url =
-                URL.createObjectURL(
-                    file
-                );
+                                </div>
 
+                            </div>
 
-            image.onload =
-                () => {
+                        `;
 
-                    URL.revokeObjectURL(
-                        url
-                    );
-
-
-                    resolve({
-
-                        width:
-                            image.naturalWidth,
-
-                        height:
-                            image.naturalHeight
-
-                    });
-
-                };
-
-
-            image.onerror =
-                () => {
-
-                    URL.revokeObjectURL(
-                        url
-                    );
-
-                    reject(
-                        new Error(
-                            "Invalid image."
-                        )
-                    );
-
-                };
-
-
-            image.src =
-                url;
-
-        }
-    );
-
-}
-
-
-// =========================================
-// SUBMIT DISTRIBUTION
-// =========================================
-
-async function submitDistributionRequest(
-    form
-) {
-
-    if (!currentUser) {
-
-        alert(
-            "You must be signed in."
-        );
-
-        return;
-
-    }
-
-
-    const formData =
-        new FormData(form);
-
-
-    const releaseId =
-        String(
-            formData.get(
-                "release_id"
-            ) || ""
-        );
-
-
-    const audioFile =
-        document.getElementById(
-            "audioFile"
-        )?.files?.[0];
-
-
-    const artworkFile =
-        document.getElementById(
-            "artworkFile"
-        )?.files?.[0];
-
-
-    if (!releaseId) {
-
-        alert(
-            "Please select a release."
-        );
-
-        return;
-
-    }
-
-
-    if (!audioFile) {
-
-        alert(
-            "Please select a WAV audio file."
-        );
-
-        return;
-
-    }
-
-
-    if (!artworkFile) {
-
-        alert(
-            "Please select JPG artwork."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !validateAudioFile(
-            document.getElementById(
-                "audioFile"
-            )
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        !await validateArtwork(
-            document.getElementById(
-                "artworkFile"
-            )
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    const submitButton =
-        form.querySelector(
-            'button[type="submit"]'
-        );
-
-
-    try {
-
-        if (submitButton) {
-
-            submitButton.disabled =
-                true;
-
-            submitButton.textContent =
-                "UPLOADING...";
-
-        }
-
-
-        // ---------------------------------
-        // AUDIO
-        // ---------------------------------
-
-        const audioPath =
-            `releases/${currentUser.id}/${crypto.randomUUID()}.wav`;
-
-
-        const {
-            error: audioError
-        } =
-            await supabaseClient.storage
-
-                .from("distribution")
-
-                .upload(
-                    audioPath,
-                    audioFile,
-                    {
-                        contentType:
-                            "audio/wav",
-
-                        upsert:
-                            false
                     }
-                );
-
-
-        if (audioError) {
-
-            throw audioError;
-
-        }
-
-
-        // ---------------------------------
-        // ARTWORK
-        // ---------------------------------
-
-        const artworkPath =
-            `artwork/${currentUser.id}/${crypto.randomUUID()}.jpg`;
-
-
-        const {
-            error: artworkError
-        } =
-            await supabaseClient.storage
-
-                .from("distribution")
-
-                .upload(
-                    artworkPath,
-                    artworkFile,
-                    {
-                        contentType:
-                            "image/jpeg",
-
-                        upsert:
-                            false
-                    }
-                );
-
-
-        if (artworkError) {
-
-            throw artworkError;
-
-        }
-
-
-        // ---------------------------------
-        // UPDATE RELEASE
-        // ---------------------------------
-
-        const {
-            error: updateError
-        } =
-            await supabaseClient
-
-                .from("releases")
-
-                .update({
-
-                    audio_path:
-                        audioPath,
-
-                    artwork_path:
-                        artworkPath,
-
-                    status:
-                        "PENDING",
-
-                    submitted_at:
-                        new Date().toISOString()
-
-                })
-
-                .eq(
-                    "id",
-                    releaseId
-                );
-
-
-        if (updateError) {
-
-            throw updateError;
-
-        }
-
-
-        form.reset();
-
-
-        await loadReleases();
-
-        await loadDistributionRequests();
-
-
-        alert(
-            "Release submitted for owner review."
-        );
+                )
+                .join("");
 
 
     } catch (error) {
 
         console.error(
-            "Distribution submission error:",
+            "Loading releases failed:",
             error
         );
 
-
-        alert(
-            "Unable to submit release:\n\n" +
-            (
-                error.message ||
-                "Unknown error"
-            )
-        );
-
-
-    } finally {
-
-        if (submitButton) {
-
-            submitButton.disabled =
-                false;
-
-            submitButton.textContent =
-                "SUBMIT FOR DISTRIBUTION";
-
-        }
-
     }
-
-}
-
-
-// =========================================
-// DISTRIBUTION REQUESTS
-// =========================================
-
-async function loadDistributionRequests() {
-
-    const list =
-        document.getElementById(
-            "distributionList"
-        );
-
-
-    if (!list) {
-        return;
-    }
-
-
-    let query =
-        supabaseClient
-
-            .from("releases")
-
-            .select("*")
-
-            .in(
-                "status",
-                [
-                    "PENDING",
-                    "APPROVED",
-                    "DECLINED",
-                    "TAKEN_DOWN"
-                ]
-            )
-
-            .order(
-                "submitted_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (
-        currentProfile?.role === "artist"
-    ) {
-
-        query =
-            query.eq(
-                "user_id",
-                currentUser.id
-            );
-
-    }
-
-
-    const {
-        data,
-        error
-    } =
-        await query;
-
-
-    if (error) {
-
-        console.error(
-            "Distribution request error:",
-            error
-        );
-
-        list.innerHTML = `
-
-            <div class="empty-state">
-
-                Unable to load distribution requests.
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    if (
-        !data ||
-        data.length === 0
-    ) {
-
-        list.innerHTML = `
-
-            <div class="empty-state">
-
-                No distribution requests yet.
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    list.innerHTML =
-        data.map(
-            release => {
-
-                const status =
-                    String(
-                        release.status ||
-                        "PENDING"
-                    ).toUpperCase();
-
-
-                let actions = "";
-
-
-                if (
-                    isOwner() &&
-                    status === "PENDING"
-                ) {
-
-                    actions = `
-
-                        <div class="distribution-actions">
-
-                            <button
-                                class="approve-button"
-                                type="button"
-                                onclick="approveRelease('${release.id}')"
-                            >
-                                APPROVE
-                            </button>
-
-                            <button
-                                class="decline-button"
-                                type="button"
-                                onclick="declineRelease('${release.id}')"
-                            >
-                                DECLINE
-                            </button>
-
-                        </div>
-
-                    `;
-
-                }
-
-
-                if (
-                    isOwner() &&
-                    status === "APPROVED"
-                ) {
-
-                    actions = `
-
-                        <div class="distribution-actions">
-
-                            <button
-                                class="takedown-button"
-                                type="button"
-                                onclick="takedownRelease('${release.id}')"
-                            >
-                                TAKE DOWN
-                            </button>
-
-                        </div>
-
-                    `;
-
-                }
-
-
-                return `
-
-                    <div class="distribution-card">
-
-                        <div class="distribution-header">
-
-                            <div class="distribution-title">
-
-                                <h3>
-                                    ${escapeHtml(
-                                        release.title ||
-                                        "Untitled Release"
-                                    )}
-                                </h3>
-
-                                <p>
-                                    ${escapeHtml(
-                                        release.artist ||
-                                        "Unknown Artist"
-                                    )}
-                                </p>
-
-                            </div>
-
-
-                            <div
-                                class="status ${status.toLowerCase().replaceAll("_", "-")}"
-                            >
-                                ${escapeHtml(
-                                    status
-                                )}
-                            </div>
-
-                        </div>
-
-
-                        <div class="distribution-meta">
-
-                            <div class="distribution-meta-item">
-
-                                <span>
-                                    RELEASE TYPE
-                                </span>
-
-                                <strong>
-                                    ${escapeHtml(
-                                        release.release_type ||
-                                        "Release"
-                                    )}
-                                </strong>
-
-                            </div>
-
-
-                            <div class="distribution-meta-item">
-
-                                <span>
-                                    RELEASE DATE
-                                </span>
-
-                                <strong>
-                                    ${escapeHtml(
-                                        release.release_date ||
-                                        "Not set"
-                                    )}
-                                </strong>
-
-                            </div>
-
-
-                            <div class="distribution-meta-item">
-
-                                <span>
-                                    FILE STATUS
-                                </span>
-
-                                <strong>
-                                    ${
-                                        release.audio_path &&
-                                        release.artwork_path
-                                            ? "FILES READY"
-                                            : "FILES MISSING"
-                                    }
-                                </strong>
-
-                            </div>
-
-                        </div>
-
-
-                        ${
-                            release.review_note
-                                ? `
-
-                                    <div class="review-panel">
-
-                                        <h4>
-                                            REVIEW NOTE
-                                        </h4>
-
-                                        <p>
-                                            ${escapeHtml(
-                                                release.review_note
-                                            )}
-                                        </p>
-
-                                    </div>
-
-                                `
-                                : ""
-                        }
-
-
-                        ${actions}
-
-                    </div>
-
-                `;
-
-            }
-        ).join("");
 
 }
 
@@ -1926,9 +941,13 @@ function setupArtistModal() {
     }
 
 
+    // OPEN
+
     openButton?.addEventListener(
         "click",
-        () => {
+        event => {
+
+            event.preventDefault();
 
             clearArtistMessage();
 
@@ -1940,17 +959,21 @@ function setupArtistModal() {
     );
 
 
+    // CLOSE
+
     closeButton?.addEventListener(
         "click",
-        () => {
+        event => {
 
-            modal.classList.add(
-                "hidden"
-            );
+            event.preventDefault();
+
+            closeArtistModal();
 
         }
     );
 
+
+    // CLICK OUTSIDE
 
     modal.addEventListener(
         "click",
@@ -1960,15 +983,34 @@ function setupArtistModal() {
                 event.target === modal
             ) {
 
-                modal.classList.add(
-                    "hidden"
-                );
+                closeArtistModal();
 
             }
 
         }
     );
 
+
+    // ESCAPE
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Escape" &&
+                !modal.classList.contains("hidden")
+            ) {
+
+                closeArtistModal();
+
+            }
+
+        }
+    );
+
+
+    // SUBMIT
 
     form?.addEventListener(
         "submit",
@@ -1982,6 +1024,30 @@ function setupArtistModal() {
             );
 
         }
+    );
+
+}
+
+
+// =========================================
+// CLOSE ARTIST MODAL
+// =========================================
+
+function closeArtistModal() {
+
+    const modal =
+        document.getElementById(
+            "artistModal"
+        );
+
+
+    if (!modal) {
+        return;
+    }
+
+
+    modal.classList.add(
+        "hidden"
     );
 
 }
@@ -2004,20 +1070,45 @@ async function createArtist(
 
     try {
 
-        button.disabled =
-            true;
+        if (!supabaseClient) {
 
-        button.textContent =
-            "CREATING...";
+            throw new Error(
+                "Supabase is not connected."
+            );
+
+        }
+
+
+        if (button) {
+
+            button.disabled = true;
+
+            button.textContent =
+                "CREATING...";
+
+        }
 
 
         clearArtistMessage();
 
 
-        if (!currentUser) {
+        // Check session.
+
+        const {
+            data: userData,
+            error: userError
+        } =
+            await supabaseClient.auth.getUser();
+
+
+        if (
+            userError ||
+            !userData ||
+            !userData.user
+        ) {
 
             throw new Error(
-                "Your session has expired."
+                "Your session has expired. Please sign in again."
             );
 
         }
@@ -2073,6 +1164,8 @@ async function createArtist(
         }
 
 
+        // Your existing invitation system.
+
         const {
             data,
             error
@@ -2103,13 +1196,23 @@ async function createArtist(
 
         if (error) {
 
-            throw error;
+            console.error(
+                "Create artist function error:",
+                error
+            );
+
+
+            throw new Error(
+                error.message ||
+                "Unable to create artist."
+            );
 
         }
 
 
         if (
-            data?.error
+            data &&
+            data.error
         ) {
 
             throw new Error(
@@ -2134,9 +1237,7 @@ async function createArtist(
         setTimeout(
             () => {
 
-                modal.classList.add(
-                    "hidden"
-                );
+                closeArtistModal();
 
                 clearArtistMessage();
 
@@ -2162,11 +1263,14 @@ async function createArtist(
 
     } finally {
 
-        button.disabled =
-            false;
+        if (button) {
 
-        button.textContent =
-            "CREATE ARTIST";
+            button.disabled = false;
+
+            button.textContent =
+                "CREATE ARTIST";
+
+        }
 
     }
 
@@ -2190,115 +1294,129 @@ async function loadArtists() {
     }
 
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-
-            .from("artists")
-
-            .select("*")
-
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        console.error(
-            "Load artists error:",
-            error
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !data ||
-        data.length === 0
-    ) {
+    if (!supabaseClient) {
 
         list.innerHTML = `
-
             <div class="empty-state">
-
-                No artists added yet.
-
-                <br><br>
-
-                Add an artist to begin managing
-                their releases and distribution.
-
+                Supabase is not connected.
             </div>
-
         `;
 
         return;
-
     }
 
 
-    list.innerHTML =
-        data.map(
-            artist => `
+    try {
 
-                <div class="artist-card">
-
-                    <div class="artist-card-info">
-
-                        <div class="artist-avatar">
-
-                            ${escapeHtml(
-                                (
-                                    artist.artist_name ||
-                                    "A"
-                                ).charAt(0).toUpperCase()
-                            )}
-
-                        </div>
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("artists")
+                .select("*")
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                );
 
 
-                        <div>
+        if (error) {
 
-                            <h3>
-                                ${escapeHtml(
-                                    artist.artist_name ||
-                                    "Unnamed Artist"
-                                )}
-                            </h3>
-
-                            <p>
-                                ${escapeHtml(
-                                    artist.email ||
-                                    "No portal email"
-                                )}
-                            </p>
-
-                        </div>
-
-                    </div>
+            console.error(
+                "Load artists error:",
+                error
+            );
 
 
-                    <div class="status">
+            list.innerHTML = `
+                <div class="empty-state">
+                    Unable to load artists.
+                </div>
+            `;
 
-                        ${escapeHtml(
-                            artist.status ||
-                            "ACTIVE"
-                        )}
 
-                    </div>
+            return;
+        }
+
+
+        if (
+            !data ||
+            data.length === 0
+        ) {
+
+            list.innerHTML = `
+
+                <div class="empty-state">
+
+                    No artists added yet.
+
+                    <br><br>
+
+                    Add an artist to begin managing
+                    their releases and distribution.
 
                 </div>
 
-            `
-        ).join("");
+            `;
+
+
+            return;
+        }
+
+
+        list.innerHTML =
+            data
+                .map(
+                    artist => `
+
+                        <div class="list-card">
+
+                            <div>
+
+                                <h3>
+                                    ${escapeHtml(
+                                        artist.artist_name ||
+                                        "Unnamed Artist"
+                                    )}
+                                </h3>
+
+                                <p>
+                                    ${escapeHtml(
+                                        artist.email ||
+                                        "No portal email"
+                                    )}
+                                </p>
+
+                            </div>
+
+
+                            <div class="status">
+
+                                ${escapeHtml(
+                                    artist.status ||
+                                    "ACTIVE"
+                                )}
+
+                            </div>
+
+                        </div>
+
+                    `
+                )
+                .join("");
+
+
+    } catch (error) {
+
+        console.error(
+            "Loading artists failed:",
+            error
+        );
+
+    }
 
 }
 
@@ -2358,51 +1476,9 @@ function clearArtistMessage() {
     message.textContent =
         "";
 
+
     message.style.display =
         "none";
-
-}
-
-
-// =========================================
-// ROLE CHECK
-// =========================================
-
-function isOwner() {
-
-    if (!currentProfile) {
-        return false;
-    }
-
-
-    const role =
-        String(
-            currentProfile.role || ""
-        ).toLowerCase();
-
-
-    return (
-        role === "owner" ||
-        role === "label_manager"
-    );
-
-}
-
-
-// =========================================
-// FILE EXTENSION
-// =========================================
-
-function getExtension(
-    filename
-) {
-
-    return String(
-        filename || ""
-    )
-        .split(".")
-        .pop()
-        .toLowerCase();
 
 }
 
@@ -2419,11 +1495,40 @@ function setupLogout() {
         );
 
 
-    button?.addEventListener(
-        "click",
-        async () => {
+    if (!button) {
+        return;
+    }
 
-            await supabaseClient.auth.signOut();
+
+    button.addEventListener(
+        "click",
+        async event => {
+
+            event.preventDefault();
+
+
+            if (!supabaseClient) {
+
+                window.location.href =
+                    "./index.html";
+
+                return;
+            }
+
+
+            try {
+
+                await supabaseClient.auth.signOut();
+
+            } catch (error) {
+
+                console.error(
+                    "Logout error:",
+                    error
+                );
+
+            }
+
 
             window.location.href =
                 "./index.html";
@@ -2438,7 +1543,9 @@ function setupLogout() {
 // HTML ESCAPE
 // =========================================
 
-function escapeHtml(value) {
+function escapeHtml(
+    value
+) {
 
     return String(value)
 
