@@ -1,597 +1,508 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* =========================================
+   ARTIST MANAGEMENT
+========================================= */
 
-:root {
-    --black: #050505;
-    --dark: #080808;
-    --panel: #0d0d0d;
-    --panel2: #111111;
-    --border: #242424;
-    --white: #ffffff;
-    --gray: #777777;
-}
+.artist-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
 
-html,
-body {
-    width: 100%;
-    min-height: 100%;
-}
-
-body {
-    min-height: 100vh;
-    background: var(--black);
-    color: white;
-    font-family: Arial, Helvetica, sans-serif;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.artist-card-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.artist-avatar {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+
+    border-radius: 50%;
+    background: #151515;
+    border: 1px solid #292929;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #777;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.artist-card h3 {
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.artist-card p {
+    color: #555;
+    font-size: 9px;
+}
+
+.artist-actions {
+    display: flex;
+    gap: 8px;
 }
 
 
 /* =========================================
-   SIDEBAR
+   SECONDARY BUTTON
 ========================================= */
 
-.sidebar {
-    width: 230px;
-    min-width: 230px;
-    min-height: 100vh;
-
-    background: #080808;
-
-    border-right: 1px solid var(--border);
-
-    padding: 30px 20px;
-
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar-brand {
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: 4px;
-}
-
-.portal-label {
-    margin-top: 8px;
-    margin-bottom: 45px;
-
-    color: #444;
-
-    font-size: 7px;
-    letter-spacing: 1.5px;
-
-    line-height: 1.5;
-}
-
-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.nav-item {
-    width: 100%;
-
-    padding: 13px 14px;
-
-    background: transparent;
-
-    border: 1px solid transparent;
+.secondary-button {
+    border: 1px solid #292929;
     border-radius: 7px;
 
-    color: #666;
+    background: #111;
+    color: #777;
 
-    text-align: left;
+    padding: 10px 13px;
 
-    font-size: 9px;
+    font-size: 8px;
+    font-weight: 700;
     letter-spacing: 1px;
 
     cursor: pointer;
 }
 
-.nav-item:hover {
+.secondary-button:hover {
     color: white;
-    background: #101010;
-}
-
-.nav-item.active {
-    color: white;
+    border-color: #555;
     background: #151515;
-    border-color: #242424;
 }
 
-.sidebar-bottom {
-    margin-top: auto;
+
+/* =========================================
+   DISTRIBUTION REQUESTS
+========================================= */
+
+.distribution-card {
+    background: var(--panel);
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
 }
 
-.logout-button {
-    width: 100%;
+.distribution-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.distribution-title h3 {
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.distribution-title p {
+    color: #555;
+    font-size: 9px;
+}
+
+.distribution-meta {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 10px;
+}
+
+.distribution-meta-item {
+    background: #090909;
+
+    border: 1px solid #202020;
+    border-radius: 8px;
 
     padding: 12px;
+}
 
-    background: transparent;
+.distribution-meta-item span {
+    display: block;
 
-    border: 1px solid #242424;
+    color: #444;
+
+    font-size: 7px;
+    letter-spacing: 1px;
+
+    margin-bottom: 7px;
+}
+
+.distribution-meta-item strong {
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.distribution-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 5px;
+}
+
+
+/* =========================================
+   APPROVE / DECLINE / TAKE DOWN
+========================================= */
+
+.approve-button,
+.decline-button,
+.takedown-button {
     border-radius: 7px;
 
-    color: #777;
+    padding: 10px 14px;
 
     font-size: 8px;
-    letter-spacing: 1.5px;
+    font-weight: 800;
+    letter-spacing: 1px;
 
     cursor: pointer;
 }
 
-.logout-button:hover {
+.approve-button {
+    background: white;
+    color: black;
+    border: 1px solid white;
+}
+
+.approve-button:hover {
+    background: #ddd;
+}
+
+.decline-button,
+.takedown-button {
+    background: transparent;
+    color: #777;
+    border: 1px solid #292929;
+}
+
+.decline-button:hover,
+.takedown-button:hover {
     color: white;
     border-color: #555;
 }
 
 
 /* =========================================
-   DASHBOARD
+   RELEASE SUBMISSION FORM
 ========================================= */
 
-.dashboard {
-    flex: 1;
-    min-width: 0;
-
-    padding: 45px;
-}
-
-.dashboard-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-
-    margin-bottom: 40px;
-}
-
-.dashboard-header h1 {
-    font-size: 32px;
-    letter-spacing: -1px;
-}
-
-.eyebrow {
-    color: #555;
-
-    font-size: 8px;
-    font-weight: 700;
-
-    letter-spacing: 2px;
-
-    margin-bottom: 10px;
-}
-
-.user-area {
-    color: #666;
-    font-size: 9px;
-}
-
-
-/* =========================================
-   SECTIONS
-========================================= */
-
-.dashboard-section {
-    display: none;
-}
-
-.dashboard-section.active-section {
-    display: block;
-}
-
-
-/* =========================================
-   WELCOME
-========================================= */
-
-.welcome-card {
-    padding: 35px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #111111,
-            #090909
-        );
+.release-form-section {
+    background: var(--panel);
 
     border: 1px solid var(--border);
+    border-radius: 12px;
 
-    border-radius: 16px;
+    padding: 25px;
 
     margin-bottom: 20px;
 }
 
-.welcome-card h2 {
-    font-size: 25px;
-    margin-bottom: 10px;
-}
-
-.welcome-card p {
-    color: #666;
-    font-size: 11px;
+.release-form-section h3 {
+    font-size: 13px;
+    margin-bottom: 18px;
 }
 
 
 /* =========================================
-   STATS
+   FILE UPLOAD
 ========================================= */
 
-.stats-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    gap: 15px;
-
-    margin-bottom: 30px;
+.file-upload-wrapper {
+    margin-bottom: 18px;
 }
 
-.stat-card {
-    min-height: 120px;
-
-    background: var(--panel);
-
-    border: 1px solid var(--border);
-
-    border-radius: 12px;
-
-    padding: 25px;
-}
-
-.stat-card span {
+.file-upload-wrapper label {
     display: block;
 
-    color: #555;
+    color: #666;
 
     font-size: 8px;
-
+    font-weight: 700;
     letter-spacing: 1.5px;
 
-    margin-bottom: 15px;
+    margin-bottom: 7px;
 }
 
-.stat-card strong {
-    font-size: 28px;
-}
+.file-upload {
+    width: 100%;
 
+    padding: 15px;
 
-/* =========================================
-   SECTION HEADER
-========================================= */
+    background: #080808;
 
-.section-header {
-    display: flex;
+    color: #777;
 
-    align-items: center;
-
-    justify-content: space-between;
-
-    margin-bottom: 25px;
-}
-
-.section-header h2 {
-    font-size: 25px;
-}
-
-
-/* =========================================
-   BUTTONS
-========================================= */
-
-.primary-button {
-    border: none;
-
-    border-radius: 7px;
-
-    background: white;
-
-    color: black;
-
-    padding: 12px 17px;
-
-    font-size: 8px;
-
-    font-weight: 800;
-
-    letter-spacing: 1.5px;
+    border: 1px dashed #292929;
+    border-radius: 8px;
 
     cursor: pointer;
-}
-
-.primary-button:hover {
-    background: #ddd;
-}
-
-.primary-button.full {
-    width: 100%;
-    margin-top: 15px;
-}
-
-
-/* =========================================
-   CARDS
-========================================= */
-
-.card-list {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 10px;
-}
-
-.list-card {
-    background: var(--panel);
-
-    border: 1px solid var(--border);
-
-    border-radius: 10px;
-
-    padding: 18px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-}
-
-.list-card h3 {
-    font-size: 12px;
-
-    margin-bottom: 5px;
-}
-
-.list-card p {
-    color: #555;
 
     font-size: 9px;
 }
 
-.status {
-    font-size: 7px;
-
-    letter-spacing: 1px;
-
-    color: #777;
-
-    border: 1px solid #292929;
-
-    padding: 7px 9px;
-
-    border-radius: 5px;
+.file-upload:hover {
+    border-color: #555;
+    color: white;
 }
 
-.empty-state {
-    border: 1px dashed #242424;
-
-    border-radius: 10px;
-
-    padding: 40px;
-
-    text-align: center;
-
+.file-help {
     color: #444;
 
-    font-size: 10px;
+    font-size: 8px;
+
+    line-height: 1.5;
+
+    margin-top: 7px;
 }
 
 
 /* =========================================
-   MODAL
+   TRACK LIST
 ========================================= */
 
-.modal {
-    position: fixed;
+.track-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 
-    inset: 0;
+    margin-top: 10px;
+}
 
-    z-index: 1000;
+.track-item {
+    background: #090909;
 
-    background:
-        rgba(
-            0,
-            0,
-            0,
-            0.8
-        );
+    border: 1px solid #202020;
+    border-radius: 8px;
+
+    padding: 12px;
 
     display: flex;
 
     align-items: center;
+    justify-content: space-between;
 
-    justify-content: center;
-
-    padding: 20px;
+    gap: 15px;
 }
 
-.modal.hidden {
-    display: none;
+.track-info {
+    min-width: 0;
 }
 
-.modal-box {
-    width: 430px;
+.track-info strong {
+    display: block;
 
-    max-width: 100%;
+    font-size: 10px;
 
-    background: #0d0d0d;
-
-    border: 1px solid #292929;
-
-    border-radius: 15px;
-
-    padding: 30px;
-
-    position: relative;
+    margin-bottom: 4px;
 }
 
-.modal-box h2 {
-    margin-bottom: 25px;
+.track-info span {
+    color: #555;
+    font-size: 8px;
 }
 
-.modal-close {
-    position: absolute;
-
-    right: 18px;
-    top: 15px;
-
-    background: none;
+.remove-track {
+    background: transparent;
 
     border: none;
 
     color: #555;
 
-    font-size: 24px;
+    font-size: 18px;
 
     cursor: pointer;
 }
 
-.modal-close:hover {
+.remove-track:hover {
     color: white;
-}
-
-.modal-box form {
-    display: flex;
-
-    flex-direction: column;
-}
-
-.modal-box label {
-    color: #666;
-
-    font-size: 8px;
-
-    font-weight: 700;
-
-    letter-spacing: 1.5px;
-
-    margin-bottom: 6px;
-}
-
-.modal-box input,
-.modal-box textarea,
-.modal-box select {
-    width: 100%;
-
-    background: #080808;
-
-    color: white;
-
-    border: 1px solid #252525;
-
-    border-radius: 7px;
-
-    padding: 12px;
-
-    margin-bottom: 17px;
-
-    outline: none;
-
-    font-size: 10px;
-}
-
-.modal-box textarea {
-    min-height: 90px;
-
-    resize: vertical;
-}
-
-.modal-box input:focus,
-.modal-box textarea:focus,
-.modal-box select:focus {
-    border-color: #666;
 }
 
 
 /* =========================================
-   MOBILE
+   ARTWORK PREVIEW
+========================================= */
+
+.artwork-preview {
+    width: 150px;
+    height: 150px;
+
+    object-fit: cover;
+
+    border-radius: 8px;
+
+    border: 1px solid #292929;
+
+    display: none;
+
+    margin-top: 10px;
+}
+
+.artwork-preview.visible {
+    display: block;
+}
+
+
+/* =========================================
+   FORM MESSAGE
+========================================= */
+
+.form-message {
+    display: none;
+
+    padding: 10px;
+
+    background: #101010;
+
+    border: 1px solid #292929;
+    border-radius: 7px;
+
+    color: #aaa;
+
+    font-size: 9px;
+
+    line-height: 1.5;
+
+    margin-bottom: 10px;
+}
+
+.form-message.visible {
+    display: block;
+}
+
+
+/* =========================================
+   DISTRIBUTION STATUS
+========================================= */
+
+.status.pending {
+    color: #aaa;
+}
+
+.status.approved {
+    color: white;
+    border-color: #555;
+}
+
+.status.declined {
+    color: #666;
+}
+
+.status.taken-down {
+    color: #777;
+    border-color: #444;
+}
+
+
+/* =========================================
+   OWNER REVIEW
+========================================= */
+
+.review-panel {
+    background: #090909;
+
+    border: 1px solid #202020;
+    border-radius: 10px;
+
+    padding: 18px;
+
+    margin-top: 10px;
+}
+
+.review-panel h4 {
+    font-size: 10px;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 12px;
+}
+
+.review-info {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 10px;
+}
+
+.review-info div {
+    padding: 10px;
+
+    background: #0d0d0d;
+
+    border: 1px solid #202020;
+
+    border-radius: 7px;
+}
+
+.review-info span {
+    display: block;
+
+    color: #444;
+
+    font-size: 7px;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 5px;
+}
+
+.review-info strong {
+    font-size: 9px;
+}
+
+
+/* =========================================
+   RESPONSIVE DISTRIBUTION
 ========================================= */
 
 @media (max-width: 700px) {
 
-    body {
-        display: block;
+    .artist-card {
+        align-items: flex-start;
+        flex-direction: column;
     }
 
-    .sidebar {
+    .artist-actions {
         width: 100%;
-        min-width: 0;
-        min-height: auto;
-
-        padding: 20px;
     }
 
-    .portal-label {
-        margin-bottom: 15px;
+    .artist-actions button {
+        flex: 1;
     }
 
-    nav {
-        flex-direction: row;
-
-        overflow-x: auto;
+    .distribution-header {
+        flex-direction: column;
     }
 
-    .nav-item {
-        width: auto;
-
-        white-space: nowrap;
-    }
-
-    .sidebar-bottom {
-        display: none;
-    }
-
-    .dashboard {
-        padding: 25px 20px;
-    }
-
-    .stats-grid {
+    .distribution-meta {
         grid-template-columns: 1fr;
     }
 
-    .dashboard-header {
-        display: block;
+    .distribution-actions {
+        flex-direction: column;
     }
 
-    .user-area {
-        margin-top: 10px;
+    .distribution-actions button {
+        width: 100%;
     }
 
-    .list-card {
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-}
-
-
-/* =========================================
-   SMALL PHONES
-========================================= */
-
-@media (max-width: 430px) {
-
-    .dashboard {
-        padding: 20px 15px;
-    }
-
-    .welcome-card {
-        padding: 25px;
-    }
-
-    .section-header {
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-    .section-header h2 {
-        font-size: 21px;
+    .review-info {
+        grid-template-columns: 1fr;
     }
 
 }
