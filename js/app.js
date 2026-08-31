@@ -78,7 +78,14 @@ const forgotPassword =
 
 let progress = 0;
 
+let loadingFinished = false;
+
+
 const loadingInterval = setInterval(() => {
+
+    if (loadingFinished) {
+        return;
+    }
 
     progress += Math.random() * 12;
 
@@ -87,7 +94,10 @@ const loadingInterval = setInterval(() => {
     }
 
     if (loadingProgress) {
-        loadingProgress.style.width = `${progress}%`;
+
+        loadingProgress.style.width =
+            `${progress}%`;
+
     }
 
 }, 150);
@@ -99,20 +109,42 @@ const loadingInterval = setInterval(() => {
 
 function finishLoading() {
 
-    clearInterval(loadingInterval);
+    if (loadingFinished) {
+        return;
+    }
+
+    loadingFinished = true;
+
+    clearInterval(
+        loadingInterval
+    );
+
 
     if (loadingProgress) {
-        loadingProgress.style.width = "100%";
+
+        loadingProgress.style.width =
+            "100%";
+
     }
+
 
     setTimeout(() => {
 
         if (loadingScreen) {
-            loadingScreen.classList.add("fade-out");
+
+            loadingScreen.classList.add(
+                "fade-out"
+            );
+
         }
 
+
         if (loginPage) {
-            loginPage.classList.add("ready");
+
+            loginPage.classList.add(
+                "ready"
+            );
+
         }
 
     }, 300);
@@ -121,27 +153,71 @@ function finishLoading() {
 
 
 /* =========================================================
-   SLOW MESSAGE
+   START WEBSITE
 ========================================================= */
+
+/*
+    IMPORTANT:
+
+    We do NOT wait for window "load".
+
+    External resources such as Supabase,
+    fonts, images, etc. can cause that event
+    to take too long.
+
+    DOMContentLoaded is enough to display
+    the login page.
+*/
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        setTimeout(() => {
+
+            finishLoading();
+
+        }, 500);
+
+    }
+);
+
+
+/* =========================================================
+   SAFETY FALLBACK
+========================================================= */
+
+/*
+    If something unexpected happens,
+    never leave the user stuck on the
+    loading screen forever.
+*/
 
 setTimeout(() => {
 
-    if (slowMessage) {
-        slowMessage.classList.add("show");
-    }
+    finishLoading();
 
 }, 5000);
 
 
 /* =========================================================
-   START WEBSITE
+   SLOW MESSAGE
 ========================================================= */
 
-window.addEventListener("load", () => {
+setTimeout(() => {
 
-    finishLoading();
+    if (
+        !loadingFinished &&
+        slowMessage
+    ) {
 
-});
+        slowMessage.classList.add(
+            "show"
+        );
+
+    }
+
+}, 3000);
 
 
 /* =========================================================
@@ -154,6 +230,7 @@ if (!supabaseClient) {
         "VoidRecords: Supabase failed to initialize."
     );
 
+
     if (loginMessage) {
 
         loginMessage.textContent =
@@ -165,16 +242,20 @@ if (!supabaseClient) {
 
 
 /* =========================================================
-   SHOW MESSAGE
+   SHOW LOGIN MESSAGE
 ========================================================= */
 
-function showLoginMessage(message) {
+function showLoginMessage(
+    message
+) {
 
     if (!loginMessage) {
         return;
     }
 
-    loginMessage.textContent = message;
+
+    loginMessage.textContent =
+        message;
 
 }
 
@@ -193,7 +274,7 @@ if (loginForm) {
 
 
             /* -----------------------------------------
-               Check connection
+               CHECK CONNECTION
             ----------------------------------------- */
 
             if (!supabaseClient) {
@@ -208,7 +289,7 @@ if (loginForm) {
 
 
             /* -----------------------------------------
-               Get form values
+               GET FORM VALUES
             ----------------------------------------- */
 
             const email =
@@ -217,6 +298,7 @@ if (loginForm) {
                     .value
                     .trim();
 
+
             const password =
                 document
                     .getElementById("password")
@@ -224,10 +306,13 @@ if (loginForm) {
 
 
             /* -----------------------------------------
-               Validate
+               VALIDATE
             ----------------------------------------- */
 
-            if (!email || !password) {
+            if (
+                !email ||
+                !password
+            ) {
 
                 showLoginMessage(
                     "Please enter your email and password."
@@ -239,94 +324,172 @@ if (loginForm) {
 
 
             /* -----------------------------------------
-               Loading state
+               LOADING STATE
             ----------------------------------------- */
 
             if (loginButton) {
-                loginButton.disabled = true;
+
+                loginButton.disabled =
+                    true;
+
             }
+
 
             if (loginButtonText) {
-                loginButtonText.textContent = "SIGNING IN";
+
+                loginButtonText.textContent =
+                    "SIGNING IN";
+
             }
 
+
             if (loginArrow) {
-                loginArrow.textContent = "…";
+
+                loginArrow.textContent =
+                    "…";
+
             }
+
 
             showLoginMessage("");
 
 
             /* -----------------------------------------
-               Supabase authentication
+               SUPABASE AUTHENTICATION
             ----------------------------------------- */
 
-            const {
-                data,
-                error
-            } =
-                await supabaseClient.auth.signInWithPassword({
+            try {
 
-                    email: email,
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.auth.signInWithPassword({
 
-                    password: password
+                        email:
+                            email,
 
-                });
+                        password:
+                            password
+
+                    });
 
 
-            /* -----------------------------------------
-               Login failed
-            ----------------------------------------- */
+                /* -----------------------------------------
+                   LOGIN FAILED
+                ----------------------------------------- */
 
-            if (error) {
+                if (error) {
+
+                    console.error(
+                        "VoidRecords login error:",
+                        error
+                    );
+
+
+                    showLoginMessage(
+                        error.message
+                    );
+
+
+                    if (loginButton) {
+
+                        loginButton.disabled =
+                            false;
+
+                    }
+
+
+                    if (loginButtonText) {
+
+                        loginButtonText.textContent =
+                            "SIGN IN";
+
+                    }
+
+
+                    if (loginArrow) {
+
+                        loginArrow.textContent =
+                            "→";
+
+                    }
+
+
+                    return;
+
+                }
+
+
+                /* -----------------------------------------
+                   LOGIN SUCCESSFUL
+                ----------------------------------------- */
+
+                if (
+                    data &&
+                    data.session
+                ) {
+
+                    if (loginButtonText) {
+
+                        loginButtonText.textContent =
+                            "SUCCESS";
+
+                    }
+
+
+                    if (loginArrow) {
+
+                        loginArrow.textContent =
+                            "✓";
+
+                    }
+
+
+                    /*
+                        Send user to dashboard.
+                    */
+
+                    window.location.href =
+                        "./dashboard.html";
+
+                }
+
+            } catch (error) {
 
                 console.error(
-                    "VoidRecords login error:",
+                    "VoidRecords authentication error:",
                     error
                 );
 
+
                 showLoginMessage(
-                    error.message
+                    "Unable to connect to the login system."
                 );
 
+
                 if (loginButton) {
-                    loginButton.disabled = false;
+
+                    loginButton.disabled =
+                        false;
+
                 }
+
 
                 if (loginButtonText) {
-                    loginButtonText.textContent = "SIGN IN";
+
+                    loginButtonText.textContent =
+                        "SIGN IN";
+
                 }
+
 
                 if (loginArrow) {
-                    loginArrow.textContent = "→";
+
+                    loginArrow.textContent =
+                        "→";
+
                 }
-
-                return;
-
-            }
-
-
-            /* -----------------------------------------
-               Login successful
-            ----------------------------------------- */
-
-            if (data && data.session) {
-
-                if (loginButtonText) {
-                    loginButtonText.textContent = "SUCCESS";
-                }
-
-                if (loginArrow) {
-                    loginArrow.textContent = "✓";
-                }
-
-
-                /*
-                 * Send the user to the dashboard.
-                 */
-
-                window.location.href =
-                    "./dashboard.html";
 
             }
 
@@ -378,33 +541,53 @@ if (forgotPassword) {
             }
 
 
-            const {
-                error
-            } =
-                await supabaseClient.auth.resetPasswordForEmail(
-                    email,
-                    {
-                        redirectTo:
-                            window.location.origin +
-                            "/reset-password.html"
-                    }
-                );
+            try {
+
+                const {
+                    error
+                } =
+                    await supabaseClient.auth
+                        .resetPasswordForEmail(
+                            email,
+                            {
+
+                                redirectTo:
+                                    window.location.origin +
+                                    "/reset-password.html"
+
+                            }
+                        );
 
 
-            if (error) {
+                if (error) {
+
+                    showLoginMessage(
+                        error.message
+                    );
+
+                    return;
+
+                }
+
 
                 showLoginMessage(
-                    error.message
+                    "Password reset email sent."
                 );
 
-                return;
+
+            } catch (error) {
+
+                console.error(
+                    "Password reset error:",
+                    error
+                );
+
+
+                showLoginMessage(
+                    "Unable to send password reset email."
+                );
 
             }
-
-
-            showLoginMessage(
-                "Password reset email sent."
-            );
 
         }
     );
