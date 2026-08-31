@@ -1,5 +1,5 @@
 // =========================================
-// VOIDRECORDS DASHBOARD
+// VOIDRECORDS OWNER / A&R DASHBOARD
 // =========================================
 
 
@@ -8,13 +8,14 @@
 // =========================================
 
 const SUPABASE_URL =
-    "YOUR_SUPABASE_PROJECT_URL";
+    "https://kttpyshyutdmxhcqekxh.supabase.co/rest/v1/";
 
 const SUPABASE_PUBLISHABLE_KEY =
-    "YOUR_SUPABASE_PUBLISHABLE_KEY";
-
+    "sb_publishable_W-r75b5qVPiikM20aF8NwA_I4h5lhau";
 
 let supabaseClient = null;
+let currentUser = null;
+let currentProfile = null;
 
 
 // =========================================
@@ -25,31 +26,11 @@ document.addEventListener(
     "DOMContentLoaded",
     async () => {
 
-        console.log(
-            "VoidRecords dashboard starting..."
-        );
-
-
-        // Always enable the interface first.
-
         setupNavigation();
-
-        setupReleaseModal();
-
         setupArtistModal();
-
         setupLogout();
 
-
-        // Check Supabase library.
-
-        if (
-            !window.supabase
-        ) {
-
-            console.error(
-                "Supabase JavaScript library did not load."
-            );
+        if (!window.supabase) {
 
             setUserMessage(
                 "Supabase library failed to load."
@@ -58,9 +39,6 @@ document.addEventListener(
             return;
 
         }
-
-
-        // Create Supabase client.
 
         try {
 
@@ -72,10 +50,7 @@ document.addEventListener(
 
         } catch (error) {
 
-            console.error(
-                "Supabase initialization failed:",
-                error
-            );
+            console.error(error);
 
             setUserMessage(
                 "Supabase configuration error."
@@ -85,24 +60,15 @@ document.addEventListener(
 
         }
 
-
-        // Authenticate.
-
         const loggedIn =
             await loadUser();
-
 
         if (!loggedIn) {
             return;
         }
 
-
-        // Load dashboard data.
-
         await loadReleaseCount();
-
-        await loadReleases();
-
+        await loadReleaseInbox();
         await loadArtists();
 
     }
@@ -115,11 +81,6 @@ document.addEventListener(
 
 async function loadUser() {
 
-    if (!supabaseClient) {
-        return false;
-    }
-
-
     try {
 
         const {
@@ -128,17 +89,11 @@ async function loadUser() {
         } =
             await supabaseClient.auth.getUser();
 
-
         if (
             error ||
             !data ||
             !data.user
         ) {
-
-            console.error(
-                "Authentication error:",
-                error
-            );
 
             window.location.href =
                 "./index.html";
@@ -146,6 +101,40 @@ async function loadUser() {
             return false;
 
         }
+
+        currentUser =
+            data.user;
+
+
+        const {
+            data: profile,
+            error: profileError
+        } =
+            await supabaseClient
+                .from("profiles")
+                .select("*")
+                .eq("id", currentUser.id)
+                .single();
+
+
+        if (profileError) {
+
+            console.error(
+                "Profile error:",
+                profileError
+            );
+
+            setUserMessage(
+                "Profile could not be loaded."
+            );
+
+            return false;
+
+        }
+
+
+        currentProfile =
+            profile;
 
 
         const userEmail =
@@ -157,7 +146,40 @@ async function loadUser() {
         if (userEmail) {
 
             userEmail.textContent =
-                data.user.email || "ACCOUNT";
+                currentUser.email ||
+                "ACCOUNT";
+
+        }
+
+
+        /*
+         * This dashboard is only for Owner/A&R.
+         */
+
+        if (
+            profile.role !== "owner" &&
+            profile.role !== "ar"
+        ) {
+
+            if (profile.role === "artist") {
+
+                window.location.href =
+                    "./artist/dashboard.html";
+
+                return false;
+
+            }
+
+            alert(
+                "You do not have permission to access this dashboard."
+            );
+
+            await supabaseClient.auth.signOut();
+
+            window.location.href =
+                "./index.html";
+
+            return false;
 
         }
 
@@ -192,7 +214,6 @@ function setupNavigation() {
             ".nav-item"
         );
 
-
     const sections =
         document.querySelectorAll(
             ".dashboard-section"
@@ -204,7 +225,7 @@ function setupNavigation() {
 
             button.addEventListener(
                 "click",
-                () => {
+                async () => {
 
                     const target =
                         button.dataset.section;
@@ -237,17 +258,35 @@ function setupNavigation() {
                     );
 
 
-                    const targetSection =
+                    const section =
                         document.getElementById(
                             target
                         );
 
 
-                    if (targetSection) {
+                    if (section) {
 
-                        targetSection.classList.add(
+                        section.classList.add(
                             "active-section"
                         );
+
+                    }
+
+
+                    if (
+                        target === "releases"
+                    ) {
+
+                        await loadReleaseInbox();
+
+                    }
+
+
+                    if (
+                        target === "artists"
+                    ) {
+
+                        await loadArtists();
 
                     }
 
@@ -255,234 +294,6 @@ function setupNavigation() {
             );
 
         }
-    );
-
-}
-
-
-// =========================================
-// RELEASE MODAL
-// =========================================
-
-function setupReleaseModal() {
-
-    const modal =
-        document.getElementById(
-            "releaseModal"
-        );
-
-
-    const openButton =
-        document.getElementById(
-            "createReleaseButton"
-        );
-
-
-    const closeButton =
-        document.getElementById(
-            "closeReleaseModal"
-        );
-
-
-    const form =
-        document.getElementById(
-            "releaseForm"
-        );
-
-
-    if (!modal) {
-        return;
-    }
-
-
-    openButton?.addEventListener(
-        "click",
-        () => {
-
-            modal.classList.remove(
-                "hidden"
-            );
-
-        }
-    );
-
-
-    closeButton?.addEventListener(
-        "click",
-        () => {
-
-            modal.classList.add(
-                "hidden"
-            );
-
-        }
-    );
-
-
-    modal.addEventListener(
-        "click",
-        event => {
-
-            if (
-                event.target === modal
-            ) {
-
-                modal.classList.add(
-                    "hidden"
-                );
-
-            }
-
-        }
-    );
-
-
-    form?.addEventListener(
-        "submit",
-        async event => {
-
-            event.preventDefault();
-
-            await createRelease(
-                form,
-                modal
-            );
-
-        }
-    );
-
-}
-
-
-// =========================================
-// CREATE RELEASE
-// =========================================
-
-async function createRelease(
-    form,
-    modal
-) {
-
-    if (!supabaseClient) {
-        return;
-    }
-
-
-    const {
-        data: userData,
-        error: userError
-    } =
-        await supabaseClient.auth.getUser();
-
-
-    if (
-        userError ||
-        !userData ||
-        !userData.user
-    ) {
-
-        alert(
-            "Your session has expired. Please sign in again."
-        );
-
-        window.location.href =
-            "./index.html";
-
-        return;
-
-    }
-
-
-    const formData =
-        new FormData(form);
-
-
-    const release = {
-
-        user_id:
-            userData.user.id,
-
-        title:
-            String(
-                formData.get("title") || ""
-            ).trim(),
-
-        artist:
-            String(
-                formData.get("artist") || ""
-            ).trim(),
-
-        release_type:
-            formData.get("release_type"),
-
-        release_date:
-            formData.get("release_date"),
-
-        description:
-            String(
-                formData.get("description") || ""
-            ).trim(),
-
-        status:
-            "DRAFT"
-
-    };
-
-
-    if (
-        !release.title ||
-        !release.artist ||
-        !release.release_date
-    ) {
-
-        alert(
-            "Please complete the required fields."
-        );
-
-        return;
-
-    }
-
-
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("releases")
-            .insert(release);
-
-
-    if (error) {
-
-        console.error(
-            "Create release error:",
-            error
-        );
-
-        alert(
-            "Unable to create release:\n\n" +
-            error.message
-        );
-
-        return;
-
-    }
-
-
-    form.reset();
-
-    modal.classList.add(
-        "hidden"
-    );
-
-
-    await loadReleaseCount();
-
-    await loadReleases();
-
-
-    alert(
-        "Release created successfully."
     );
 
 }
@@ -506,7 +317,7 @@ async function loadReleaseCount() {
         await supabaseClient
             .from("releases")
             .select(
-                "*",
+                "id",
                 {
                     count: "exact",
                     head: true
@@ -543,15 +354,10 @@ async function loadReleaseCount() {
 
 
 // =========================================
-// LOAD RELEASES
+// RELEASE INBOX
 // =========================================
 
-async function loadReleases() {
-
-    if (!supabaseClient) {
-        return;
-    }
-
+async function loadReleaseInbox() {
 
     const list =
         document.getElementById(
@@ -564,57 +370,136 @@ async function loadReleases() {
     }
 
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("releases")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
+    list.innerHTML = `
+        <div class="empty-state">
+            Loading releases...
+        </div>
+    `;
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("releases")
+                .select(`
+                    *,
+                    artist_profile:profiles!releases_artist_id_fkey(
+                        id,
+                        artist_name,
+                        first_name,
+                        last_name,
+                        email
+                    )
+                `)
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                );
+
+
+        if (error) {
+
+            /*
+             * If the foreign-key relationship has a
+             * different generated name, fall back to
+             * loading releases normally.
+             */
+
+            console.warn(
+                "Relationship query failed:",
+                error
             );
 
 
-    if (error) {
+            const fallback =
+                await supabaseClient
+                    .from("releases")
+                    .select("*")
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
+                    );
+
+
+            if (fallback.error) {
+
+                throw fallback.error;
+
+            }
+
+
+            renderReleaseInbox(
+                fallback.data || []
+            );
+
+            return;
+
+        }
+
+
+        renderReleaseInbox(
+            data || []
+        );
+
+    } catch (error) {
 
         console.error(
-            "Load releases error:",
+            "Release inbox error:",
             error
         );
+
 
         list.innerHTML = `
             <div class="empty-state">
                 Unable to load releases.
+                <br><br>
+                ${escapeHtml(
+                    error.message || ""
+                )}
             </div>
         `;
 
-        return;
+    }
 
+}
+
+
+// =========================================
+// RENDER RELEASE INBOX
+// =========================================
+
+function renderReleaseInbox(
+    releases
+) {
+
+    const list =
+        document.getElementById(
+            "releaseList"
+        );
+
+
+    if (!list) {
+        return;
     }
 
 
     if (
-        !data ||
-        data.length === 0
+        !releases ||
+        releases.length === 0
     ) {
 
         list.innerHTML = `
-
             <div class="empty-state">
-
-                No releases yet.
-
-                <br><br>
-
-                Create your first release to
-                begin building your catalog.
-
+                No releases have been submitted yet.
             </div>
-
         `;
 
         return;
@@ -623,51 +508,812 @@ async function loadReleases() {
 
 
     list.innerHTML =
-        data.map(
-            release => `
+        releases.map(
+            release => {
 
-                <div class="list-card">
+                const artist =
+                    release.artist_profile;
 
-                    <div>
 
-                        <h3>
-                            ${escapeHtml(
-                                release.title ||
-                                "Untitled Release"
-                            )}
-                        </h3>
+                const artistName =
+                    artist?.artist_name ||
+                    release.artist ||
+                    "Unknown Artist";
 
-                        <p>
 
-                            ${escapeHtml(
-                                release.artist ||
-                                "Unknown Artist"
-                            )}
+                const status =
+                    String(
+                        release.status ||
+                        "DRAFT"
+                    ).toUpperCase();
 
-                            ·
 
-                            ${escapeHtml(
-                                release.release_type ||
-                                "Release"
-                            )}
+                const date =
+                    release.created_at
+                        ? new Date(
+                            release.created_at
+                        ).toLocaleDateString()
+                        : "";
 
-                        </p>
+
+                return `
+
+                    <div
+                        class="list-card release-card"
+                        data-release-id="${escapeHtml(
+                            release.id
+                        )}"
+                    >
+
+                        <div>
+
+                            <h3>
+                                ${escapeHtml(
+                                    release.title ||
+                                    "Untitled Release"
+                                )}
+                            </h3>
+
+                            <p>
+                                ${escapeHtml(
+                                    artistName
+                                )}
+
+                                ·
+
+                                ${escapeHtml(
+                                    release.release_type ||
+                                    "Release"
+                                )}
+
+                                ${date
+                                    ? ` · ${escapeHtml(date)}`
+                                    : ""
+                                }
+                            </p>
+
+                        </div>
+
+
+                        <div class="release-card-right">
+
+                            <div class="status">
+                                ${escapeHtml(status)}
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="secondary-button"
+                                onclick="openRelease(
+                                    '${escapeHtml(release.id)}'
+                                )"
+                            >
+                                VIEW
+                            </button>
+
+                        </div>
 
                     </div>
 
-                    <div class="status">
+                `;
 
+            }
+        ).join("");
+
+}
+
+
+// =========================================
+// OPEN RELEASE
+// =========================================
+
+async function openRelease(
+    releaseId
+) {
+
+    try {
+
+        const {
+            data: release,
+            error
+        } =
+            await supabaseClient
+                .from("releases")
+                .select("*")
+                .eq("id", releaseId)
+                .single();
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        const {
+            data: tracks,
+            error: tracksError
+        } =
+            await supabaseClient
+                .from("tracks")
+                .select("*")
+                .eq(
+                    "release_id",
+                    releaseId
+                )
+                .order(
+                    "track_number",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+        if (tracksError) {
+            throw tracksError;
+        }
+
+
+        const {
+            data: artwork
+        } =
+            await supabaseClient
+                .from("release_artwork")
+                .select("*")
+                .eq(
+                    "release_id",
+                    releaseId
+                )
+                .limit(1);
+
+
+        showReleaseDetails(
+            release,
+            tracks || [],
+            artwork?.[0] || null
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Open release error:",
+            error
+        );
+
+        alert(
+            "Unable to open release:\n\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+// =========================================
+// RELEASE DETAILS
+// =========================================
+
+function showReleaseDetails(
+    release,
+    tracks,
+    artwork
+) {
+
+    let modal =
+        document.getElementById(
+            "releaseDetailsModal"
+        );
+
+
+    if (!modal) {
+
+        modal =
+            document.createElement(
+                "div"
+            );
+
+        modal.id =
+            "releaseDetailsModal";
+
+        modal.className =
+            "modal";
+
+
+        document.body.appendChild(
+            modal
+        );
+
+    }
+
+
+    const status =
+        String(
+            release.status ||
+            "DRAFT"
+        ).toUpperCase();
+
+
+    const trackHTML =
+        tracks.length
+            ? tracks.map(
+                (track, index) => `
+
+                    <div class="track-row">
+
+                        <div>
+
+                            <strong>
+                                ${escapeHtml(
+                                    String(
+                                        track.track_number ||
+                                        index + 1
+                                    ).padStart(
+                                        2,
+                                        "0"
+                                    )
+                                )}
+                            </strong>
+
+                            <span>
+                                ${escapeHtml(
+                                    track.title ||
+                                    "Untitled Track"
+                                )}
+                            </span>
+
+                        </div>
+
+                        ${
+                            track.audio_path
+                                ? `
+                                    <button
+                                        type="button"
+                                        class="secondary-button"
+                                        onclick="downloadAudio(
+                                            '${escapeHtml(
+                                                track.audio_path
+                                            )}'
+                                        )"
+                                    >
+                                        DOWNLOAD
+                                    </button>
+                                  `
+                                : ""
+                        }
+
+                    </div>
+
+                `
+            ).join("")
+            : `
+                <div class="empty-state">
+                    No tracks uploaded.
+                </div>
+              `;
+
+
+    const artworkHTML =
+        artwork?.file_path
+            ? `
+                <div class="release-artwork-preview">
+                    Artwork uploaded
+                </div>
+              `
+            : `
+                <div class="release-artwork-preview">
+                    No artwork uploaded
+                </div>
+              `;
+
+
+    modal.innerHTML = `
+
+        <div class="modal-box release-details-box">
+
+            <button
+                class="modal-close"
+                type="button"
+                onclick="closeReleaseDetails()"
+            >
+                ×
+            </button>
+
+
+            <p class="eyebrow">
+                RELEASE REVIEW
+            </p>
+
+
+            <h2>
+                ${escapeHtml(
+                    release.title ||
+                    "Untitled Release"
+                )}
+            </h2>
+
+
+            <div class="release-detail-status">
+                ${escapeHtml(status)}
+            </div>
+
+
+            ${artworkHTML}
+
+
+            <div class="release-meta">
+
+                <div>
+                    <span>ARTIST</span>
+
+                    <strong>
                         ${escapeHtml(
-                            release.status ||
-                            "DRAFT"
+                            release.artist ||
+                            "Unknown Artist"
                         )}
-
-                    </div>
-
+                    </strong>
                 </div>
 
-            `
-        ).join("");
+
+                <div>
+                    <span>TYPE</span>
+
+                    <strong>
+                        ${escapeHtml(
+                            release.release_type ||
+                            "Release"
+                        )}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>RELEASE DATE</span>
+
+                    <strong>
+                        ${escapeHtml(
+                            release.release_date ||
+                            "Not specified"
+                        )}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            ${
+                release.description
+                    ? `
+                        <div class="release-description">
+
+                            <span>
+                                DESCRIPTION
+                            </span>
+
+                            <p>
+                                ${escapeHtml(
+                                    release.description
+                                )}
+                            </p>
+
+                        </div>
+                      `
+                    : ""
+            }
+
+
+            <div class="tracks-section">
+
+                <p class="eyebrow">
+                    TRACKS
+                </p>
+
+                ${trackHTML}
+
+            </div>
+
+
+            <div class="release-actions">
+
+                ${
+                    status !== "APPROVED"
+                        ? `
+                            <button
+                                type="button"
+                                class="primary-button"
+                                onclick="approveRelease(
+                                    '${escapeHtml(
+                                        release.id
+                                    )}'
+                                )"
+                            >
+                                APPROVE RELEASE
+                            </button>
+                          `
+                        : ""
+                }
+
+
+                ${
+                    status !== "REJECTED"
+                        ? `
+                            <button
+                                type="button"
+                                class="secondary-button"
+                                onclick="rejectRelease(
+                                    '${escapeHtml(
+                                        release.id
+                                    )}'
+                                )"
+                            >
+                                REJECT
+                            </button>
+                          `
+                        : ""
+                }
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    modal.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+// =========================================
+// CLOSE RELEASE DETAILS
+// =========================================
+
+function closeReleaseDetails() {
+
+    const modal =
+        document.getElementById(
+            "releaseDetailsModal"
+        );
+
+
+    if (modal) {
+
+        modal.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+// =========================================
+// APPROVE RELEASE
+// =========================================
+
+async function approveRelease(
+    releaseId
+) {
+
+    if (
+        !confirm(
+            "Approve this release?"
+        )
+    ) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("releases")
+                .update({
+
+                    status:
+                        "APPROVED",
+
+                    reviewed_at:
+                        new Date().toISOString(),
+
+                    reviewed_by:
+                        currentUser.id
+
+                })
+                .eq(
+                    "id",
+                    releaseId
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        closeReleaseDetails();
+
+        await loadReleaseInbox();
+
+        await loadReleaseCount();
+
+
+        alert(
+            "Release approved."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Approve release error:",
+            error
+        );
+
+        alert(
+            "Unable to approve release:\n\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+// =========================================
+// REJECT RELEASE
+// =========================================
+
+async function rejectRelease(
+    releaseId
+) {
+
+    const reason =
+        prompt(
+            "Why is this release being rejected?"
+        );
+
+
+    if (
+        reason === null
+    ) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("releases")
+                .update({
+
+                    status:
+                        "REJECTED",
+
+                    rejection_reason:
+                        reason.trim(),
+
+                    reviewed_at:
+                        new Date().toISOString(),
+
+                    reviewed_by:
+                        currentUser.id
+
+                })
+                .eq(
+                    "id",
+                    releaseId
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        closeReleaseDetails();
+
+        await loadReleaseInbox();
+
+
+        alert(
+            "Release rejected."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Reject release error:",
+            error
+        );
+
+        alert(
+            "Unable to reject release:\n\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+// =========================================
+// DOWNLOAD AUDIO
+// =========================================
+
+async function downloadAudio(
+    path
+) {
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.storage
+                .from("release-audio")
+                .createSignedUrl(
+                    path,
+                    300
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        window.open(
+            data.signedUrl,
+            "_blank"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Audio download error:",
+            error
+        );
+
+        alert(
+            "Unable to create download link:\n\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+// =========================================
+// ARTISTS
+// =========================================
+
+async function loadArtists() {
+
+    const list =
+        document.getElementById(
+            "artistList"
+        );
+
+
+    if (!list) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("profiles")
+                .select(
+                    "id, first_name, last_name, artist_name, role"
+                )
+                .eq(
+                    "role",
+                    "artist"
+                )
+                .order(
+                    "artist_name",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        if (
+            !data ||
+            data.length === 0
+        ) {
+
+            list.innerHTML = `
+                <div class="empty-state">
+                    No artists added yet.
+                    <br><br>
+                    Add an artist to begin managing
+                    their releases.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        list.innerHTML =
+            data.map(
+                artist => `
+
+                    <div class="list-card">
+
+                        <div>
+
+                            <h3>
+                                ${escapeHtml(
+                                    artist.artist_name ||
+                                    "Unnamed Artist"
+                                )}
+                            </h3>
+
+                            <p>
+                                ${escapeHtml(
+                                    artist.first_name ||
+                                    ""
+                                )}
+
+                                ${escapeHtml(
+                                    artist.last_name ||
+                                    ""
+                                )}
+                            </p>
+
+                        </div>
+
+
+                        <div class="status">
+                            ARTIST
+                        </div>
+
+                    </div>
+
+                `
+            ).join("");
+
+    } catch (error) {
+
+        console.error(
+            "Load artists error:",
+            error
+        );
+
+        list.innerHTML = `
+            <div class="empty-state">
+                Unable to load artists.
+                <br><br>
+                ${escapeHtml(
+                    error.message || ""
+                )}
+            </div>
+        `;
+
+    }
 
 }
 
@@ -683,28 +1329,20 @@ function setupArtistModal() {
             "artistModal"
         );
 
-
     const openButton =
         document.getElementById(
             "addArtistButton"
         );
-
 
     const closeButton =
         document.getElementById(
             "closeArtistModal"
         );
 
-
     const form =
         document.getElementById(
             "artistForm"
         );
-
-
-    if (!modal) {
-        return;
-    }
 
 
     openButton?.addEventListener(
@@ -713,7 +1351,7 @@ function setupArtistModal() {
 
             clearArtistMessage();
 
-            modal.classList.remove(
+            modal?.classList.remove(
                 "hidden"
             );
 
@@ -725,7 +1363,7 @@ function setupArtistModal() {
         "click",
         () => {
 
-            modal.classList.add(
+            modal?.classList.add(
                 "hidden"
             );
 
@@ -733,7 +1371,7 @@ function setupArtistModal() {
     );
 
 
-    modal.addEventListener(
+    modal?.addEventListener(
         "click",
         event => {
 
@@ -785,37 +1423,13 @@ async function createArtist(
 
     try {
 
-        if (button) {
+        button.disabled = true;
 
-            button.disabled = true;
-
-            button.textContent =
-                "CREATING...";
-
-        }
+        button.textContent =
+            "CREATING...";
 
 
         clearArtistMessage();
-
-
-        const {
-            data: userData,
-            error: userError
-        } =
-            await supabaseClient.auth.getUser();
-
-
-        if (
-            userError ||
-            !userData ||
-            !userData.user
-        ) {
-
-            throw new Error(
-                "Your session has expired. Please sign in again."
-            );
-
-        }
 
 
         const formData =
@@ -862,13 +1476,11 @@ async function createArtist(
         ) {
 
             throw new Error(
-                "Please complete every artist field."
+                "Please complete every field."
             );
 
         }
 
-
-        // Existing invitation system.
 
         const {
             data,
@@ -899,23 +1511,11 @@ async function createArtist(
 
 
         if (error) {
-
-            console.error(
-                "Edge Function error:",
-                error
-            );
-
-            throw new Error(
-                error.message ||
-                "Unable to create artist."
-            );
-
+            throw error;
         }
 
 
-        if (
-            data?.error
-        ) {
+        if (data?.error) {
 
             throw new Error(
                 data.error
@@ -928,7 +1528,7 @@ async function createArtist(
 
 
         showArtistMessage(
-            "Artist created. An invitation email has been sent.",
+            "Artist created and invitation sent.",
             "success"
         );
 
@@ -949,11 +1549,10 @@ async function createArtist(
             1200
         );
 
-
     } catch (error) {
 
         console.error(
-            "Artist creation failed:",
+            "Create artist error:",
             error
         );
 
@@ -964,140 +1563,14 @@ async function createArtist(
             "error"
         );
 
-
     } finally {
 
-        if (button) {
+        button.disabled = false;
 
-            button.disabled = false;
-
-            button.textContent =
-                "CREATE ARTIST";
-
-        }
+        button.textContent =
+            "CREATE ARTIST";
 
     }
-
-}
-
-
-// =========================================
-// LOAD ARTISTS
-// =========================================
-
-async function loadArtists() {
-
-    if (!supabaseClient) {
-        return;
-    }
-
-
-    const list =
-        document.getElementById(
-            "artistList"
-        );
-
-
-    if (!list) {
-        return;
-    }
-
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("artists")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        console.error(
-            "Load artists error:",
-            error
-        );
-
-        list.innerHTML = `
-            <div class="empty-state">
-                Unable to load artists.
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    if (
-        !data ||
-        data.length === 0
-    ) {
-
-        list.innerHTML = `
-
-            <div class="empty-state">
-
-                No artists added yet.
-
-                <br><br>
-
-                Add an artist to begin managing
-                their releases and distribution.
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    list.innerHTML =
-        data.map(
-            artist => `
-
-                <div class="list-card">
-
-                    <div>
-
-                        <h3>
-                            ${escapeHtml(
-                                artist.artist_name ||
-                                "Unnamed Artist"
-                            )}
-                        </h3>
-
-                        <p>
-                            ${escapeHtml(
-                                artist.email ||
-                                "No portal email"
-                            )}
-                        </p>
-
-                    </div>
-
-                    <div class="status">
-
-                        ${escapeHtml(
-                            artist.status ||
-                            "ACTIVE"
-                        )}
-
-                    </div>
-
-                </div>
-
-            `
-        ).join("");
 
 }
 
@@ -1125,10 +1598,8 @@ function showArtistMessage(
     message.textContent =
         text;
 
-
     message.style.display =
         "block";
-
 
     message.className =
         "login-message " +
@@ -1136,10 +1607,6 @@ function showArtistMessage(
 
 }
 
-
-// =========================================
-// CLEAR ARTIST MESSAGE
-// =========================================
 
 function clearArtistMessage() {
 
@@ -1185,7 +1652,6 @@ function setupLogout() {
 
             }
 
-
             window.location.href =
                 "./index.html";
 
@@ -1196,7 +1662,7 @@ function setupLogout() {
 
 
 // =========================================
-// ERROR MESSAGE
+// USER MESSAGE
 // =========================================
 
 function setUserMessage(
