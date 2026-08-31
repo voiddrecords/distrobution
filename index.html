@@ -254,7 +254,7 @@
                     </button>
 
 
-                    <!-- ERROR MESSAGE -->
+                    <!-- LOGIN MESSAGE -->
 
                     <p
                         id="loginMessage"
@@ -338,17 +338,448 @@
 
 
     <!-- =========================================
-         SUPABASE
+         SUPABASE LIBRARY
     ========================================== -->
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
     <!-- =========================================
-         VOIDRECORDS APP
+         VOIDRECORDS SUPABASE CONNECTION
     ========================================== -->
 
-    <script src="./js/app.js"></script>
+    <script src="./js/supabase.js"></script>
+
+
+    <!-- =========================================
+         LOGIN / APPLICATION SCRIPT
+    ========================================== -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+
+            const loginForm = document.getElementById("loginForm");
+            const emailInput = document.getElementById("email");
+            const passwordInput = document.getElementById("password");
+            const rememberInput = document.getElementById("remember");
+
+            const loginButton = document.getElementById("loginButton");
+            const loginButtonText = document.getElementById("loginButtonText");
+            const loginArrow = document.getElementById("loginArrow");
+
+            const loginMessage = document.getElementById("loginMessage");
+            const forgotPassword = document.getElementById("forgotPassword");
+            const requestInviteButton = document.getElementById("requestInviteButton");
+
+            const loadingScreen = document.getElementById("loadingScreen");
+            const loadingProgress = document.getElementById("loadingProgress");
+
+
+
+            /* =========================================
+               LOADING BAR
+            ========================================== */
+
+            let progress = 0;
+
+            const progressTimer = setInterval(() => {
+
+                progress += 5;
+
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(progressTimer);
+                }
+
+                if (loadingProgress) {
+                    loadingProgress.style.width = progress + "%";
+                }
+
+            }, 50);
+
+
+
+            /* =========================================
+               CHECK EXISTING SESSION
+            ========================================== */
+
+            try {
+
+                const {
+                    data: {
+                        session
+                    }
+                } = await supabaseClient.auth.getSession();
+
+
+                if (session) {
+
+                    await redirectUserByRole(session.user.id);
+
+                    return;
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Supabase session error:",
+                    error
+                );
+
+            }
+
+
+
+            /* =========================================
+               FINISH LOADING
+            ========================================== */
+
+            setTimeout(() => {
+
+                if (loadingScreen) {
+
+                    loadingScreen.classList.add("hidden");
+
+                }
+
+            }, 900);
+
+
+
+            /* =========================================
+               LOGIN
+            ========================================== */
+
+            loginForm.addEventListener(
+                "submit",
+                async (event) => {
+
+                    event.preventDefault();
+
+
+                    const email =
+                        emailInput.value.trim();
+
+                    const password =
+                        passwordInput.value;
+
+
+                    loginMessage.textContent = "";
+                    loginMessage.className =
+                        "login-message";
+
+
+                    if (!email || !password) {
+
+                        showLoginMessage(
+                            "Please enter your email and password.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    loginButton.disabled = true;
+
+                    loginButtonText.textContent =
+                        "SIGNING IN...";
+
+                    loginArrow.textContent =
+                        "";
+
+
+                    try {
+
+                        const {
+                            data,
+                            error
+                        } =
+                            await supabaseClient.auth.signInWithPassword({
+
+                                email: email,
+                                password: password
+
+                            });
+
+
+                        if (error) {
+
+                            throw error;
+
+                        }
+
+
+                        if (!data.user) {
+
+                            throw new Error(
+                                "Login failed. Please try again."
+                            );
+
+                        }
+
+
+                        /*
+                         * Supabase already persists the session
+                         * automatically.
+                         *
+                         * The Remember Me checkbox is kept in
+                         * the UI for compatibility with your
+                         * existing design.
+                         */
+
+                        await redirectUserByRole(
+                            data.user.id
+                        );
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "Login error:",
+                            error
+                        );
+
+
+                        let message =
+                            "Unable to sign in. Please check your email and password.";
+
+
+                        if (
+                            error.message &&
+                            error.message.toLowerCase().includes(
+                                "invalid login credentials"
+                            )
+                        ) {
+
+                            message =
+                                "Incorrect email or password.";
+
+                        }
+
+
+                        showLoginMessage(
+                            message,
+                            "error"
+                        );
+
+
+                        loginButton.disabled = false;
+
+                        loginButtonText.textContent =
+                            "SIGN IN";
+
+                        loginArrow.textContent =
+                            "→";
+
+                    }
+
+                }
+            );
+
+
+
+            /* =========================================
+               FORGOT PASSWORD
+            ========================================== */
+
+            forgotPassword.addEventListener(
+                "click",
+                async (event) => {
+
+                    event.preventDefault();
+
+
+                    const email =
+                        emailInput.value.trim();
+
+
+                    if (!email) {
+
+                        showLoginMessage(
+                            "Enter your email first, then click Forgot.",
+                            "error"
+                        );
+
+                        emailInput.focus();
+
+                        return;
+
+                    }
+
+
+                    try {
+
+                        const {
+                            error
+                        } =
+                            await supabaseClient.auth
+                                .resetPasswordForEmail(
+                                    email,
+                                    {
+                                        redirectTo:
+                                            window.location.origin +
+                                            window.location.pathname
+                                    }
+                                );
+
+
+                        if (error) {
+
+                            throw error;
+
+                        }
+
+
+                        showLoginMessage(
+                            "Password reset instructions have been sent to your email.",
+                            "success"
+                        );
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "Password reset error:",
+                            error
+                        );
+
+
+                        showLoginMessage(
+                            "Unable to send the password reset email.",
+                            "error"
+                        );
+
+                    }
+
+                }
+            );
+
+
+
+            /* =========================================
+               REQUEST INVITE
+            ========================================== */
+
+            requestInviteButton.addEventListener(
+                "click",
+                () => {
+
+                    /*
+                     * Change this later to your actual
+                     * VoidRecords invite-request page.
+                     */
+
+                    window.location.href =
+                        "https://voiddrecords.github.io/";
+
+                }
+            );
+
+
+
+            /* =========================================
+               SHOW LOGIN MESSAGE
+            ========================================== */
+
+            function showLoginMessage(
+                message,
+                type
+            ) {
+
+                loginMessage.textContent =
+                    message;
+
+                loginMessage.className =
+                    "login-message " + type;
+
+            }
+
+
+
+            /* =========================================
+               ROLE REDIRECTION
+            ========================================== */
+
+            async function redirectUserByRole(
+                userId
+            ) {
+
+                const {
+                    data: profile,
+                    error
+                } =
+                    await supabaseClient
+                        .from("profiles")
+                        .select("role")
+                        .eq("id", userId)
+                        .single();
+
+
+                if (error) {
+
+                    console.error(
+                        "Profile lookup error:",
+                        error
+                    );
+
+
+                    throw new Error(
+                        "Your account exists, but your VoidRecords profile could not be found."
+                    );
+
+                }
+
+
+                if (!profile || !profile.role) {
+
+                    throw new Error(
+                        "Your account does not have a VoidRecords role yet."
+                    );
+
+                }
+
+
+                switch (profile.role) {
+
+                    case "owner":
+
+                        window.location.href =
+                            "./dashboard.html";
+
+                        break;
+
+
+                    case "ar":
+
+                        window.location.href =
+                            "./ar/dashboard.html";
+
+                        break;
+
+
+                    case "artist":
+
+                        window.location.href =
+                            "./artist/dashboard.html";
+
+                        break;
+
+
+                    default:
+
+                        throw new Error(
+                            "Your account has an invalid VoidRecords role."
+                        );
+
+                }
+
+            }
+
+        });
+    </script>
 
 </body>
 
