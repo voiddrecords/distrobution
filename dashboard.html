@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>VoidRecords — Dashboard</title>
+    <title>VoidRecords — Distribution</title>
 
     <link
         rel="icon"
@@ -20,178 +20,78 @@
 
     <link
         rel="stylesheet"
-        href="./css/dashboard.css?v=4"
+        href="./css/style.css?v=6"
     >
 
 </head>
 
+
 <body>
 
+
     <!-- =========================================
-         SIDEBAR
+         LOADING SCREEN
     ========================================== -->
 
-    <aside class="sidebar">
+    <div
+        class="loading-screen"
+        id="loadingScreen"
+    >
 
-        <div>
+        <div class="loading-bar">
 
-            <div class="sidebar-brand">
-                VOIDRECORDS
-            </div>
-
-            <div class="portal-label">
-                DISTRIBUTION PORTAL
-            </div>
-
-            <nav>
-
-                <button
-                    class="nav-item active"
-                    data-section="overview"
-                    type="button"
-                >
-                    OVERVIEW
-                </button>
-
-                <button
-                    class="nav-item"
-                    data-section="releases"
-                    type="button"
-                >
-                    RELEASE INBOX
-                </button>
-
-                <button
-                    class="nav-item"
-                    data-section="artists"
-                    type="button"
-                >
-                    ARTISTS
-                </button>
-
-                <button
-                    class="nav-item"
-                    data-section="catalog"
-                    type="button"
-                >
-                    CATALOG
-                </button>
-
-            </nav>
+            <div
+                class="loading-progress"
+                id="loadingProgress"
+            ></div>
 
         </div>
 
 
-        <div class="sidebar-bottom">
+        <div class="loading-content">
 
-            <button
-                class="logout-button"
-                id="logoutButton"
-                type="button"
+            <img
+                src="./favicon.png"
+                alt="VoidRecords"
+                class="loading-logo"
             >
-                SIGN OUT
-            </button>
 
         </div>
 
-    </aside>
+    </div>
+
 
 
     <!-- =========================================
-         MAIN DASHBOARD
+         LOGIN PAGE
     ========================================== -->
 
-    <main class="dashboard">
+    <main class="login-page">
 
-        <header class="dashboard-header">
 
-            <div>
+        <!-- LEFT SIDE -->
 
-                <p class="eyebrow">
+        <section class="login-visual">
+
+            <div class="visual-overlay"></div>
+
+
+            <div class="visual-content">
+
+                <div class="brand-mark">
                     VOIDRECORDS
-                </p>
-
-                <h1>
-                    Dashboard
-                </h1>
-
-            </div>
-
-            <div
-                class="user-area"
-                id="userEmail"
-            >
-                Loading...
-            </div>
-
-        </header>
-
-
-        <!-- =====================================
-             OVERVIEW
-        ====================================== -->
-
-        <section
-            class="dashboard-section active-section"
-            id="overview"
-        >
-
-            <div class="welcome-card">
-
-                <p class="eyebrow">
-                    DISTRIBUTION PORTAL
-                </p>
-
-                <h2>
-                    Welcome to VoidRecords.
-                </h2>
-
-                <p>
-                    Review artist submissions,
-                    manage your roster and prepare
-                    approved releases for distribution.
-                </p>
-
-            </div>
-
-
-            <div class="stats-grid">
-
-                <div class="stat-card">
-
-                    <span>
-                        TOTAL RELEASES
-                    </span>
-
-                    <strong id="releaseCount">
-                        0
-                    </strong>
-
                 </div>
 
 
-                <div class="stat-card">
+                <div class="visual-bottom">
 
                     <span>
-                        PENDING REVIEW
+                        INDEPENDENT MUSIC DISTRIBUTION
                     </span>
-
-                    <strong id="pendingReleaseCount">
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div class="stat-card">
 
                     <span>
-                        ACCOUNT
+                        EST. 2026
                     </span>
-
-                    <strong>
-                        ACTIVE
-                    </strong>
 
                 </div>
 
@@ -200,135 +100,227 @@
         </section>
 
 
-        <!-- =====================================
-             RELEASE INBOX
-        ====================================== -->
 
-        <section
-            class="dashboard-section"
-            id="releases"
-        >
+        <!-- RIGHT SIDE -->
 
-            <div class="section-header">
+        <section class="login-panel">
 
-                <div>
+
+            <div class="login-container">
+
+
+                <!-- MOBILE BRAND -->
+
+                <div class="mobile-brand">
+                    VOIDRECORDS
+                </div>
+
+
+
+                <!-- HEADER -->
+
+                <div class="login-header">
 
                     <p class="eyebrow">
-                        ARTIST SUBMISSIONS
+                        ARTIST / LABEL PORTAL
                     </p>
 
-                    <h2>
-                        Release Inbox
-                    </h2>
 
-                </div>
-
-                <div class="inbox-label">
-                    OWNER / A&R REVIEW
-                </div>
-
-            </div>
+                    <h1>
+                        Welcome back!
+                    </h1>
 
 
-            <div
-                class="card-list"
-                id="releaseList"
-            >
-
-                <div class="empty-state">
-
-                    Loading releases...
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =====================================
-             ARTISTS
-        ====================================== -->
-
-        <section
-            class="dashboard-section"
-            id="artists"
-        >
-
-            <div class="section-header">
-
-                <div>
-
-                    <p class="eyebrow">
-                        MANAGEMENT
+                    <p class="subtitle">
+                        Sign in to manage your releases,
+                        artists, catalog and distribution.
                     </p>
 
-                    <h2>
-                        Artists
-                    </h2>
-
                 </div>
 
-                <button
-                    class="primary-button"
-                    id="addArtistButton"
-                    type="button"
-                >
-                    ADD ARTIST
-                </button>
-
-            </div>
 
 
-            <div
-                class="card-list"
-                id="artistList"
-            >
+                <!-- LOGIN FORM -->
 
-                <div
-                    class="empty-state"
-                    id="artistEmptyState"
+                <form
+                    id="loginForm"
+                    novalidate
                 >
 
-                    Loading artists...
 
-                </div>
+                    <!-- EMAIL -->
 
-            </div>
+                    <div class="input-group">
 
-        </section>
+                        <label for="email">
+                            EMAIL
+                        </label>
 
 
-        <!-- =====================================
-             CATALOG
-        ====================================== -->
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                            required
+                        >
 
-        <section
-            class="dashboard-section"
-            id="catalog"
-        >
+                    </div>
 
-            <div class="section-header">
 
-                <div>
 
-                    <p class="eyebrow">
-                        LIBRARY
+                    <!-- PASSWORD -->
+
+                    <div class="input-group">
+
+                        <div class="password-label">
+
+                            <label for="password">
+                                PASSWORD
+                            </label>
+
+
+                            <a
+                                href="#"
+                                id="forgotPassword"
+                            >
+                                Forgot?
+                            </a>
+
+                        </div>
+
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="••••••••"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <!-- REMEMBER ME -->
+
+                    <div class="remember-row">
+
+                        <label class="remember">
+
+                            <input
+                                type="checkbox"
+                                id="remember"
+                                name="remember"
+                            >
+
+                            <span>
+                                Remember me
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <!-- SIGN IN -->
+
+                    <button
+                        type="submit"
+                        class="login-button"
+                        id="loginButton"
+                    >
+
+                        <span id="loginButtonText">
+                            SIGN IN
+                        </span>
+
+
+                        <span id="loginArrow">
+                            →
+                        </span>
+
+                    </button>
+
+
+
+                    <!-- LOGIN MESSAGE -->
+
+                    <p
+                        id="loginMessage"
+                        class="login-message"
+                    ></p>
+
+
+                </form>
+
+
+
+                <!-- DIVIDER -->
+
+                <div class="divider">
+
+                    <span></span>
+
+                    <p>
+                        INVITE ONLY
                     </p>
 
-                    <h2>
-                        Catalog
-                    </h2>
+                    <span></span>
 
                 </div>
 
-            </div>
 
 
-            <div class="empty-state">
+                <!-- INVITE -->
 
-                Approved releases will appear
-                in your catalog.
+                <div class="invite-section">
+
+                    <p>
+                        Distribution access is currently
+                        available by invitation only.
+                    </p>
+
+
+                    <button
+                        type="button"
+                        class="request-button"
+                        id="requestInviteButton"
+                    >
+                        REQUEST AN INVITE
+                    </button>
+
+                </div>
+
+
+
+                <!-- FOOTER -->
+
+                <footer>
+
+                    <span>
+                        © 2026 VoidRecords Music & Entertainment.
+                    </span>
+
+
+                    <div>
+
+                        <a href="#">
+                            Privacy
+                        </a>
+
+
+                        <a href="#">
+                            Terms
+                        </a>
+
+                    </div>
+
+                </footer>
+
 
             </div>
 
@@ -337,119 +329,9 @@
     </main>
 
 
-    <!-- =========================================
-         ADD ARTIST MODAL
-    ========================================== -->
-
-    <div
-        class="modal hidden"
-        id="artistModal"
-    >
-
-        <div class="modal-box">
-
-            <button
-                class="modal-close"
-                id="closeArtistModal"
-                type="button"
-            >
-                ×
-            </button>
-
-
-            <p class="eyebrow">
-                ARTIST MANAGEMENT
-            </p>
-
-
-            <h2>
-                Add Artist
-            </h2>
-
-
-            <form id="artistForm">
-
-
-                <label for="newArtistName">
-                    ARTIST NAME
-                </label>
-
-
-                <input
-                    type="text"
-                    id="newArtistName"
-                    name="artist_name"
-                    placeholder="Artist name"
-                    required
-                >
-
-
-                <label for="artistFirstName">
-                    FIRST NAME
-                </label>
-
-
-                <input
-                    type="text"
-                    id="artistFirstName"
-                    name="first_name"
-                    placeholder="First name"
-                    required
-                >
-
-
-                <label for="artistLastName">
-                    LAST NAME
-                </label>
-
-
-                <input
-                    type="text"
-                    id="artistLastName"
-                    name="last_name"
-                    placeholder="Last name"
-                    required
-                >
-
-
-                <label for="artistEmail">
-                    PORTAL EMAIL
-                </label>
-
-
-                <input
-                    type="email"
-                    id="artistEmail"
-                    name="email"
-                    placeholder="artist@example.com"
-                    autocomplete="email"
-                    required
-                >
-
-
-                <p
-                    id="artistFormMessage"
-                    class="login-message"
-                ></p>
-
-
-                <button
-                    type="submit"
-                    class="primary-button full"
-                    id="createArtistButton"
-                >
-                    CREATE ARTIST
-                </button>
-
-            </form>
-
-        </div>
-
-    </div>
-
 
     <!-- =========================================
-         SUPABASE
+         SUPABASE LIBRARY
     ========================================== -->
 
     <script
@@ -457,14 +339,739 @@
     ></script>
 
 
-    <!-- YOUR SUPABASE CONFIG -->
 
-    <script src="./js/supabase.js"></script>
+    <!-- =========================================
+         VOIDRECORDS SCRIPT
+    ========================================== -->
+
+    <script>
+
+        // =========================================
+        // SUPABASE CONFIG
+        // =========================================
+
+        const SUPABASE_URL =
+            "YOUR_SUPABASE_PROJECT_URL";
+
+        const SUPABASE_PUBLISHABLE_KEY =
+            "YOUR_SUPABASE_PUBLISHABLE_KEY";
 
 
-    <!-- DASHBOARD JAVASCRIPT -->
+        let supabaseClient = null;
 
-    <script src="./js/dashboard.js?v=4"></script>
+
+
+        // =========================================
+        // START
+        // =========================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                console.log(
+                    "VoidRecords loaded."
+                );
+
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * The loading screen has NOTHING
+                 * to do with Supabase.
+                 */
+
+                startLoading();
+
+
+                /*
+                 * Supabase starts separately.
+                 */
+
+                initializeSupabase();
+
+
+                /*
+                 * Login buttons are prepared
+                 * immediately.
+                 */
+
+                setupLogin();
+
+                setupForgotPassword();
+
+                setupInvite();
+
+            }
+        );
+
+
+
+        // =========================================
+        // LOADING SCREEN
+        // =========================================
+
+        function startLoading() {
+
+            const loadingScreen =
+                document.getElementById(
+                    "loadingScreen"
+                );
+
+
+            const progress =
+                document.getElementById(
+                    "loadingProgress"
+                );
+
+
+            if (!loadingScreen) {
+
+                /*
+                 * If the loading screen doesn't
+                 * exist, make the login visible.
+                 */
+
+                showLogin();
+
+                return;
+
+            }
+
+
+            let current =
+                0;
+
+
+            /*
+             * Progress animation.
+             */
+
+            const timer =
+                setInterval(
+                    function () {
+
+                        current += 5;
+
+
+                        if (progress) {
+
+                            progress.style.width =
+                                current + "%";
+
+                        }
+
+
+                        if (current >= 100) {
+
+                            clearInterval(timer);
+
+                            finishLoading();
+
+                        }
+
+                    },
+                    50
+                );
+
+        }
+
+
+
+        // =========================================
+        // FINISH LOADING
+        // =========================================
+
+        function finishLoading() {
+
+            /*
+             * FIRST:
+             * Make the login page visible.
+             */
+
+            showLogin();
+
+
+            /*
+             * SECOND:
+             * Fade out the loading screen.
+             */
+
+            const loadingScreen =
+                document.getElementById(
+                    "loadingScreen"
+                );
+
+
+            if (!loadingScreen) {
+                return;
+            }
+
+
+            loadingScreen.classList.add(
+                "loading-finished"
+            );
+
+
+            /*
+             * Completely remove the loading
+             * screen after the fade.
+             */
+
+            setTimeout(
+                function () {
+
+                    loadingScreen.style.display =
+                        "none";
+
+                },
+                400
+            );
+
+        }
+
+
+
+        // =========================================
+        // SHOW LOGIN
+        // =========================================
+
+        function showLogin() {
+
+            const loginPage =
+                document.querySelector(
+                    ".login-page"
+                );
+
+
+            if (!loginPage) {
+                return;
+            }
+
+
+            loginPage.classList.add(
+                "ready"
+            );
+
+
+            /*
+             * Safety fallback.
+             */
+
+            loginPage.style.opacity =
+                "1";
+
+        }
+
+
+
+        // =========================================
+        // SUPABASE
+        // =========================================
+
+        function initializeSupabase() {
+
+            /*
+             * Do NOT wait for this function
+             * before showing the website.
+             */
+
+            try {
+
+                if (!window.supabase) {
+
+                    console.warn(
+                        "Supabase library unavailable."
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    SUPABASE_URL ===
+                    "YOUR_SUPABASE_PROJECT_URL"
+                ) {
+
+                    console.warn(
+                        "Supabase URL has not been configured."
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    SUPABASE_PUBLISHABLE_KEY ===
+                    "YOUR_SUPABASE_PUBLISHABLE_KEY"
+                ) {
+
+                    console.warn(
+                        "Supabase key has not been configured."
+                    );
+
+                    return;
+
+                }
+
+
+                supabaseClient =
+                    window.supabase.createClient(
+                        SUPABASE_URL,
+                        SUPABASE_PUBLISHABLE_KEY
+                    );
+
+
+                console.log(
+                    "Supabase ready."
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Supabase initialization error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+
+        // =========================================
+        // LOGIN
+        // =========================================
+
+        function setupLogin() {
+
+            const form =
+                document.getElementById(
+                    "loginForm"
+                );
+
+
+            if (!form) {
+                return;
+            }
+
+
+            form.addEventListener(
+                "submit",
+                async function (event) {
+
+                    event.preventDefault();
+
+
+                    const email =
+                        document.getElementById(
+                            "email"
+                        ).value.trim();
+
+
+                    const password =
+                        document.getElementById(
+                            "password"
+                        ).value;
+
+
+                    const remember =
+                        document.getElementById(
+                            "remember"
+                        ).checked;
+
+
+                    if (
+                        !email ||
+                        !password
+                    ) {
+
+                        showMessage(
+                            "Please enter your email and password.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * Supabase must be ready only
+                     * when the user actually logs in.
+                     */
+
+                    if (!supabaseClient) {
+
+                        showMessage(
+                            "Login service is still starting. Please try again.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    const button =
+                        document.getElementById(
+                            "loginButton"
+                        );
+
+
+                    const buttonText =
+                        document.getElementById(
+                            "loginButtonText"
+                        );
+
+
+                    if (button) {
+
+                        button.disabled =
+                            true;
+
+                    }
+
+
+                    if (buttonText) {
+
+                        buttonText.textContent =
+                            "SIGNING IN...";
+
+                    }
+
+
+                    try {
+
+                        const {
+                            data,
+                            error
+                        } =
+                            await supabaseClient
+                                .auth
+                                .signInWithPassword({
+
+                                    email:
+                                        email,
+
+                                    password:
+                                        password
+
+                                });
+
+
+                        if (error) {
+
+                            throw error;
+
+                        }
+
+
+                        if (
+                            !data ||
+                            !data.user
+                        ) {
+
+                            throw new Error(
+                                "Login failed."
+                            );
+
+                        }
+
+
+                        /*
+                         * Remember email.
+                         */
+
+                        if (remember) {
+
+                            localStorage.setItem(
+                                "voidrecords_remember_email",
+                                email
+                            );
+
+                        }
+
+                        else {
+
+                            localStorage.removeItem(
+                                "voidrecords_remember_email"
+                            );
+
+                        }
+
+
+                        /*
+                         * Send user to dashboard.
+                         */
+
+                        window.location.href =
+                            "./dashboard.html";
+
+                    }
+
+                    catch (error) {
+
+                        console.error(
+                            "Login error:",
+                            error
+                        );
+
+
+                        showMessage(
+                            error.message ||
+                            "Unable to sign in.",
+                            "error"
+                        );
+
+                    }
+
+                    finally {
+
+                        if (button) {
+
+                            button.disabled =
+                                false;
+
+                        }
+
+
+                        if (buttonText) {
+
+                            buttonText.textContent =
+                                "SIGN IN";
+
+                        }
+
+                    }
+
+                }
+            );
+
+
+            /*
+             * Restore remembered email.
+             */
+
+            const rememberedEmail =
+                localStorage.getItem(
+                    "voidrecords_remember_email"
+                );
+
+
+            if (rememberedEmail) {
+
+                const emailInput =
+                    document.getElementById(
+                        "email"
+                    );
+
+
+                const rememberCheckbox =
+                    document.getElementById(
+                        "remember"
+                    );
+
+
+                if (emailInput) {
+
+                    emailInput.value =
+                        rememberedEmail;
+
+                }
+
+
+                if (rememberCheckbox) {
+
+                    rememberCheckbox.checked =
+                        true;
+
+                }
+
+            }
+
+        }
+
+
+
+        // =========================================
+        // FORGOT PASSWORD
+        // =========================================
+
+        function setupForgotPassword() {
+
+            const button =
+                document.getElementById(
+                    "forgotPassword"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            button.addEventListener(
+                "click",
+                async function (event) {
+
+                    event.preventDefault();
+
+
+                    const email =
+                        document.getElementById(
+                            "email"
+                        ).value.trim();
+
+
+                    if (!email) {
+
+                        showMessage(
+                            "Enter your email first.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (!supabaseClient) {
+
+                        showMessage(
+                            "Login service is still starting. Please try again.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    try {
+
+                        const {
+                            error
+                        } =
+                            await supabaseClient
+                                .auth
+                                .resetPasswordForEmail(
+                                    email
+                                );
+
+
+                        if (error) {
+
+                            throw error;
+
+                        }
+
+
+                        showMessage(
+                            "Password reset email sent.",
+                            "success"
+                        );
+
+                    }
+
+                    catch (error) {
+
+                        console.error(
+                            "Password reset error:",
+                            error
+                        );
+
+
+                        showMessage(
+                            error.message ||
+                            "Unable to send password reset email.",
+                            "error"
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+
+        // =========================================
+        // INVITE BUTTON
+        // =========================================
+
+        function setupInvite() {
+
+            const button =
+                document.getElementById(
+                    "requestInviteButton"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    window.location.href =
+                        "https://voiddrecords.github.io/";
+
+                }
+            );
+
+        }
+
+
+
+        // =========================================
+        // MESSAGE
+        // =========================================
+
+        function showMessage(
+            text,
+            type
+        ) {
+
+            const message =
+                document.getElementById(
+                    "loginMessage"
+                );
+
+
+            if (!message) {
+                return;
+            }
+
+
+            message.textContent =
+                text;
+
+
+            message.className =
+                "login-message";
+
+
+            if (type) {
+
+                message.classList.add(
+                    type
+                );
+
+            }
+
+        }
+
+    </script>
+
 
 </body>
 
