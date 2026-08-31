@@ -70,14 +70,20 @@ body {
 
     visibility: visible;
 
+    pointer-events: auto;
+
     transition:
-        opacity 0.7s ease,
-        visibility 0.7s ease;
+        opacity 0.35s ease,
+        visibility 0.35s ease;
 
 }
 
 
-.loading-screen.fade-out {
+/* =========================================
+   LOADING FINISHED
+========================================= */
+
+.loading-screen.loading-finished {
 
     opacity: 0;
 
@@ -87,6 +93,10 @@ body {
 
 }
 
+
+/* =========================================
+   LOADING CONTENT
+========================================= */
 
 .loading-content {
 
@@ -118,6 +128,8 @@ body {
 
     background: #151515;
 
+    overflow: hidden;
+
 }
 
 
@@ -130,7 +142,7 @@ body {
     background: white;
 
     transition:
-        width 0.25s ease;
+        width 0.05s linear;
 
 }
 
@@ -159,28 +171,41 @@ body {
 @keyframes heartbeat {
 
     0% {
+
         transform: scale(1);
+
         opacity: 1;
+
     }
 
     12% {
+
         transform: scale(1.08);
+
     }
 
     24% {
+
         transform: scale(1);
+
     }
 
     36% {
+
         transform: scale(1.05);
+
     }
 
     52% {
+
         transform: scale(1);
+
     }
 
     100% {
+
         transform: scale(1);
+
     }
 
 }
@@ -205,13 +230,6 @@ body {
     font-size: 10px;
 
     line-height: 1.4;
-
-}
-
-
-.slow-message.show {
-
-    display: block;
 
 }
 
@@ -735,6 +753,13 @@ input::placeholder {
     font-size: 9px;
 
     color: #d00000;
+
+}
+
+
+.login-message.success {
+
+    color: #ffffff;
 
 }
 
