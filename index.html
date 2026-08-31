@@ -20,7 +20,7 @@
 
     <link
         rel="stylesheet"
-        href="./css/style.css"
+        href="./css/style.css?v=6"
     >
 
 </head>
@@ -55,14 +55,6 @@
                 alt="VoidRecords"
                 class="loading-logo"
             >
-
-            <p
-                class="slow-message"
-                id="slowMessage"
-            >
-                If the website is taking too long,
-                please refresh.
-            </p>
 
         </div>
 
@@ -254,6 +246,7 @@
                     </button>
 
 
+
                     <!-- LOGIN MESSAGE -->
 
                     <p
@@ -338,7 +331,7 @@
 
 
     <!-- =========================================
-         SUPABASE
+         SUPABASE LIBRARY
     ========================================== -->
 
     <script
@@ -348,13 +341,13 @@
 
 
     <!-- =========================================
-         VOIDRECORDS APPLICATION
+         VOIDRECORDS SCRIPT
     ========================================== -->
 
     <script>
 
         // =========================================
-        // SUPABASE CONFIGURATION
+        // SUPABASE CONFIG
         // =========================================
 
         const SUPABASE_URL =
@@ -369,38 +362,45 @@
 
 
         // =========================================
-        // PAGE START
+        // START
         // =========================================
 
         document.addEventListener(
             "DOMContentLoaded",
-            () => {
+            function () {
 
                 console.log(
-                    "VoidRecords starting..."
+                    "VoidRecords loaded."
                 );
 
 
-                // IMPORTANT:
-                // The loading screen does NOT
-                // wait for Supabase.
+                /*
+                 * IMPORTANT:
+                 *
+                 * The loading screen has NOTHING
+                 * to do with Supabase.
+                 */
 
-                startLoadingScreen();
+                startLoading();
 
 
-                // Set up login immediately.
+                /*
+                 * Supabase starts separately.
+                 */
+
+                initializeSupabase();
+
+
+                /*
+                 * Login buttons are prepared
+                 * immediately.
+                 */
 
                 setupLogin();
 
                 setupForgotPassword();
 
-                setupInviteButton();
-
-
-                // Initialize Supabase
-                // separately in the background.
-
-                initializeSupabase();
+                setupInvite();
 
             }
         );
@@ -411,7 +411,7 @@
         // LOADING SCREEN
         // =========================================
 
-        function startLoadingScreen() {
+        function startLoading() {
 
             const loadingScreen =
                 document.getElementById(
@@ -425,62 +425,48 @@
                 );
 
 
-            const slowMessage =
-                document.getElementById(
-                    "slowMessage"
-                );
-
-
             if (!loadingScreen) {
+
+                /*
+                 * If the loading screen doesn't
+                 * exist, make the login visible.
+                 */
+
+                showLogin();
+
                 return;
-            }
-
-
-            // Show loading screen.
-
-            loadingScreen.style.display =
-                "flex";
-
-
-            // Hide old slow-loading message.
-
-            if (slowMessage) {
-
-                slowMessage.style.display =
-                    "none";
 
             }
 
 
-            let value = 0;
+            let current =
+                0;
 
 
-            const interval =
+            /*
+             * Progress animation.
+             */
+
+            const timer =
                 setInterval(
-                    () => {
+                    function () {
 
-                        value += 5;
+                        current += 5;
 
 
                         if (progress) {
 
                             progress.style.width =
-                                value + "%";
+                                current + "%";
 
                         }
 
 
-                        // Finish after approximately
-                        // one second.
+                        if (current >= 100) {
 
-                        if (value >= 100) {
+                            clearInterval(timer);
 
-                            clearInterval(
-                                interval
-                            );
-
-
-                            finishLoadingScreen();
+                            finishLoading();
 
                         }
 
@@ -493,10 +479,23 @@
 
 
         // =========================================
-        // FINISH LOADING SCREEN
+        // FINISH LOADING
         // =========================================
 
-        function finishLoadingScreen() {
+        function finishLoading() {
+
+            /*
+             * FIRST:
+             * Make the login page visible.
+             */
+
+            showLogin();
+
+
+            /*
+             * SECOND:
+             * Fade out the loading screen.
+             */
 
             const loadingScreen =
                 document.getElementById(
@@ -514,14 +513,19 @@
             );
 
 
+            /*
+             * Completely remove the loading
+             * screen after the fade.
+             */
+
             setTimeout(
-                () => {
+                function () {
 
                     loadingScreen.style.display =
                         "none";
 
                 },
-                350
+                400
             );
 
         }
@@ -529,19 +533,55 @@
 
 
         // =========================================
-        // SUPABASE INITIALIZATION
+        // SHOW LOGIN
+        // =========================================
+
+        function showLogin() {
+
+            const loginPage =
+                document.querySelector(
+                    ".login-page"
+                );
+
+
+            if (!loginPage) {
+                return;
+            }
+
+
+            loginPage.classList.add(
+                "ready"
+            );
+
+
+            /*
+             * Safety fallback.
+             */
+
+            loginPage.style.opacity =
+                "1";
+
+        }
+
+
+
+        // =========================================
+        // SUPABASE
         // =========================================
 
         function initializeSupabase() {
 
-            try {
+            /*
+             * Do NOT wait for this function
+             * before showing the website.
+             */
 
-                // Check Supabase library.
+            try {
 
                 if (!window.supabase) {
 
                     console.warn(
-                        "Supabase library did not load."
+                        "Supabase library unavailable."
                     );
 
                     return;
@@ -549,12 +589,9 @@
                 }
 
 
-                // Check URL.
-
                 if (
-                    !SUPABASE_URL ||
                     SUPABASE_URL ===
-                        "YOUR_SUPABASE_PROJECT_URL"
+                    "YOUR_SUPABASE_PROJECT_URL"
                 ) {
 
                     console.warn(
@@ -566,24 +603,19 @@
                 }
 
 
-                // Check key.
-
                 if (
-                    !SUPABASE_PUBLISHABLE_KEY ||
                     SUPABASE_PUBLISHABLE_KEY ===
-                        "YOUR_SUPABASE_PUBLISHABLE_KEY"
+                    "YOUR_SUPABASE_PUBLISHABLE_KEY"
                 ) {
 
                     console.warn(
-                        "Supabase publishable key has not been configured."
+                        "Supabase key has not been configured."
                     );
 
                     return;
 
                 }
 
-
-                // Create client.
 
                 supabaseClient =
                     window.supabase.createClient(
@@ -593,7 +625,7 @@
 
 
                 console.log(
-                    "Supabase initialized."
+                    "Supabase ready."
                 );
 
             }
@@ -601,7 +633,7 @@
             catch (error) {
 
                 console.error(
-                    "Supabase initialization failed:",
+                    "Supabase initialization error:",
                     error
                 );
 
@@ -630,34 +662,59 @@
 
             form.addEventListener(
                 "submit",
-                async event => {
+                async function (event) {
 
                     event.preventDefault();
 
 
                     const email =
-                        document
-                            .getElementById(
-                                "email"
-                            )
-                            ?.value
-                            .trim();
+                        document.getElementById(
+                            "email"
+                        ).value.trim();
 
 
                     const password =
-                        document
-                            .getElementById(
-                                "password"
-                            )
-                            ?.value;
+                        document.getElementById(
+                            "password"
+                        ).value;
 
 
                     const remember =
-                        document
-                            .getElementById(
-                                "remember"
-                            )
-                            ?.checked;
+                        document.getElementById(
+                            "remember"
+                        ).checked;
+
+
+                    if (
+                        !email ||
+                        !password
+                    ) {
+
+                        showMessage(
+                            "Please enter your email and password.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * Supabase must be ready only
+                     * when the user actually logs in.
+                     */
+
+                    if (!supabaseClient) {
+
+                        showMessage(
+                            "Login service is still starting. Please try again.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
 
 
                     const button =
@@ -670,36 +727,6 @@
                         document.getElementById(
                             "loginButtonText"
                         );
-
-
-                    if (
-                        !email ||
-                        !password
-                    ) {
-
-                        showLoginMessage(
-                            "Please enter your email and password.",
-                            "error"
-                        );
-
-                        return;
-
-                    }
-
-
-                    // Supabase may still be
-                    // initializing.
-
-                    if (!supabaseClient) {
-
-                        showLoginMessage(
-                            "Login system is still starting. Please try again in a moment.",
-                            "error"
-                        );
-
-                        return;
-
-                    }
 
 
                     if (button) {
@@ -750,13 +777,15 @@
                         ) {
 
                             throw new Error(
-                                "Unable to sign in."
+                                "Login failed."
                             );
 
                         }
 
 
-                        // Remember email.
+                        /*
+                         * Remember email.
+                         */
 
                         if (remember) {
 
@@ -776,7 +805,9 @@
                         }
 
 
-                        // Go to dashboard.
+                        /*
+                         * Send user to dashboard.
+                         */
 
                         window.location.href =
                             "./dashboard.html";
@@ -791,7 +822,7 @@
                         );
 
 
-                        showLoginMessage(
+                        showMessage(
                             error.message ||
                             "Unable to sign in.",
                             "error"
@@ -822,9 +853,9 @@
             );
 
 
-            // =====================================
-            // RESTORE REMEMBERED EMAIL
-            // =====================================
+            /*
+             * Restore remembered email.
+             */
 
             const rememberedEmail =
                 localStorage.getItem(
@@ -832,36 +863,34 @@
                 );
 
 
-            const emailInput =
-                document.getElementById(
-                    "email"
-                );
+            if (rememberedEmail) {
+
+                const emailInput =
+                    document.getElementById(
+                        "email"
+                    );
 
 
-            const rememberCheckbox =
-                document.getElementById(
-                    "remember"
-                );
+                const rememberCheckbox =
+                    document.getElementById(
+                        "remember"
+                    );
 
 
-            if (
-                rememberedEmail &&
-                emailInput
-            ) {
+                if (emailInput) {
 
-                emailInput.value =
-                    rememberedEmail;
+                    emailInput.value =
+                        rememberedEmail;
 
-            }
+                }
 
 
-            if (
-                rememberedEmail &&
-                rememberCheckbox
-            ) {
+                if (rememberCheckbox) {
 
-                rememberCheckbox.checked =
-                    true;
+                    rememberCheckbox.checked =
+                        true;
+
+                }
 
             }
 
@@ -870,10 +899,144 @@
 
 
         // =========================================
-        // LOGIN MESSAGE
+        // FORGOT PASSWORD
         // =========================================
 
-        function showLoginMessage(
+        function setupForgotPassword() {
+
+            const button =
+                document.getElementById(
+                    "forgotPassword"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            button.addEventListener(
+                "click",
+                async function (event) {
+
+                    event.preventDefault();
+
+
+                    const email =
+                        document.getElementById(
+                            "email"
+                        ).value.trim();
+
+
+                    if (!email) {
+
+                        showMessage(
+                            "Enter your email first.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (!supabaseClient) {
+
+                        showMessage(
+                            "Login service is still starting. Please try again.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    try {
+
+                        const {
+                            error
+                        } =
+                            await supabaseClient
+                                .auth
+                                .resetPasswordForEmail(
+                                    email
+                                );
+
+
+                        if (error) {
+
+                            throw error;
+
+                        }
+
+
+                        showMessage(
+                            "Password reset email sent.",
+                            "success"
+                        );
+
+                    }
+
+                    catch (error) {
+
+                        console.error(
+                            "Password reset error:",
+                            error
+                        );
+
+
+                        showMessage(
+                            error.message ||
+                            "Unable to send password reset email.",
+                            "error"
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+
+        // =========================================
+        // INVITE BUTTON
+        // =========================================
+
+        function setupInvite() {
+
+            const button =
+                document.getElementById(
+                    "requestInviteButton"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    window.location.href =
+                        "https://voiddrecords.github.io/";
+
+                }
+            );
+
+        }
+
+
+
+        // =========================================
+        // MESSAGE
+        // =========================================
+
+        function showMessage(
             text,
             type
         ) {
@@ -894,144 +1057,21 @@
 
 
             message.className =
-                "login-message " +
-                type;
-
-        }
+                "login-message";
 
 
+            if (type) {
 
-        // =========================================
-        // FORGOT PASSWORD
-        // =========================================
-
-        function setupForgotPassword() {
-
-            const button =
-                document.getElementById(
-                    "forgotPassword"
+                message.classList.add(
+                    type
                 );
 
-
-            button?.addEventListener(
-                "click",
-                async event => {
-
-                    event.preventDefault();
-
-
-                    if (!supabaseClient) {
-
-                        showLoginMessage(
-                            "Login system is still starting. Please try again.",
-                            "error"
-                        );
-
-                        return;
-
-                    }
-
-
-                    const email =
-                        document
-                            .getElementById(
-                                "email"
-                            )
-                            ?.value
-                            .trim();
-
-
-                    if (!email) {
-
-                        showLoginMessage(
-                            "Enter your email address first.",
-                            "error"
-                        );
-
-                        return;
-
-                    }
-
-
-                    try {
-
-                        const {
-                            error
-                        } =
-                            await supabaseClient
-                                .auth
-                                .resetPasswordForEmail(
-                                    email,
-                                    {
-                                        redirectTo:
-                                            window.location.origin +
-                                            "/distribution/reset-password.html"
-                                    }
-                                );
-
-
-                        if (error) {
-
-                            throw error;
-
-                        }
-
-
-                        showLoginMessage(
-                            "Password reset email sent.",
-                            "success"
-                        );
-
-                    }
-
-                    catch (error) {
-
-                        console.error(
-                            "Password reset error:",
-                            error
-                        );
-
-
-                        showLoginMessage(
-                            error.message ||
-                            "Unable to send reset email.",
-                            "error"
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-
-
-
-        // =========================================
-        // REQUEST INVITE
-        // =========================================
-
-        function setupInviteButton() {
-
-            const button =
-                document.getElementById(
-                    "requestInviteButton"
-                );
-
-
-            button?.addEventListener(
-                "click",
-                () => {
-
-                    window.location.href =
-                        "https://voiddrecords.github.io/";
-
-                }
-            );
+            }
 
         }
 
     </script>
+
 
 </body>
 
