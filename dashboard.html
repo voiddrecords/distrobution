@@ -20,14 +20,16 @@
 
     <link
         rel="stylesheet"
-        href="./css/dashboard.css?v=3"
+        href="./css/dashboard.css?v=4"
     >
 
 </head>
 
 <body>
 
-    <!-- SIDEBAR -->
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
 
     <aside class="sidebar">
 
@@ -56,7 +58,7 @@
                     data-section="releases"
                     type="button"
                 >
-                    RELEASES
+                    RELEASE INBOX
                 </button>
 
                 <button
@@ -79,6 +81,7 @@
 
         </div>
 
+
         <div class="sidebar-bottom">
 
             <button
@@ -94,7 +97,9 @@
     </aside>
 
 
-    <!-- MAIN DASHBOARD -->
+    <!-- =========================================
+         MAIN DASHBOARD
+    ========================================== -->
 
     <main class="dashboard">
 
@@ -122,7 +127,9 @@
         </header>
 
 
-        <!-- OVERVIEW -->
+        <!-- =====================================
+             OVERVIEW
+        ====================================== -->
 
         <section
             class="dashboard-section active-section"
@@ -140,8 +147,9 @@
                 </h2>
 
                 <p>
-                    Manage your releases, artists,
-                    catalog and distribution from here.
+                    Review artist submissions,
+                    manage your roster and prepare
+                    approved releases for distribution.
                 </p>
 
             </div>
@@ -152,7 +160,7 @@
                 <div class="stat-card">
 
                     <span>
-                        RELEASES
+                        TOTAL RELEASES
                     </span>
 
                     <strong id="releaseCount">
@@ -165,11 +173,11 @@
                 <div class="stat-card">
 
                     <span>
-                        DISTRIBUTION STATUS
+                        PENDING REVIEW
                     </span>
 
-                    <strong>
-                        READY
+                    <strong id="pendingReleaseCount">
+                        0
                     </strong>
 
                 </div>
@@ -192,7 +200,9 @@
         </section>
 
 
-        <!-- RELEASES -->
+        <!-- =====================================
+             RELEASE INBOX
+        ====================================== -->
 
         <section
             class="dashboard-section"
@@ -204,22 +214,18 @@
                 <div>
 
                     <p class="eyebrow">
-                        DISTRIBUTION
+                        ARTIST SUBMISSIONS
                     </p>
 
                     <h2>
-                        Releases
+                        Release Inbox
                     </h2>
 
                 </div>
 
-                <button
-                    class="primary-button"
-                    id="createReleaseButton"
-                    type="button"
-                >
-                    CREATE RELEASE
-                </button>
+                <div class="inbox-label">
+                    OWNER / A&R REVIEW
+                </div>
 
             </div>
 
@@ -231,12 +237,7 @@
 
                 <div class="empty-state">
 
-                    No releases yet.
-
-                    <br><br>
-
-                    Create your first release to
-                    begin building your catalog.
+                    Loading releases...
 
                 </div>
 
@@ -245,7 +246,9 @@
         </section>
 
 
-        <!-- ARTISTS -->
+        <!-- =====================================
+             ARTISTS
+        ====================================== -->
 
         <section
             class="dashboard-section"
@@ -287,12 +290,7 @@
                     id="artistEmptyState"
                 >
 
-                    No artists added yet.
-
-                    <br><br>
-
-                    Add an artist to begin managing
-                    their releases and distribution.
+                    Loading artists...
 
                 </div>
 
@@ -301,7 +299,9 @@
         </section>
 
 
-        <!-- CATALOG -->
+        <!-- =====================================
+             CATALOG
+        ====================================== -->
 
         <section
             class="dashboard-section"
@@ -327,7 +327,8 @@
 
             <div class="empty-state">
 
-                Your catalog will appear here.
+                Approved releases will appear
+                in your catalog.
 
             </div>
 
@@ -336,122 +337,9 @@
     </main>
 
 
-    <!-- CREATE RELEASE MODAL -->
-
-    <div
-        class="modal hidden"
-        id="releaseModal"
-    >
-
-        <div class="modal-box">
-
-            <button
-                class="modal-close"
-                id="closeReleaseModal"
-                type="button"
-            >
-                ×
-            </button>
-
-            <p class="eyebrow">
-                DISTRIBUTION
-            </p>
-
-            <h2>
-                Create Release
-            </h2>
-
-
-            <form id="releaseForm">
-
-                <label for="releaseTitle">
-                    RELEASE TITLE
-                </label>
-
-                <input
-                    type="text"
-                    id="releaseTitle"
-                    name="title"
-                    placeholder="Release title"
-                    required
-                >
-
-
-                <label for="artistName">
-                    ARTIST
-                </label>
-
-                <input
-                    type="text"
-                    id="artistName"
-                    name="artist"
-                    placeholder="Artist name"
-                    required
-                >
-
-
-                <label for="releaseType">
-                    RELEASE TYPE
-                </label>
-
-                <select
-                    id="releaseType"
-                    name="release_type"
-                >
-
-                    <option value="Single">
-                        Single
-                    </option>
-
-                    <option value="EP">
-                        EP
-                    </option>
-
-                    <option value="Album">
-                        Album
-                    </option>
-
-                </select>
-
-
-                <label for="releaseDate">
-                    RELEASE DATE
-                </label>
-
-                <input
-                    type="date"
-                    id="releaseDate"
-                    name="release_date"
-                    required
-                >
-
-
-                <label for="releaseDescription">
-                    DESCRIPTION
-                </label>
-
-                <textarea
-                    id="releaseDescription"
-                    name="description"
-                    placeholder="Optional release description"
-                ></textarea>
-
-
-                <button
-                    type="submit"
-                    class="primary-button full"
-                >
-                    CREATE RELEASE
-                </button>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    <!-- ADD ARTIST MODAL -->
+    <!-- =========================================
+         ADD ARTIST MODAL
+    ========================================== -->
 
     <div
         class="modal hidden"
@@ -468,9 +356,11 @@
                 ×
             </button>
 
+
             <p class="eyebrow">
                 ARTIST MANAGEMENT
             </p>
+
 
             <h2>
                 Add Artist
@@ -479,9 +369,11 @@
 
             <form id="artistForm">
 
+
                 <label for="newArtistName">
                     ARTIST NAME
                 </label>
+
 
                 <input
                     type="text"
@@ -496,6 +388,7 @@
                     FIRST NAME
                 </label>
 
+
                 <input
                     type="text"
                     id="artistFirstName"
@@ -509,6 +402,7 @@
                     LAST NAME
                 </label>
 
+
                 <input
                     type="text"
                     id="artistLastName"
@@ -521,6 +415,7 @@
                 <label for="artistEmail">
                     PORTAL EMAIL
                 </label>
+
 
                 <input
                     type="email"
@@ -553,16 +448,23 @@
     </div>
 
 
-    <!-- SUPABASE -->
+    <!-- =========================================
+         SUPABASE
+    ========================================== -->
 
     <script
         src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
 
 
-    <!-- DASHBOARD JS -->
+    <!-- YOUR SUPABASE CONFIG -->
 
-    <script src="./js/dashboard.js?v=3"></script>
+    <script src="./js/supabase.js"></script>
+
+
+    <!-- DASHBOARD JAVASCRIPT -->
+
+    <script src="./js/dashboard.js?v=4"></script>
 
 </body>
 
