@@ -12,7 +12,7 @@ let supabaseClient = null;
 
 
 // =========================================
-// ELEMENTS
+// PAGE ELEMENTS
 // =========================================
 
 const loadingScreen =
@@ -47,10 +47,10 @@ const forgotPassword =
 
 
 // =========================================
-// START PAGE IMMEDIATELY
+// SHOW LOGIN PAGE
 // =========================================
 
-function showPage() {
+function showLoginPage() {
 
     if (loadingProgress) {
         loadingProgress.style.width = "100%";
@@ -60,60 +60,40 @@ function showPage() {
         loginPage.classList.add("ready");
     }
 
-    setTimeout(() => {
-
-        if (loadingScreen) {
-            loadingScreen.classList.add("fade-out");
-        }
-
-    }, 150);
+    if (loadingScreen) {
+        loadingScreen.classList.add("fade-out");
+    }
 
 }
 
 
-// Never wait for Supabase.
-setTimeout(showPage, 900);
+// =========================================
+// DO NOT WAIT FOR SUPABASE
+// =========================================
+
+showLoginPage();
 
 
 // =========================================
-// SLOW MESSAGE
-// =========================================
-
-setTimeout(() => {
-
-    if (
-        slowMessage &&
-        loadingScreen &&
-        !loadingScreen.classList.contains("fade-out")
-    ) {
-
-        slowMessage.classList.add("show");
-
-    }
-
-}, 3000);
-
-
-// =========================================
-// SUPABASE
+// SUPABASE INITIALIZATION
 // =========================================
 
 function initializeSupabase() {
 
-    if (
-        !window.supabase ||
-        typeof window.supabase.createClient !== "function"
-    ) {
-
-        console.error(
-            "Supabase JavaScript library did not load."
-        );
-
-        return false;
-
-    }
-
     try {
+
+        if (
+            !window.supabase ||
+            typeof window.supabase.createClient !== "function"
+        ) {
+
+            console.error(
+                "Supabase library unavailable."
+            );
+
+            return;
+
+        }
 
         supabaseClient =
             window.supabase.createClient(
@@ -122,29 +102,28 @@ function initializeSupabase() {
             );
 
         console.log(
-            "VoidRecords: Supabase initialized."
+            "VoidRecords Supabase ready."
         );
-
-        return true;
 
     } catch (error) {
 
         console.error(
-            "Supabase initialization error:",
+            "Supabase initialization failed:",
             error
         );
-
-        return false;
 
     }
 
 }
 
 
-// Initialize separately.
-// The page does NOT wait for this.
+// Initialize AFTER displaying the page.
+// It cannot hold up the login screen.
 
-initializeSupabase();
+setTimeout(
+    initializeSupabase,
+    0
+);
 
 
 // =========================================
@@ -157,7 +136,31 @@ function showLoginMessage(message) {
         return;
     }
 
-    loginMessage.textContent = message;
+    loginMessage.textContent =
+        message;
+
+}
+
+
+// =========================================
+// RESET LOGIN BUTTON
+// =========================================
+
+function resetLoginButton() {
+
+    if (loginButton) {
+        loginButton.disabled = false;
+    }
+
+    if (loginButtonText) {
+        loginButtonText.textContent =
+            "SIGN IN";
+    }
+
+    if (loginArrow) {
+        loginArrow.textContent =
+            "→";
+    }
 
 }
 
@@ -173,17 +176,6 @@ if (loginForm) {
         async function(event) {
 
             event.preventDefault();
-
-
-            if (!supabaseClient) {
-
-                showLoginMessage(
-                    "Login service is unavailable. Please refresh."
-                );
-
-                return;
-
-            }
 
 
             const emailInput =
@@ -211,20 +203,32 @@ if (loginForm) {
             }
 
 
-            // Button loading
+            // Supabase isn't ready yet.
+
+            if (!supabaseClient) {
+
+                showLoginMessage(
+                    "Login service is starting. Please try again."
+                );
+
+                return;
+
+            }
+
 
             if (loginButton) {
                 loginButton.disabled = true;
             }
 
             if (loginButtonText) {
-                loginButtonText.textContent = "SIGNING IN";
+                loginButtonText.textContent =
+                    "SIGNING IN";
             }
 
             if (loginArrow) {
-                loginArrow.textContent = "…";
+                loginArrow.textContent =
+                    "…";
             }
-
 
             showLoginMessage("");
 
@@ -235,19 +239,20 @@ if (loginForm) {
                     data,
                     error
                 } =
-                    await supabaseClient.auth.signInWithPassword({
+                    await supabaseClient.auth
+                        .signInWithPassword({
 
-                        email: email,
+                            email: email,
 
-                        password: password
+                            password: password
 
-                    });
+                        });
 
 
                 if (error) {
 
                     console.error(
-                        "VoidRecords login error:",
+                        "Login error:",
                         error
                     );
 
@@ -273,7 +278,8 @@ if (loginForm) {
                     }
 
                     if (loginArrow) {
-                        loginArrow.textContent = "✓";
+                        loginArrow.textContent =
+                            "✓";
                     }
 
 
@@ -286,7 +292,7 @@ if (loginForm) {
 
 
                 showLoginMessage(
-                    "Login failed. Please try again."
+                    "Unable to sign in. Please try again."
                 );
 
                 resetLoginButton();
@@ -300,7 +306,7 @@ if (loginForm) {
                 );
 
                 showLoginMessage(
-                    "Unable to sign in. Please try again."
+                    "Unable to connect to the login service."
                 );
 
                 resetLoginButton();
@@ -309,27 +315,6 @@ if (loginForm) {
 
         }
     );
-
-}
-
-
-// =========================================
-// RESET BUTTON
-// =========================================
-
-function resetLoginButton() {
-
-    if (loginButton) {
-        loginButton.disabled = false;
-    }
-
-    if (loginButtonText) {
-        loginButtonText.textContent = "SIGN IN";
-    }
-
-    if (loginArrow) {
-        loginArrow.textContent = "→";
-    }
 
 }
 
@@ -345,17 +330,6 @@ if (forgotPassword) {
         async function(event) {
 
             event.preventDefault();
-
-
-            if (!supabaseClient) {
-
-                showLoginMessage(
-                    "Password reset is currently unavailable."
-                );
-
-                return;
-
-            }
 
 
             const emailInput =
@@ -376,19 +350,31 @@ if (forgotPassword) {
             }
 
 
+            if (!supabaseClient) {
+
+                showLoginMessage(
+                    "Password reset is still starting. Please try again."
+                );
+
+                return;
+
+            }
+
+
             try {
 
                 const {
                     error
                 } =
-                    await supabaseClient.auth.resetPasswordForEmail(
-                        email,
-                        {
-                            redirectTo:
-                                window.location.origin +
-                                window.location.pathname
-                        }
-                    );
+                    await supabaseClient.auth
+                        .resetPasswordForEmail(
+                            email,
+                            {
+                                redirectTo:
+                                    window.location.origin +
+                                    "/distribution/"
+                            }
+                        );
 
 
                 if (error) {
