@@ -1,12 +1,5 @@
 // =========================================
-// VOIDRECORDS LOGIN
-// =========================================
-// Supabase is OPTIONAL during page startup.
-//
-// The loading screen NEVER waits for Supabase.
-// The login page appears immediately.
-//
-// Supabase is initialized in the background.
+// VOIDRECORDS LOGIN SYSTEM
 // =========================================
 
 
@@ -23,15 +16,6 @@ const SUPABASE_PUBLISHABLE_KEY =
 
 let supabaseClient = null;
 
-let supabaseReady = false;
-
-
-// =========================================
-// SETTINGS
-// =========================================
-
-const LOADING_TIME = 1000;
-
 
 // =========================================
 // PAGE START
@@ -39,31 +23,25 @@ const LOADING_TIME = 1000;
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    function () {
 
         console.log(
-            "VoidRecords starting..."
+            "VoidRecords login page started."
         );
 
 
-        // Set up the login interface immediately.
+        // Set up login immediately.
 
         setupLogin();
 
         setupForgotPassword();
 
-        setupInviteButton();
-
         setupRememberMe();
 
-
-        // IMPORTANT:
-        // Do NOT wait for Supabase here.
-
-        startLoadingScreen();
+        setupInviteButton();
 
 
-        // Start Supabase separately.
+        // Supabase starts separately.
 
         initializeSupabase();
 
@@ -72,193 +50,28 @@ document.addEventListener(
 
 
 // =========================================
-// LOADING SCREEN
-// =========================================
-// This function has NOTHING to do with
-// Supabase.
-// =========================================
-
-function startLoadingScreen() {
-
-    const loadingScreen =
-        document.getElementById(
-            "loadingScreen"
-        );
-
-
-    const loadingProgress =
-        document.getElementById(
-            "loadingProgress"
-        );
-
-
-    const loginPage =
-        document.getElementById(
-            "loginPage"
-        );
-
-
-    if (!loadingScreen) {
-        return;
-    }
-
-
-    // Start progress.
-
-    if (loadingProgress) {
-
-        loadingProgress.style.width =
-            "0%";
-
-
-        setTimeout(
-            () => {
-
-                loadingProgress.style.width =
-                    "45%";
-
-            },
-            100
-        );
-
-
-        setTimeout(
-            () => {
-
-                loadingProgress.style.width =
-                    "80%";
-
-            },
-            350
-        );
-
-
-        setTimeout(
-            () => {
-
-                loadingProgress.style.width =
-                    "100%";
-
-            },
-            650
-        );
-
-    }
-
-
-    // ALWAYS finish loading after
-    // approximately one second.
-
-    setTimeout(
-        () => {
-
-            loadingScreen.classList.add(
-                "fade-out"
-            );
-
-
-            if (loginPage) {
-
-                loginPage.classList.add(
-                    "ready"
-                );
-
-            }
-
-
-            console.log(
-                "VoidRecords interface ready."
-            );
-
-
-        },
-        LOADING_TIME
-    );
-
-
-    // Show slow message only if something
-    // genuinely takes longer than expected.
-
-    setTimeout(
-        () => {
-
-            if (
-                !loadingScreen.classList.contains(
-                    "fade-out"
-                )
-            ) {
-
-                const message =
-                    document.getElementById(
-                        "slowMessage"
-                    );
-
-
-                message?.classList.add(
-                    "show"
-                );
-
-            }
-
-        },
-        3000
-    );
-
-}
-
-
-// =========================================
 // SUPABASE INITIALIZATION
 // =========================================
 
-async function initializeSupabase() {
+function initializeSupabase() {
 
-    console.log(
-        "Starting Supabase in background..."
-    );
-
-
-    // Give the CDN a short amount of time
-    // to become available.
-
-    let attempts = 0;
-
-    const maxAttempts = 20;
-
-
-    while (
-        !window.supabase &&
-        attempts < maxAttempts
-    ) {
-
-        await sleep(100);
-
-        attempts++;
-
-    }
-
-
-    // Supabase CDN failed.
+    /*
+     * IMPORTANT:
+     *
+     * This function does NOT control
+     * the loading screen.
+     */
 
     if (!window.supabase) {
 
         console.error(
-            "Supabase library failed to load."
+            "Supabase library did not load."
         );
-
-
-        showLoginMessage(
-            "Login service is unavailable. Please refresh.",
-            "error"
-        );
-
 
         return;
 
     }
 
-
-    // Create Supabase client.
 
     try {
 
@@ -269,12 +82,12 @@ async function initializeSupabase() {
             );
 
 
-        supabaseReady = true;
-
-
         console.log(
-            "Supabase initialized successfully."
+            "Supabase initialized."
         );
+
+
+        checkExistingSession();
 
 
     } catch (error) {
@@ -284,38 +97,19 @@ async function initializeSupabase() {
             error
         );
 
-
-        showLoginMessage(
-            "Login service could not start.",
-            "error"
-        );
-
-
-        return;
-
     }
-
-
-    // Check whether the user is already logged in.
-
-    await checkExistingSession();
 
 }
 
 
 // =========================================
-// CHECK EXISTING SESSION
+// EXISTING SESSION
 // =========================================
 
 async function checkExistingSession() {
 
-    if (
-        !supabaseClient ||
-        !supabaseReady
-    ) {
-
+    if (!supabaseClient) {
         return;
-
     }
 
 
@@ -340,14 +134,10 @@ async function checkExistingSession() {
         }
 
 
-        const session =
-            data?.session;
-
-
-        if (session) {
+        if (data?.session) {
 
             console.log(
-                "Existing session found."
+                "Existing session detected."
             );
 
 
@@ -359,7 +149,7 @@ async function checkExistingSession() {
     } catch (error) {
 
         console.error(
-            "Existing session check failed:",
+            "Session error:",
             error
         );
 
@@ -369,7 +159,7 @@ async function checkExistingSession() {
 
 
 // =========================================
-// LOGIN
+// LOGIN SETUP
 // =========================================
 
 function setupLogin() {
@@ -387,7 +177,7 @@ function setupLogin() {
 
     form.addEventListener(
         "submit",
-        async event => {
+        async function (event) {
 
             event.preventDefault();
 
@@ -403,7 +193,7 @@ function setupLogin() {
 
 
 // =========================================
-// LOGIN USER
+// LOGIN
 // =========================================
 
 async function loginUser(form) {
@@ -429,13 +219,14 @@ async function loginUser(form) {
     clearLoginMessage();
 
 
-    // Make sure Supabase has had time
-    // to initialize.
+    // =========================================
+    // CHECK SUPABASE
+    // =========================================
 
     if (!supabaseClient) {
 
         showLoginMessage(
-            "Login service is still starting. Please try again in a moment.",
+            "Login service is unavailable. Please refresh and try again.",
             "error"
         );
 
@@ -466,10 +257,14 @@ async function loginUser(form) {
         )?.checked;
 
 
-    if (!email || !password) {
+    // =========================================
+    // VALIDATION
+    // =========================================
+
+    if (!email) {
 
         showLoginMessage(
-            "Please enter your email and password.",
+            "Please enter your email.",
             "error"
         );
 
@@ -478,7 +273,21 @@ async function loginUser(form) {
     }
 
 
-    // Disable button.
+    if (!password) {
+
+        showLoginMessage(
+            "Please enter your password.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    // =========================================
+    // BUTTON LOADING
+    // =========================================
 
     if (button) {
 
@@ -506,7 +315,7 @@ async function loginUser(form) {
     try {
 
         console.log(
-            "Attempting login..."
+            "Signing in..."
         );
 
 
@@ -527,34 +336,23 @@ async function loginUser(form) {
 
         if (error) {
 
-            console.error(
-                "Login failed:",
-                error
-            );
+            throw error;
 
+        }
+
+
+        if (!data?.user) {
 
             throw new Error(
-                getFriendlyAuthError(
-                    error
-                )
+                "Login failed."
             );
 
         }
 
 
-        if (
-            !data ||
-            !data.user
-        ) {
-
-            throw new Error(
-                "Login failed. No user account was returned."
-            );
-
-        }
-
-
-        // Remember-me behavior.
+        // =========================================
+        // REMEMBER ME
+        // =========================================
 
         if (remember) {
 
@@ -562,6 +360,7 @@ async function loginUser(form) {
                 "voidrecords_remember",
                 "true"
             );
+
 
             localStorage.setItem(
                 "voidrecords_email",
@@ -574,6 +373,7 @@ async function loginUser(form) {
                 "voidrecords_remember"
             );
 
+
             localStorage.removeItem(
                 "voidrecords_email"
             );
@@ -582,35 +382,38 @@ async function loginUser(form) {
 
 
         showLoginMessage(
-            "Login successful. Opening dashboard...",
+            "Login successful.",
             "success"
         );
 
 
-        // Small delay so the message is visible.
+        // =========================================
+        // GO TO DASHBOARD
+        // =========================================
 
         setTimeout(
-            () => {
+            function () {
 
                 window.location.href =
                     "./dashboard.html";
 
             },
-            400
+            300
         );
 
 
     } catch (error) {
 
         console.error(
-            "Authentication error:",
+            "Login error:",
             error
         );
 
 
         showLoginMessage(
-            error.message ||
-            "Unable to sign in.",
+            getFriendlyAuthError(
+                error
+            ),
             "error"
         );
 
@@ -659,7 +462,7 @@ function setupForgotPassword() {
 
     button?.addEventListener(
         "click",
-        async event => {
+        async function (event) {
 
             event.preventDefault();
 
@@ -670,7 +473,7 @@ function setupForgotPassword() {
             if (!supabaseClient) {
 
                 showLoginMessage(
-                    "Login service is still starting. Please try again.",
+                    "Login service is unavailable. Please try again.",
                     "error"
                 );
 
@@ -692,7 +495,7 @@ function setupForgotPassword() {
             if (!email) {
 
                 showLoginMessage(
-                    "Enter your email first, then click Forgot.",
+                    "Enter your email first.",
                     "error"
                 );
 
@@ -726,7 +529,7 @@ function setupForgotPassword() {
 
 
                 showLoginMessage(
-                    "Password reset instructions have been sent to your email.",
+                    "Password reset instructions sent.",
                     "success"
                 );
 
@@ -759,27 +562,26 @@ function setupForgotPassword() {
 
 function setupRememberMe() {
 
-    const remember =
-        document.getElementById(
-            "remember"
-        );
-
-
     const emailInput =
         document.getElementById(
             "email"
         );
 
 
-    if (!remember || !emailInput) {
-        return;
-    }
-
-
-    const remembered =
-        localStorage.getItem(
-            "voidrecords_remember"
+    const remember =
+        document.getElementById(
+            "remember"
         );
+
+
+    if (
+        !emailInput ||
+        !remember
+    ) {
+
+        return;
+
+    }
 
 
     const savedEmail =
@@ -788,9 +590,15 @@ function setupRememberMe() {
         );
 
 
+    const shouldRemember =
+        localStorage.getItem(
+            "voidrecords_remember"
+        );
+
+
     if (
-        remembered === "true" &&
-        savedEmail
+        savedEmail &&
+        shouldRemember === "true"
     ) {
 
         emailInput.value =
@@ -824,17 +632,15 @@ function setupInviteButton() {
 
     button.addEventListener(
         "click",
-        () => {
+        function () {
 
-            // CHANGE THIS to your actual
-            // VoidRecords invite/request page.
-
-            const inviteUrl =
-                "https://voiddrecords.github.io/";
-
+            /*
+             * Change this URL to your
+             * actual VoidRecords invite page.
+             */
 
             window.location.href =
-                inviteUrl;
+                "https://voiddrecords.github.io/";
 
         }
     );
@@ -848,7 +654,7 @@ function setupInviteButton() {
 
 function showLoginMessage(
     message,
-    type = "error"
+    type
 ) {
 
     const element =
@@ -872,7 +678,7 @@ function showLoginMessage(
 
     element.className =
         "login-message " +
-        type;
+        (type || "error");
 
 }
 
@@ -905,7 +711,7 @@ function clearLoginMessage() {
 
 
 // =========================================
-// AUTH ERROR TRANSLATOR
+// FRIENDLY AUTH ERRORS
 // =========================================
 
 function getFriendlyAuthError(
@@ -946,7 +752,7 @@ function getFriendlyAuthError(
         )
     ) {
 
-        return "Too many login attempts. Please wait a moment and try again.";
+        return "Too many attempts. Please wait and try again.";
 
     }
 
@@ -965,25 +771,6 @@ function getFriendlyAuthError(
     return (
         error?.message ||
         "Unable to sign in."
-    );
-
-}
-
-
-// =========================================
-// SLEEP
-// =========================================
-
-function sleep(
-    milliseconds
-) {
-
-    return new Promise(
-        resolve =>
-            setTimeout(
-                resolve,
-                milliseconds
-            )
     );
 
 }
