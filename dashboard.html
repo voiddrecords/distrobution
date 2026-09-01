@@ -3,153 +3,81 @@
 
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>VoidRecords — Dashboard</title>
 
-    <link
-        rel="icon"
-        type="image/png"
-        href="./favicon.png"
-    >
-
-    <link
-        rel="stylesheet"
-        href="./css/dashboard.css?v=2"
-    >
+    <link rel="icon" type="image/png" href="./favicon.png">
+    <link rel="stylesheet" href="./css/dashboard.css?v=3">
 </head>
 
 <body>
 
-    <!-- =========================================
-         SIDEBAR
-    ========================================== -->
-
+    <!-- SIDEBAR -->
     <aside class="sidebar">
 
         <div>
-
-            <div class="sidebar-brand">
-                VOIDRECORDS
-            </div>
-
-            <div class="portal-label">
-                DISTRIBUTION PORTAL
-            </div>
+            <div class="sidebar-brand">VOIDRECORDS</div>
+            <div class="portal-label">DISTRIBUTION PORTAL</div>
 
             <nav>
-
-                <button
-                    class="nav-item active"
-                    data-section="overview"
-                    type="button"
-                >
+                <button class="nav-item active" data-section="overview" type="button">
                     OVERVIEW
                 </button>
 
-                <button
-                    class="nav-item"
-                    data-section="releases"
-                    type="button"
-                >
+                <button class="nav-item" data-section="releases" type="button">
                     RELEASES
                 </button>
 
-                <button
-                    class="nav-item"
-                    data-section="artists"
-                    type="button"
-                >
+                <button class="nav-item" data-section="artists" type="button">
                     ARTISTS
                 </button>
 
-                <button
-                    class="nav-item"
-                    data-section="catalog"
-                    type="button"
-                >
+                <button class="nav-item" data-section="catalog" type="button">
                     CATALOG
                 </button>
-
             </nav>
-
         </div>
 
-
         <div class="sidebar-bottom">
-
-            <button
-                class="logout-button"
-                id="logoutButton"
-                type="button"
-            >
+            <button class="logout-button" id="logoutButton" type="button">
                 SIGN OUT
             </button>
-
         </div>
 
     </aside>
 
 
-    <!-- =========================================
-         DASHBOARD
-    ========================================== -->
-
+    <!-- DASHBOARD -->
     <main class="dashboard">
-
-        <!-- HEADER -->
 
         <header class="dashboard-header">
 
             <div>
-
-                <p class="eyebrow">
-                    VOIDRECORDS
-                </p>
-
-                <h1>
-                    Dashboard
-                </h1>
-
+                <p class="eyebrow">VOIDRECORDS</p>
+                <h1>Dashboard</h1>
             </div>
 
-            <div
-                class="user-area"
-                id="userEmail"
-            >
+            <div class="user-area" id="userEmail">
                 Loading...
             </div>
 
         </header>
 
 
-        <!-- =====================================
-             OVERVIEW
-        ====================================== -->
-
-        <section
-            class="dashboard-section active-section"
-            id="overview"
-        >
+        <!-- OVERVIEW -->
+        <section class="dashboard-section active-section" id="overview">
 
             <div class="welcome-card">
 
-                <p class="eyebrow">
-                    DISTRIBUTION PORTAL
-                </p>
+                <p class="eyebrow">DISTRIBUTION PORTAL</p>
 
                 <h2>
                     Welcome, <span id="welcomeName">there</span>.
                 </h2>
 
                 <p>
-                    Manage your releases,
-                    artists, catalog and
-                    distribution from here.
+                    Manage your releases, artists, catalog and distribution from here.
                 </p>
 
             </div>
@@ -158,41 +86,18 @@
             <div class="stats-grid">
 
                 <div class="stat-card">
-
-                    <span>
-                        RELEASES
-                    </span>
-
-                    <strong id="releaseCount">
-                        0
-                    </strong>
-
+                    <span>RELEASES</span>
+                    <strong id="releaseCount">0</strong>
                 </div>
 
-
                 <div class="stat-card">
-
-                    <span>
-                        DISTRIBUTION STATUS
-                    </span>
-
-                    <strong>
-                        READY
-                    </strong>
-
+                    <span>DISTRIBUTION STATUS</span>
+                    <strong>READY</strong>
                 </div>
 
-
                 <div class="stat-card">
-
-                    <span>
-                        ACCOUNT
-                    </span>
-
-                    <strong>
-                        ACTIVE
-                    </strong>
-
+                    <span>ACCOUNT</span>
+                    <strong>ACTIVE</strong>
                 </div>
 
             </div>
@@ -200,29 +105,15 @@
         </section>
 
 
-        <!-- =====================================
-             RELEASES
-        ====================================== -->
-
-        <section
-            class="dashboard-section"
-            id="releases"
-        >
+        <!-- RELEASES -->
+        <section class="dashboard-section" id="releases">
 
             <div class="section-header">
 
                 <div>
-
-                    <p class="eyebrow">
-                        DISTRIBUTION
-                    </p>
-
-                    <h2>
-                        Releases
-                    </h2>
-
+                    <p class="eyebrow">DISTRIBUTION</p>
+                    <h2>Releases</h2>
                 </div>
-
 
                 <button
                     class="primary-button"
@@ -235,20 +126,10 @@
             </div>
 
 
-            <div
-                class="card-list"
-                id="releaseList"
-            >
+            <div class="card-list" id="releaseList">
 
                 <div class="empty-state">
-
-                    No releases yet.
-
-                    <br><br>
-
-                    Create your first release to
-                    begin building your catalog.
-
+                    Loading releases...
                 </div>
 
             </div>
@@ -256,29 +137,15 @@
         </section>
 
 
-        <!-- =====================================
-             ARTISTS
-        ====================================== -->
-
-        <section
-            class="dashboard-section"
-            id="artists"
-        >
+        <!-- ARTISTS -->
+        <section class="dashboard-section" id="artists">
 
             <div class="section-header">
 
                 <div>
-
-                    <p class="eyebrow">
-                        MANAGEMENT
-                    </p>
-
-                    <h2>
-                        Artists
-                    </h2>
-
+                    <p class="eyebrow">MANAGEMENT</p>
+                    <h2>Artists</h2>
                 </div>
-
 
                 <button
                     class="primary-button"
@@ -291,23 +158,10 @@
             </div>
 
 
-            <div
-                class="card-list"
-                id="artistList"
-            >
+            <div class="card-list" id="artistList">
 
-                <div
-                    class="empty-state"
-                    id="artistEmptyState"
-                >
-
-                    No artists added yet.
-
-                    <br><br>
-
-                    Add an artist to begin managing
-                    their releases and distribution.
-
+                <div class="empty-state">
+                    Loading artists...
                 </div>
 
             </div>
@@ -315,36 +169,20 @@
         </section>
 
 
-        <!-- =====================================
-             CATALOG
-        ====================================== -->
-
-        <section
-            class="dashboard-section"
-            id="catalog"
-        >
+        <!-- CATALOG -->
+        <section class="dashboard-section" id="catalog">
 
             <div class="section-header">
 
                 <div>
-
-                    <p class="eyebrow">
-                        LIBRARY
-                    </p>
-
-                    <h2>
-                        Catalog
-                    </h2>
-
+                    <p class="eyebrow">LIBRARY</p>
+                    <h2>Catalog</h2>
                 </div>
 
             </div>
 
-
             <div class="empty-state">
-
                 Your catalog will appear here.
-
             </div>
 
         </section>
@@ -352,14 +190,8 @@
     </main>
 
 
-    <!-- =========================================
-         CREATE RELEASE MODAL
-    ========================================== -->
-
-    <div
-        class="modal hidden"
-        id="releaseModal"
-    >
+    <!-- CREATE RELEASE MODAL -->
+    <div class="modal hidden" id="releaseModal">
 
         <div class="modal-box">
 
@@ -371,14 +203,9 @@
                 ×
             </button>
 
+            <p class="eyebrow">DISTRIBUTION</p>
 
-            <p class="eyebrow">
-                DISTRIBUTION
-            </p>
-
-            <h2>
-                Create Release
-            </h2>
+            <h2>Create Release</h2>
 
 
             <form id="releaseForm">
@@ -416,20 +243,11 @@
                 <select
                     id="releaseType"
                     name="release_type"
+                    required
                 >
-
-                    <option value="Single">
-                        Single
-                    </option>
-
-                    <option value="EP">
-                        EP
-                    </option>
-
-                    <option value="Album">
-                        Album
-                    </option>
-
+                    <option value="Single">Single</option>
+                    <option value="EP">EP</option>
+                    <option value="Album">Album</option>
                 </select>
 
 
@@ -456,9 +274,42 @@
                 ></textarea>
 
 
+                <label for="releaseArtwork">
+                    RELEASE ARTWORK
+                </label>
+
+                <input
+                    type="file"
+                    id="releaseArtwork"
+                    name="artwork"
+                    accept="image/jpeg,image/png,image/webp"
+                    required
+                >
+
+
+                <label for="releaseAudio">
+                    RELEASE AUDIO
+                </label>
+
+                <input
+                    type="file"
+                    id="releaseAudio"
+                    name="audio"
+                    accept="audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/flac"
+                    required
+                >
+
+
+                <p
+                    id="releaseFormMessage"
+                    class="login-message"
+                ></p>
+
+
                 <button
                     type="submit"
                     class="primary-button full"
+                    id="createReleaseSubmit"
                 >
                     CREATE RELEASE
                 </button>
@@ -470,14 +321,8 @@
     </div>
 
 
-    <!-- =========================================
-         ADD ARTIST MODAL
-    ========================================== -->
-
-    <div
-        class="modal hidden"
-        id="artistModal"
-    >
+    <!-- ADD ARTIST MODAL -->
+    <div class="modal hidden" id="artistModal">
 
         <div class="modal-box">
 
@@ -489,14 +334,9 @@
                 ×
             </button>
 
+            <p class="eyebrow">ARTIST MANAGEMENT</p>
 
-            <p class="eyebrow">
-                ARTIST MANAGEMENT
-            </p>
-
-            <h2>
-                Add Artist
-            </h2>
+            <h2>Add Artist</h2>
 
 
             <form id="artistForm">
@@ -575,20 +415,11 @@
     </div>
 
 
-    <!-- =========================================
-         SUPABASE
-    ========================================== -->
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-    ></script>
-
-
-    <!-- =========================================
-         DASHBOARD JAVASCRIPT
-    ========================================== -->
-
-    <script src="./js/dashboard.js?v=2"></script>
+    <!-- DASHBOARD JS -->
+    <script src="./js/dashboard.js?v=3"></script>
 
 </body>
 
