@@ -20,18 +20,16 @@
 
     <link
         rel="stylesheet"
-        href="./css/style.css?v=6"
+        href="./css/style.css"
     >
 
 </head>
-
 
 <body>
 
 
     <!-- =========================================
          LOADING SCREEN
-         DOES NOT WAIT FOR SUPABASE
     ========================================== -->
 
     <div
@@ -70,7 +68,6 @@
     </div>
 
 
-
     <!-- =========================================
          LOGIN PAGE
     ========================================== -->
@@ -80,20 +77,17 @@
         id="loginPage"
     >
 
-
         <!-- LEFT SIDE -->
 
         <section class="login-visual">
 
             <div class="visual-overlay"></div>
 
-
             <div class="visual-content">
 
                 <div class="brand-mark">
                     VOIDRECORDS
                 </div>
-
 
                 <div class="visual-bottom">
 
@@ -112,13 +106,14 @@
         </section>
 
 
-
         <!-- RIGHT SIDE -->
 
         <section class="login-panel">
 
             <div class="login-container">
 
+
+                <!-- MOBILE BRAND -->
 
                 <div class="mobile-brand">
                     VOIDRECORDS
@@ -133,11 +128,9 @@
                         ARTIST / LABEL PORTAL
                     </p>
 
-
                     <h1>
                         Welcome back!
                     </h1>
-
 
                     <p class="subtitle">
                         Sign in to manage your releases,
@@ -147,7 +140,6 @@
                 </div>
 
 
-
                 <!-- LOGIN FORM -->
 
                 <form
@@ -155,13 +147,13 @@
                     novalidate
                 >
 
+                    <!-- EMAIL -->
 
                     <div class="input-group">
 
                         <label for="email">
                             EMAIL
                         </label>
-
 
                         <input
                             type="email"
@@ -175,6 +167,7 @@
                     </div>
 
 
+                    <!-- PASSWORD -->
 
                     <div class="input-group">
 
@@ -184,7 +177,6 @@
                                 PASSWORD
                             </label>
 
-
                             <a
                                 href="#"
                                 id="forgotPassword"
@@ -193,7 +185,6 @@
                             </a>
 
                         </div>
-
 
                         <input
                             type="password"
@@ -207,6 +198,7 @@
                     </div>
 
 
+                    <!-- REMEMBER ME -->
 
                     <div class="remember-row">
 
@@ -227,6 +219,7 @@
                     </div>
 
 
+                    <!-- SIGN IN -->
 
                     <button
                         type="submit"
@@ -238,7 +231,6 @@
                             SIGN IN
                         </span>
 
-
                         <span id="loginArrow">
                             →
                         </span>
@@ -246,14 +238,14 @@
                     </button>
 
 
+                    <!-- MESSAGE -->
+
                     <p
                         id="loginMessage"
                         class="login-message"
                     ></p>
 
-
                 </form>
-
 
 
                 <!-- DIVIDER -->
@@ -271,7 +263,6 @@
                 </div>
 
 
-
                 <!-- INVITE -->
 
                 <div class="invite-section">
@@ -280,7 +271,6 @@
                         Distribution access is currently
                         available by invitation only.
                     </p>
-
 
                     <button
                         type="button"
@@ -293,7 +283,6 @@
                 </div>
 
 
-
                 <!-- FOOTER -->
 
                 <footer>
@@ -302,13 +291,11 @@
                         © 2026 VoidRecords Music & Entertainment.
                     </span>
 
-
                     <div>
 
                         <a href="#">
                             Privacy
                         </a>
-
 
                         <a href="#">
                             Terms
@@ -318,13 +305,11 @@
 
                 </footer>
 
-
             </div>
 
         </section>
 
     </main>
-
 
 
     <!-- =========================================
@@ -336,83 +321,11 @@
     ></script>
 
 
-
     <!-- =========================================
          VOIDRECORDS APP
     ========================================== -->
 
-    <script src="./js/app.js?v=6"></script>
-
-
-    <!-- =========================================
-         LOADING FAILSAFE
-         THIS RUNS INDEPENDENTLY OF SUPABASE
-    ========================================== -->
-
-    <script>
-
-        window.addEventListener(
-            "load",
-            function () {
-
-                const loadingScreen =
-                    document.getElementById(
-                        "loadingScreen"
-                    );
-
-                const loginPage =
-                    document.getElementById(
-                        "loginPage"
-                    );
-
-                const progress =
-                    document.getElementById(
-                        "loadingProgress"
-                    );
-
-
-                if (loginPage) {
-
-                    loginPage.classList.add(
-                        "ready"
-                    );
-
-                }
-
-
-                if (progress) {
-
-                    progress.style.width =
-                        "100%";
-
-                }
-
-
-                /*
-                 * FORCE THE LOADING SCREEN OFF.
-                 *
-                 * This does NOT check Supabase.
-                 */
-
-                setTimeout(
-                    function () {
-
-                        if (loadingScreen) {
-
-                            loadingScreen.classList.add(
-                                "fade-out"
-                            );
-
-                        }
-
-                    },
-                    1000
-                );
-
-            }
-        );
-
-    </script>
+    <script src="./js/app.js"></script>
 
 </body>
 
