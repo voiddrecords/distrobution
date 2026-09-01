@@ -20,7 +20,7 @@
 
     <link
         rel="stylesheet"
-        href="./css/style.css"
+        href="./css/style.css?v=6"
     >
 
 </head>
@@ -31,8 +31,7 @@
 
     <!-- =========================================
          LOADING SCREEN
-         IMPORTANT:
-         This does NOT wait for Supabase.
+         DOES NOT WAIT FOR SUPABASE
     ========================================== -->
 
     <div
@@ -118,16 +117,12 @@
 
         <section class="login-panel">
 
-
             <div class="login-container">
 
-
-                <!-- MOBILE BRAND -->
 
                 <div class="mobile-brand">
                     VOIDRECORDS
                 </div>
-
 
 
                 <!-- HEADER -->
@@ -161,8 +156,6 @@
                 >
 
 
-                    <!-- EMAIL -->
-
                     <div class="input-group">
 
                         <label for="email">
@@ -182,8 +175,6 @@
                     </div>
 
 
-
-                    <!-- PASSWORD -->
 
                     <div class="input-group">
 
@@ -217,8 +208,6 @@
 
 
 
-                    <!-- REMEMBER ME -->
-
                     <div class="remember-row">
 
                         <label class="remember">
@@ -239,8 +228,6 @@
 
 
 
-                    <!-- SIGN IN -->
-
                     <button
                         type="submit"
                         class="login-button"
@@ -258,8 +245,6 @@
 
                     </button>
 
-
-                    <!-- LOGIN MESSAGE -->
 
                     <p
                         id="loginMessage"
@@ -344,7 +329,6 @@
 
     <!-- =========================================
          SUPABASE
-         Loaded AFTER the page HTML.
     ========================================== -->
 
     <script
@@ -352,11 +336,83 @@
     ></script>
 
 
+
     <!-- =========================================
          VOIDRECORDS APP
     ========================================== -->
 
-    <script src="./js/app.js"></script>
+    <script src="./js/app.js?v=6"></script>
+
+
+    <!-- =========================================
+         LOADING FAILSAFE
+         THIS RUNS INDEPENDENTLY OF SUPABASE
+    ========================================== -->
+
+    <script>
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                const loadingScreen =
+                    document.getElementById(
+                        "loadingScreen"
+                    );
+
+                const loginPage =
+                    document.getElementById(
+                        "loginPage"
+                    );
+
+                const progress =
+                    document.getElementById(
+                        "loadingProgress"
+                    );
+
+
+                if (loginPage) {
+
+                    loginPage.classList.add(
+                        "ready"
+                    );
+
+                }
+
+
+                if (progress) {
+
+                    progress.style.width =
+                        "100%";
+
+                }
+
+
+                /*
+                 * FORCE THE LOADING SCREEN OFF.
+                 *
+                 * This does NOT check Supabase.
+                 */
+
+                setTimeout(
+                    function () {
+
+                        if (loadingScreen) {
+
+                            loadingScreen.classList.add(
+                                "fade-out"
+                            );
+
+                        }
+
+                    },
+                    1000
+                );
+
+            }
+        );
+
+    </script>
 
 </body>
 
